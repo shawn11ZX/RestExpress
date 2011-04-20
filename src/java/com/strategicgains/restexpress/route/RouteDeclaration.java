@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.strategicgains.restexpress.domain.metadata.RouteMetadata;
+import com.strategicgains.restexpress.route.fluent.FluentRouteBuilder;
 import com.strategicgains.restexpress.route.parameterized.ParameterizedRouteBuilder;
 import com.strategicgains.restexpress.route.regex.RegexRouteBuilder;
 
@@ -65,6 +66,13 @@ public abstract class RouteDeclaration
 	public RouteBuilder regex(String regex, Object controller)
 	{
 		RouteBuilder builder = new RegexRouteBuilder(regex, controller);
+		routeBuilders.add(builder);
+		return builder;
+	}
+	
+	public RouteBuilder route()
+	{
+		RouteBuilder builder = new FluentRouteBuilder();
 		routeBuilders.add(builder);
 		return builder;
 	}
