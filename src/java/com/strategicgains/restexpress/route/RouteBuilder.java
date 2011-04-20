@@ -69,6 +69,10 @@ public abstract class RouteBuilder
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 	private boolean shouldUseWrappedResponse = true;
 	
+	public RouteBuilder()
+	{
+		super();
+	}
 	/**
 	 * Create a RouteBuilder instance for the given URI pattern. URIs that match the pattern
 	 * will map to methods on the POJO controller.
@@ -79,8 +83,32 @@ public abstract class RouteBuilder
 	public RouteBuilder(String uri, Object controller)
 	{
 		super();
+		uri(uri);
+		controller(controller);
+	}
+	
+	/**
+	 * Set the URI pattern for this route.
+	 * 
+	 * @param uri
+	 * @return this RouteBuilder instance to facilitate method chaining.
+	 */
+	public RouteBuilder uri(String uri)
+	{
 		this.uri = uri;
+		return this;
+	}
+	
+	/**
+	 * Set the route controller that responds to events on this route.
+	 * 
+	 * @param controller
+	 * @return this RouteBuilder instance to facilitate method chaining.
+	 */
+	public RouteBuilder controller(Object controller)
+	{
 		this.controller = controller;
+		return this;
 	}
 	
 	/**
