@@ -40,6 +40,7 @@ public class UrlPatternTest
 	public void shouldMatchUrlWithFormat()
 	{
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/joez.json"));
+		assertTrue(pFormat.matches("/xxx/[toddf]:1/yyy/joez.json"));
 		assertTrue(pFormat.matches("/xxx/12345/yyy/67890.json"));
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/joez.xml"));
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/joez.json?x=y&a=b"));
@@ -51,6 +52,7 @@ public class UrlPatternTest
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/jose.%20json"));
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/jose.%json"));
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/joez."));
+		assertTrue(pFormat.matches("/xxx/$-_@&+-[]/yyy/!*\"'(),.json"));
 	}
 	
 	@Test
@@ -96,6 +98,7 @@ public class UrlPatternTest
 	public void shouldMatchUrlWithoutFormat()
 	{
 		assertTrue(p.matches("/xxx/toddf/yyy/joez"));
+		assertTrue(p.matches("/xxx/[toddf]:1/yyy/joez"));
 		assertTrue(p.matches("/xxx/12345/yyy/67890"));
 		assertTrue(p.matches("/xxx/toddf/yyy/joez"));
 		assertTrue(p.matches("/xxx/toddf/yyy/joez."));
@@ -134,6 +137,16 @@ public class UrlPatternTest
 	}
 
 	@Test
+	public void shouldParseSpecialParametersWithFormat()
+	{
+		UrlMatch match = pFormat.match("/xxx/$-_@&+-[toddf]:12345/yyy/!*\"'(fredt),.json");
+		assertNotNull(match);
+		assertEquals("json", match.get("format"));
+		assertEquals("$-_@&+-[toddf]:12345", match.get("a_id"));
+		assertEquals("!*\"'(fredt),", match.get("b_id"));
+	}
+
+	@Test
 	public void shouldParseParametersWithoutFormat()
 	{
 		UrlMatch match = p.match("/xxx/12345/yyy/67890");
@@ -141,6 +154,16 @@ public class UrlPatternTest
 		assertNull(match.get("format"));
 		assertEquals("12345", match.get("a_id"));
 		assertEquals("67890", match.get("b_id"));
+	}
+
+	@Test
+	public void shouldParseSpecialParametersWithoutFormat()
+	{
+		UrlMatch match = p.match("/xxx/$-_@&+-[toddf]:12345/yyy/!*\"'(fredt),");
+		assertNotNull(match);
+		assertNull(match.get("format"));
+		assertEquals("$-_@&+-[toddf]:12345", match.get("a_id"));
+		assertEquals("!*\"'(fredt),", match.get("b_id"));
 	}
 
 	@Test
