@@ -65,6 +65,7 @@ public class MessageContext
 		getRequest().addAllHeaders(action.getParameters());
 		getRequest().setResolvedRoute(action.getRoute());
 		getResponse().setIsSerialized(action.shouldSerializeResponse());
+		getResponse().setIsStreamed(action.shouldStreamResponse());
 	}
 
 	/**
@@ -73,6 +74,11 @@ public class MessageContext
     public boolean shouldSerializeResponse()
     {
     	return getResponse().isSerialized();
+    }
+    
+    public boolean shouldUseStreamedResponse()
+    {
+    	return getResponse().isStreamed();
     }
 
     public void setSerializationProcessor(SerializationProcessor processor)
@@ -97,6 +103,11 @@ public class MessageContext
     public Throwable getException()
     {
     	return getResponse().getException();
+    }
+    
+    public boolean hasException()
+    {
+    	return (getException() != null);
     }
 
 	/**

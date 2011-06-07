@@ -17,6 +17,8 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
+import com.strategicgains.restexpress.RestExpress;
+
 /**
  * Provides a tiny DSL to define the pipeline features.
  * 
@@ -28,14 +30,13 @@ implements ChannelPipelineFactory
 {
 	// SECTION: CONSTANTS
 
-	private static final int DEFAULT_MAX_CHUNK_SIZE = 1048576;
 
 	
 	// SECTION: INSTANCE VARIABLES
 
 	private boolean shouldHandleChunked = false;
 	private boolean shouldUseCompression = false;
-	private int maxChunkSize = DEFAULT_MAX_CHUNK_SIZE;
+	private int maxChunkSize = RestExpress.DEFAULT_MAX_CHUNK_SIZE;
 	private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
 
 	

@@ -41,9 +41,10 @@ extends Route
      * @param name
      */
     public ParameterizedRoute(UrlPattern urlMatcher, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-    	boolean shouldUseWrappedResponse, String name, Set<String> flags, Map<String, Object> parameters)
+    	boolean shouldUseWrappedResponse, boolean shouldUseStreamedResponse, String name, Set<String> flags, Map<String, Object> parameters)
     {
-	    super(urlMatcher, controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse, name, flags, parameters);
+	    super(urlMatcher, controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse,
+	    	shouldUseStreamedResponse, name, flags, parameters);
     }
 
     /**
@@ -55,8 +56,9 @@ extends Route
      * @param name
      */
     public ParameterizedRoute(String urlPattern, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-    	boolean shouldUseWrappedResponse, String name, Set<String> flags, Map<String, Object> parameters)
+    	boolean shouldUseWrappedResponse, boolean shouldUseStreamedResponse, String name, Set<String> flags, Map<String, Object> parameters)
     {
-	    this(new UrlPattern(urlPattern), controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse, name, flags, parameters);
+	    this(new UrlPattern(urlPattern), controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse,
+	    	shouldUseStreamedResponse, name, flags, parameters);
     }
 }

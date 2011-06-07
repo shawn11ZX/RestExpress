@@ -44,6 +44,7 @@ public class Response
 	private Object body;
 	private Map<String, List<String>> headers = new HashMap<String, List<String>>();
 	private boolean isSerialized = true;
+	private boolean isStreamed = false;
 	private Throwable exception = null;
 	
 	
@@ -216,6 +217,26 @@ public class Response
 	public void useSerialization()
 	{
 		setIsSerialized(true);
+	}
+	
+	public boolean isStreamed()
+	{
+		return isStreamed;
+	}
+	
+	public void setIsStreamed(boolean value)
+	{
+		this.isStreamed = value;
+	}
+	
+	public void useStreaming()
+	{
+		setIsStreamed(true);
+	}
+	
+	public void noStreaming()
+	{
+		setIsStreamed(false);
 	}
 
 	public Throwable getException()

@@ -32,6 +32,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
 import com.strategicgains.restexpress.exception.ExceptionUtils;
@@ -39,6 +40,7 @@ import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.response.HttpResponseWriter;
 import com.strategicgains.restexpress.response.ResponseWrapperFactory;
+import com.strategicgains.restexpress.response.StreamingHttpResponseWriter;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
@@ -58,6 +60,7 @@ extends SimpleChannelUpstreamHandler
 	private RouteResolver routeResolver;
 	private SerializationResolver serializationResolver;
 	private HttpResponseWriter responseWriter;
+	private HttpResponseWriter streamingResponseWriter;
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
@@ -69,21 +72,23 @@ extends SimpleChannelUpstreamHandler
 
 	public DefaultRequestHandler(RouteResolver routeResolver, SerializationResolver serializationResolver)
 	{
-		this(routeResolver, serializationResolver, new DefaultHttpResponseWriter());
+		this(routeResolver, serializationResolver, new DefaultHttpResponseWriter(),
+			new StreamingHttpResponseWriter(RestExpress.DEFAULT_MAX_CHUNK_SIZE));
 	}
 
 	public DefaultRequestHandler(RouteResolver routeResolver, SerializationResolver serializationResolver,
-		HttpResponseWriter responseWriter)
+	    HttpResponseWriter responseWriter, HttpResponseWriter streamingResponseWriter)
 	{
 		super();
 		this.routeResolver = routeResolver;
 		this.serializationResolver = serializationResolver;
+		setStreamingResponseWriter(streamingResponseWriter);
 		setResponseWriter(responseWriter);
 	}
 
 
 	// SECTION: MUTATORS
-	
+
 	public void addMessageObserver(MessageObserver... observers)
 	{
 		for (MessageObserver observer : observers)
@@ -100,7 +105,7 @@ extends SimpleChannelUpstreamHandler
 		exceptionMap.map(from, to);
 		return this;
 	}
-	
+
 	public DefaultRequestHandler setExceptionMap(ExceptionMapping map)
 	{
 		this.exceptionMap = map;
@@ -117,6 +122,16 @@ extends SimpleChannelUpstreamHandler
 		this.responseWriter = writer;
 	}
 	
+	public HttpResponseWriter getStreamingResponseWriter()
+	{
+		return this.streamingResponseWriter;
+	}
+	
+	public void setStreamingResponseWriter(HttpResponseWriter writer)
+	{
+		this.streamingResponseWriter = writer;
+	}
+
 	public void setResponseWrapperFactory(ResponseWrapperFactory factory)
 	{
 		this.responseWrapperFactory = factory;
@@ -138,19 +153,20 @@ extends SimpleChannelUpstreamHandler
 			resolveRoute(context);
 			invokePreprocessors(context.getRequest());
 			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
-	
+
 			if (result != null)
 			{
 				context.getResponse().setBody(result);
 			}
-	
+
 			invokePostprocessors(context.getRequest(), context.getResponse());
 			serializeResponse(context);
+			assignContentType(context);
 			enforceHttpSpecification(context);
 			writeResponse(ctx, context);
 			notifySuccess(context);
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			handleRestExpressException(ctx, t);
 		}
@@ -160,20 +176,34 @@ extends SimpleChannelUpstreamHandler
 		}
 	}
 
-	/**
-     * @param context
-     */
-    private void enforceHttpSpecification(MessageContext context)
+	private void assignContentType(MessageContext context)
     {
-    	HttpSpecification.enforce(context.getResponse());
+		Response response = context.getResponse();
+
+	    if (HttpSpecification.isContentTypeAllowed(response))
+	    {
+	    	if (!response.hasHeader(CONTENT_TYPE))
+	    	{
+	    		String contentType = (context.getContentType() == null ? TEXT_PLAIN : context.getContentType());
+	    		context.getResponse().addHeader(CONTENT_TYPE, contentType);
+	    	}
+	    }
     }
+
+	/**
+	 * @param context
+	 */
+	private void enforceHttpSpecification(MessageContext context)
+	{
+		HttpSpecification.enforce(context.getResponse());
+	}
 
 	private void handleRestExpressException(ChannelHandlerContext ctx, Throwable cause)
 	throws Exception
 	{
 		MessageContext context = (MessageContext) ctx.getAttachment();
 		Throwable rootCause = mapServiceException(cause);
-		
+
 		if (rootCause != null) // is a ServiceException
 		{
 			context.setHttpStatus(((ServiceException) rootCause).getHttpStatus());
@@ -197,14 +227,14 @@ extends SimpleChannelUpstreamHandler
 		try
 		{
 			MessageContext messageContext = (MessageContext) ctx.getAttachment();
-			
+
 			if (messageContext != null)
 			{
 				messageContext.setException(event.getCause());
 				notifyException(messageContext);
 			}
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			System.err.print("DefaultRequestHandler.exceptionCaught() threw an exception.");
 			t.printStackTrace();
@@ -231,73 +261,72 @@ extends SimpleChannelUpstreamHandler
 		{
 			context.setSerializationProcessor(serializationResolver.resolve(context.getRequest()));
 		}
-		catch(IllegalArgumentException e)
+		catch (IllegalArgumentException e)
 		{
 			throw new BadRequestException(e);
 		}
 	}
 
 	private void resolveRoute(MessageContext context)
-    {
-	    Action action = routeResolver.resolve(context.getRequest());
+	{
+		Action action = routeResolver.resolve(context.getRequest());
 		context.setAction(action);
 		context.setSerializationProcessor(serializationResolver.resolve(context.getRequest()));
-    }
-
-
-    /**
-     * @param request
-     * @param response
-     */
-    private void notifyReceived(MessageContext context)
-    {
-    	for (MessageObserver observer : messageObservers)
-    	{
-    		observer.onReceived(context.getRequest(), context.getResponse());
-    	}
-    }
+	}
 
 	/**
-     * @param request
-     * @param response
-     */
-    private void notifyComplete(MessageContext context)
-    {
-    	for (MessageObserver observer : messageObservers)
-    	{
-    		observer.onComplete(context.getRequest(), context.getResponse());
-    	}
-    }
+	 * @param request
+	 * @param response
+	 */
+	private void notifyReceived(MessageContext context)
+	{
+		for (MessageObserver observer : messageObservers)
+		{
+			observer.onReceived(context.getRequest(), context.getResponse());
+		}
+	}
+
+	/**
+	 * @param request
+	 * @param response
+	 */
+	private void notifyComplete(MessageContext context)
+	{
+		for (MessageObserver observer : messageObservers)
+		{
+			observer.onComplete(context.getRequest(), context.getResponse());
+		}
+	}
 
 	// SECTION: UTILITY -- PRIVATE
 
 	/**
-     * @param exception
-     * @param request
-     * @param response
-     */
-    private void notifyException(MessageContext context)
-    {
-    	Throwable exception = context.getException();
+	 * @param exception
+	 * @param request
+	 * @param response
+	 */
+	private void notifyException(MessageContext context)
+	{
+		Throwable exception = context.getException();
 
-    	for (MessageObserver observer : messageObservers)
-    	{
-    		observer.onException(exception, context.getRequest(), context.getResponse());
-    	}
-    }
+		for (MessageObserver observer : messageObservers)
+		{
+			observer.onException(exception, context.getRequest(), context.getResponse());
+		}
+	}
 
 	/**
-     * @param request
-     * @param response
-     */
-    private void notifySuccess(MessageContext context)
-    {
-    	for (MessageObserver observer : messageObservers)
-    	{
-    		observer.onSuccess(context.getRequest(), context.getResponse());
-    	}
-    }
-	
+	 * @param request
+	 * @param response
+	 */
+	private void notifySuccess(MessageContext context)
+	{
+		for (MessageObserver observer : messageObservers)
+		{
+			observer.onSuccess(context.getRequest(), context.getResponse());
+		}
+	}
+
 	public void addPreprocessor(Preprocessor handler)
 	{
 		if (!preprocessors.contains(handler))
@@ -314,66 +343,75 @@ extends SimpleChannelUpstreamHandler
 		}
 	}
 
-    private void invokePreprocessors(Request request)
-    {
+	private void invokePreprocessors(Request request)
+	{
 		for (Preprocessor handler : preprocessors)
 		{
 			handler.process(request);
 		}
 
 		request.getBody().resetReaderIndex();
-    }
+	}
 
-    private void invokePostprocessors(Request request, Response response)
-    {
+	private void invokePostprocessors(Request request, Response response)
+	{
 		for (Postprocessor handler : postprocessors)
 		{
 			handler.process(request, response);
 		}
-    }
+	}
 
 	/**
-	 * Uses the exceptionMap to map a Throwable to a ServiceException, if possible.
+	 * Uses the exceptionMap to map a Throwable to a ServiceException, if
+	 * possible.
 	 * 
 	 * @param cause
 	 * @return Either a ServiceException or the root cause of the exception.
 	 */
 	private Throwable mapServiceException(Throwable cause)
-    {
+	{
 		if (ServiceException.isAssignableFrom(cause))
 		{
 			return cause;
 		}
-			
+
 		return exceptionMap.getExceptionFor(cause);
-    }
+	}
 
 	/**
-     * @param request
-     * @return
-     */
-    private Request createRequest(HttpRequest request, ChannelHandlerContext context)
-    {
-    	return new Request(request, routeResolver);
-    }
+	 * @param request
+	 * @return
+	 */
+	private Request createRequest(HttpRequest request,
+	    ChannelHandlerContext context)
+	{
+		return new Request(request, routeResolver);
+	}
 
 	/**
-     * @param request
-     * @return
-     */
-    private Response createResponse()
-    {
-    	return new Response();
-    }
+	 * @param request
+	 * @return
+	 */
+	private Response createResponse()
+	{
+		return new Response();
+	}
 
-    /**
-     * @param message
-     * @return
-     */
-    private void writeResponse(ChannelHandlerContext ctx, MessageContext context)
-    {
-    	getResponseWriter().write(ctx, context.getRequest(), context.getResponse());
-    }
+	/**
+	 * @param message
+	 * @return
+	 */
+	private void writeResponse(ChannelHandlerContext ctx, MessageContext context)
+	{
+		if (context.hasException() || !context.shouldUseStreamedResponse())
+		{
+			getResponseWriter().write(ctx, context.getRequest(), context.getResponse());
+		}
+		else
+		{
+			streamingResponseWriter.write(ctx, context.getRequest(), context.getResponse());
+		}
+	}
 
 	private void serializeResponse(MessageContext context)
 	{
@@ -385,31 +423,25 @@ extends SimpleChannelUpstreamHandler
 			Request request = context.getRequest();
 			response.setBody(serializeResult(responseWrapperFactory.wrap(response), sp, request));
 		}
-
-		if (HttpSpecification.isContentTypeAllowed(response))
-		{
-			if (!response.hasHeader(CONTENT_TYPE))
-			{
-				String contentType = (context.getContentType() == null ? TEXT_PLAIN : context.getContentType());
-				context.getResponse().addHeader(CONTENT_TYPE, contentType);
-			}
-		}
 	}
 
-    private boolean shouldSerialize(MessageContext context)
-    {
-    	
-        return (context.shouldSerializeResponse() && (serializationResolver != null));
-    }
+	private boolean shouldSerialize(MessageContext context)
+	{
+		return (context.shouldSerializeResponse() 
+			&& (serializationResolver != null) 
+			&& (!context.shouldUseStreamedResponse()));
+	}
 
-    /**
-     * Depending on the result, the return value is serialized and, optionally, wrapped in a jsonp callback.
-     * 
-     * @param result object to serialize.
-     * @param processor the serialization processor that will do the serializing.
-     * @param request the current request.
-     * @return a serialized result, or null if the result is null and not wrapped in jsonp callback.
-     */
+	/**
+	 * Depending on the result, the return value is serialized and, optionally,
+	 * wrapped in a jsonp callback.
+	 * 
+	 * @param result object to serialize.
+	 * @param processor the serialization processor that will do the serializing.
+	 * @param request the current request.
+	 * @return a serialized result, or null if the result is null and not
+	 *         wrapped in jsonp callback.
+	 */
 	private String serializeResult(Object result, SerializationProcessor processor, Request request)
 	{
 		String content = processor.serialize(result);
@@ -417,33 +449,37 @@ extends SimpleChannelUpstreamHandler
 
 		if (callback != null) // must wrap in jsonp callback--serialization necessary.
 		{
-        	StringBuilder sb = new StringBuilder();
-        	sb.append(callback).append("(").append(content).append(")");
-        	content = sb.toString();
+			StringBuilder sb = new StringBuilder();
+			sb.append(callback)
+				.append("(")
+				.append(content)
+				.append(")");
+			content = sb.toString();
 		}
 		else if (result == null) // not jsonp and null result requires no serialization.
 		{
 			content = null;
 		}
-		
+
 		return content;
 	}
 
 	/**
-	 * If JSONP header is set and the resulting type of the serialization processor includes JSON,
-	 * then returns the JSONP header string.  Otherwise, returns null.
+	 * If JSONP header is set and the resulting type of the serialization
+	 * processor includes JSON, then returns the JSONP header string. Otherwise,
+	 * returns null.
 	 * 
-     * @param request
-     * @param processor
-     * @return  jsonp header string value, or null.
-     */
-    private String getJsonpCallback(Request request, SerializationProcessor processor)
-    {
-    	if (processor.getResultingContentType().toLowerCase().contains("json"))
+	 * @param request
+	 * @param processor
+	 * @return jsonp header string value, or null.
+	 */
+	private String getJsonpCallback(Request request, SerializationProcessor processor)
+	{
+		if (processor.getResultingContentType().toLowerCase().contains("json"))
 		{
-    		return request.getJsonpHeader();
+			return request.getJsonpHeader();
 		}
-    	
-    	return null;
-    }
+
+		return null;
+	}
 }

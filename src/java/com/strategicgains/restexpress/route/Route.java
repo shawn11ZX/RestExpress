@@ -50,6 +50,7 @@ public abstract class Route
 	private HttpMethod method;
 	private boolean shouldSerializeResponse = true;
 	private boolean shouldUseWrappedResponse = true;
+	private boolean shouldUseStreamedResponse = false;
 	private String name;
 	private List<String> supportedFormats = new ArrayList<String>();
 	private String defaultFormat;
@@ -63,7 +64,7 @@ public abstract class Route
 	 * @param controller
 	 */
 	public Route(UrlMatcher urlMatcher, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-		boolean shouldUseWrappedResponse, String name, Set<String> flags, Map<String, Object> parameters)
+		boolean shouldUseWrappedResponse, boolean shouldUseStreamedResponse, String name, Set<String> flags, Map<String, Object> parameters)
 	{
 		super();
 		this.urlMatcher = urlMatcher;
@@ -72,6 +73,7 @@ public abstract class Route
 		this.method = method;
 		this.shouldSerializeResponse = shouldSerializeResponse;
 		this.shouldUseWrappedResponse = shouldUseWrappedResponse;
+		this.shouldUseStreamedResponse = shouldUseStreamedResponse;
 		this.name = name;
 		this.flags.addAll(flags);
 		this.parameters.putAll(parameters);
@@ -130,6 +132,11 @@ public abstract class Route
 	public boolean shouldUseWrappedResponse()
 	{
 		return shouldUseWrappedResponse;
+	}
+	
+	public boolean shouldUseStreamedResponse()
+	{
+		return shouldUseStreamedResponse;
 	}
 	
 	public void addSupportedFormat(String format)

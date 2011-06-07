@@ -41,9 +41,11 @@ import com.strategicgains.restexpress.pipeline.MessageObserver;
 import com.strategicgains.restexpress.pipeline.PipelineBuilder;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
+import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseWrapperFactory;
+import com.strategicgains.restexpress.response.StreamingHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
@@ -67,11 +69,17 @@ import com.strategicgains.restexpress.util.Resolver;
  */
 public class RestExpress
 {
-	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress");
+	// SECTION: CONSTANTS
 
 	public static final int DEFAULT_PORT = 8081;
+	public static final int DEFAULT_MAX_CHUNK_SIZE = 8192; // 8K
 	public static final String DEFAULT_NAME = "RestExpress";
+
+	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress");
 	private static final String DEFAULT_CONSOLE_PREFIX = "/console";
+
+	
+	// SECTION: INSTANCE VARIABLES
 
 	private ServerBootstrap bootstrap;
 	private String name;
@@ -135,7 +143,6 @@ public class RestExpress
 		setPort(DEFAULT_PORT);
 		supportJson(true);
 		supportXml();
-//		supportConsoleRoutes();
 		useSystemOut();
 		useWrappedResponses();
 	}
@@ -638,7 +645,9 @@ public class RestExpress
 
 		// Set up the event pipeline factory.
 		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
-		    createRouteResolver(), createSerializationResolver());
+		    createRouteResolver(), createSerializationResolver(),
+		    new DefaultHttpResponseWriter(),
+		    new StreamingHttpResponseWriter((maxChunkSize == null ? DEFAULT_MAX_CHUNK_SIZE : maxChunkSize.intValue())));
 		requestHandler.setResponseWrapperFactory(responseWrapperFactory);
 
 		// Add MessageObservers to the request handler here, if desired...

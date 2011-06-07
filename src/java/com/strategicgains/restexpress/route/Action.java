@@ -52,6 +52,11 @@ public class Action
 	{
 		return getRoute().shouldSerializeResponse();
 	}
+	
+	public boolean shouldStreamResponse()
+	{
+		return getRoute().shouldUseStreamedResponse();
+	}
     
 	/**
 	 * Invokes the underlying Route, returning the result of the call, if any.
