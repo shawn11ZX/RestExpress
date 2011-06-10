@@ -22,6 +22,7 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -163,7 +164,7 @@ extends SimpleChannelUpstreamHandler
 			serializeResponse(context);
 			assignContentType(context);
 			enforceHttpSpecification(context);
-			writeResponse(ctx, context);
+			writeResponse(event.getChannel(), context);
 			notifySuccess(context);
 		}
 		catch (Throwable t)
@@ -217,7 +218,7 @@ extends SimpleChannelUpstreamHandler
 		context.setException(rootCause);
 		notifyException(context);
 		serializeResponse(context);
-		writeResponse(ctx, context);
+		writeResponse(ctx.getChannel(), context);
 	}
 
 	@Override
@@ -401,15 +402,15 @@ extends SimpleChannelUpstreamHandler
 	 * @param message
 	 * @return
 	 */
-	private void writeResponse(ChannelHandlerContext ctx, MessageContext context)
+	private void writeResponse(Channel ch, MessageContext context)
 	{
 		if (context.hasException() || !context.shouldUseStreamedResponse())
 		{
-			getResponseWriter().write(ctx, context.getRequest(), context.getResponse());
+			getResponseWriter().write(ch, context.getRequest(), context.getResponse());
 		}
 		else
 		{
-			streamingResponseWriter.write(ctx, context.getRequest(), context.getResponse());
+			streamingResponseWriter.write(ch, context.getRequest(), context.getResponse());
 		}
 	}
 

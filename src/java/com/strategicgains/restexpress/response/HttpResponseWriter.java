@@ -3,7 +3,7 @@
  */
 package com.strategicgains.restexpress.response;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.Channel;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
@@ -14,5 +14,5 @@ import com.strategicgains.restexpress.Response;
  */
 public interface HttpResponseWriter
 {
-	public void write(ChannelHandlerContext ctx, Request request, Response response);
+	public void write(Channel ch, Request request, Response response);
 }

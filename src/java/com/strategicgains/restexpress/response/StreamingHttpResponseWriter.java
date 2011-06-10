@@ -1,7 +1,10 @@
 /*
- * Copyright 2011, Pearson eCollege.  All rights reserved.
+ * Copyright 2011, Strategic Gains, Inc.  All rights reserved.
  */
 package com.strategicgains.restexpress.response;
+
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
+import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,15 +13,12 @@ import java.io.RandomAccessFile;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureProgressListener;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.DefaultFileRegion;
-import org.jboss.netty.channel.FileRegion;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.handler.stream.ChunkedFile;
 
+import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.exception.NotFoundException;
 import com.strategicgains.restexpress.exception.ServiceException;
@@ -43,20 +43,12 @@ extends BaseHttpResponseWriter
 		super();
 		this.chunkSize = chunkSize;
 	}
-
 	@Override
-	protected void handleBody(ChannelHandlerContext ctx,
-		HttpResponse httpResponse, Response response)
+	public void write(Channel ch, Request request, Response response)
 	{
-		Object body = response.getBody();
-		if (!response.hasBody())
-			throw new ServiceException(
-				"No File returned from controller to stream.");
-		if (!body.getClass().isAssignableFrom(File.class))
-			throw new ServiceException(
-				"Streaming response handles types of File only.");
-
-		File file = (File) body;
+		HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1, response.getResponseStatus());
+		addHeaders(response, httpResponse);
+		File file = getBodyAsFile(response);
 		RandomAccessFile raf;
 
 		try
@@ -71,12 +63,10 @@ extends BaseHttpResponseWriter
 		try
 		{
 			long fileLength = raf.length();
-			httpResponse
-				.setHeader(HttpHeaders.Names.CONTENT_LENGTH, fileLength);
-			Channel ch = ctx.getChannel();
+			httpResponse.setHeader(CONTENT_LENGTH, fileLength);
 			ch.write(httpResponse);
 
-			streamFileContent(ch, raf, fileLength);
+			streamFileContent(ch, raf, fileLength, request.isKeepAlive());
 		}
 		catch (IOException e)
 		{
@@ -84,33 +74,61 @@ extends BaseHttpResponseWriter
 		}
 	}
 
-	private void streamFileContent(Channel ch, RandomAccessFile raf, long fileLength)
+	private File getBodyAsFile(Response response)
+    {
+	    Object body = response.getBody();
+
+		if (!response.hasBody())
+		{
+			throw new ServiceException("No File returned from controller to stream.");
+		}
+
+		if (!body.getClass().isAssignableFrom(File.class))
+		{
+			throw new ServiceException("Streaming response handles types of File only.");
+		}
+
+		File file = (File) body;
+	    return file;
+    }
+
+	private void streamFileContent(Channel ch, RandomAccessFile raf, long fileLength, boolean isKeepAlive)
 	throws IOException
 	{
-		// Write the content.
+		System.out.println("Attempting to send file of size: " + fileLength);
 		ChannelFuture writeFuture;
-		if (ch.getPipeline().get(SslHandler.class) != null)
-		{
-			// Cannot use zero-copy with HTTPS.
+//		if (ch.getPipeline().get(SslHandler.class) != null)
+//		{
+//			// Cannot use zero-copy with HTTPS.
 			writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, chunkSize));
-		}
-		else
+//		}
+//		else
+//		{
+//			// No encryption - use zero-copy.
+//			final FileRegion region = new DefaultFileRegion(raf.getChannel(), 0, fileLength);
+//			writeFuture = ch.write(region);
+//			writeFuture.addListener(new ChannelFutureProgressListener()
+//			{
+//				public void operationComplete(ChannelFuture future)
+//				{
+//					region.releaseExternalResources();
+//				}
+//
+//				public void operationProgressed(ChannelFuture future, long amount, long current, long total)
+//				{
+//					System.out.printf("%s: %d / %d (+%d)%n", "stream", current, total, amount);
+//				}
+//			});
+//		}
+		
+		if (!isKeepAlive)
 		{
-			// No encryption - use zero-copy.
-			final FileRegion region = new DefaultFileRegion(raf.getChannel(), 0, fileLength);
-			writeFuture = ch.write(region);
-			writeFuture.addListener(new ChannelFutureProgressListener()
-			{
-				public void operationComplete(ChannelFuture future)
-				{
-					region.releaseExternalResources();
-				}
-
-				public void operationProgressed(ChannelFuture future, long amount, long current, long total)
-				{
-					System.out.printf("%s: %d / %d (+%d)%n", "file", current, total, amount);
-				}
-			});
+			// Close the connection when the whole content is written out.
+			writeFuture.addListener(ChannelFutureListener.CLOSE);
 		}
+//		else
+//		{
+//	  		writeFuture.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+//		}
 	}
 }

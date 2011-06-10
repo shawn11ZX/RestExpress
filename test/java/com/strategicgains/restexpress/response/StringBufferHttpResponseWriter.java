@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.Channel;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
@@ -47,7 +47,7 @@ implements HttpResponseWriter
 	}
 
 	@Override
-	public void write(ChannelHandlerContext ctx, Request request, Response response)
+	public void write(Channel ch, Request request, Response response)
 	{
 		if (headers != null)
 		{

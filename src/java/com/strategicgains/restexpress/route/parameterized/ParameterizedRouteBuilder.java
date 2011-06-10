@@ -52,4 +52,15 @@ extends RouteBuilder
     	return new ParameterizedRoute(pattern, controller, action, method, shouldSerializeResponse,
     		shouldUseWrappedResponse, shouldUseStreamedResponse, name, flags, parameters);
     }
+
+    @Override
+	protected String setPrefix(String pattern)
+    {
+	    if (pattern != null && !pattern.startsWith("/"))
+		{
+			return "/" + pattern;
+		}
+
+	    return pattern;
+    }
 }
