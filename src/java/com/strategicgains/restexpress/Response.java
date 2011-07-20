@@ -26,12 +26,17 @@ import java.util.Set;
 
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
+import com.strategicgains.restexpress.query.QueryRange;
+
 /**
  * @author toddf
  * @since Nov 20, 2009
  */
 public class Response
 {
+	private static final String CONTENT_RANGE_HEADER_NAME = "Content-Range";
+
+	
 	// SECTION: INSTANCE VARIABLES
 
 	private HttpResponseStatus responseCode = OK;
@@ -88,6 +93,11 @@ public class Response
 	{
 		return headers.get(name);
 	}
+	
+	public boolean hasHeader(String name)
+	{
+		return (getHeader(name) != null);
+	}
 
 	public boolean hasHeaders()
 	{
@@ -116,6 +126,20 @@ public class Response
 		}
 		
 		list.add(value);
+	}
+
+	/**
+	 * Add a "Content-Range" header to the response, setting it to the range and count.
+	 * This enables datagrid-style pagination support.
+	 * 
+	 * @param response
+	 * @param range
+	 * @param count
+	 * @param size
+	 */
+	public void addRangeHeader(QueryRange range, long count)
+	{
+    	addHeader(CONTENT_RANGE_HEADER_NAME, range.toString() + "/" + count);
 	}
 
 	/**

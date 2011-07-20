@@ -15,10 +15,15 @@
 */
 package com.strategicgains.restexpress;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.util.Map;
 
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
+import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,14 +41,69 @@ public class RequestTest
 	@Before
 	public void initialize()
 	{
-		request = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?param1=bar&param2=blah"), null);
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?param1=bar&param2=blah&yada");
+		httpRequest.addHeader("Host", "testing-host");
+		request = new Request(httpRequest, null);
 	}
-	
+
+	@Test
+	public void shouldRetrieveEntireUrl()
+	{
+		assertEquals("http://testing-host/foo?param1=bar&param2=blah&yada", request.getUrl());
+	}
+
+	@Test
+	public void shouldRetrieveBaseUrl()
+	{
+		assertEquals("http://testing-host", request.getBaseUrl());
+	}
+
+	@Test
+	public void shouldRetrievePath()
+	{
+		assertEquals("/foo?param1=bar&param2=blah&yada", request.getPath());
+	}
+
 	@Test
 	public void shouldApplyQueryStringParamsAsHeaders()
 	{
 		assertEquals("bar", request.getRawHeader("param1"));
 		assertEquals("blah", request.getRawHeader("param2"));
+		assertEquals("", request.getRawHeader("yada"));
+	}
+	
+	@Test
+	public void shouldParseQueryStringIntoMap()
+	{
+		Map<String, String> m = request.getQueryStringMap();
+		assertEquals("bar", m.get("param1"));
+		assertEquals("blah", m.get("param2"));
+		assertEquals("", m.get("yada"));
+	}
+
+	@Test
+	public void shouldHandleNoQueryString()
+	{
+		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo"), null);
+		Map<String, String> m = r.getQueryStringMap();
+		assertNull(m);
+	}
+
+	@Test
+	public void shouldHandleNullQueryString()
+	{
+		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?"), null);
+		Map<String, String> m = r.getQueryStringMap();
+		assertNull(m);
+	}
+
+	@Test
+	public void shouldHandleGoofyQueryString()
+	{
+		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo??&"), null);
+		Map<String, String> m = r.getQueryStringMap();
+		assertNotNull(m);
+		assertEquals("", m.get("?"));
 	}
 
 	@Test
