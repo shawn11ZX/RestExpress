@@ -93,6 +93,11 @@ public class Response
 	{
 		return headers.get(name);
 	}
+	
+	public boolean hasHeader(String name)
+	{
+		return (getHeader(name) != null);
+	}
 
 	public boolean hasHeaders()
 	{
@@ -124,12 +129,15 @@ public class Response
 	}
 
 	/**
+	 * Add a "Content-Range" header to the response, setting it to the range and count.
+	 * This enables datagrid-style pagination support.
+	 * 
 	 * @param response
 	 * @param range
 	 * @param count
 	 * @param size
 	 */
-	protected void addRangeHeader(QueryRange range, long count)
+	public void addRangeHeader(QueryRange range, long count)
 	{
     	addHeader(CONTENT_RANGE_HEADER_NAME, range.toString() + "/" + count);
 	}

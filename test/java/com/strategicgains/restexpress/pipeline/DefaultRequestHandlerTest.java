@@ -20,6 +20,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -28,12 +31,14 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.UpstreamMessageEvent;
 import org.jboss.netty.channel.local.DefaultLocalServerChannelFactory;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
@@ -57,7 +62,8 @@ public class DefaultRequestHandlerTest
 	private DummyObserver observer;
 	private Channel channel;
     private ChannelPipeline pl;
-    private StringBuffer httpResponse;
+    private StringBuffer responseBody;
+    private Map<String, List<String>> responseHeaders;
 	
 	@Before
 	public void initialize()
@@ -74,13 +80,63 @@ public class DefaultRequestHandlerTest
 		observer = new DummyObserver();
 		messageHandler.addMessageObserver(observer);
 		messageHandler.setResponseWrapperFactory(new DefaultResponseWrapper());
-		httpResponse = new StringBuffer();
-		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(httpResponse));
+		responseBody = new StringBuffer();
+		responseHeaders = new HashMap<String, List<String>>();
+		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(responseHeaders, responseBody));
 		PipelineBuilder pf = new PipelineBuilder()
 			.addRequestHandler(messageHandler);
 	    pl = pf.getPipeline();
 	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();
 	    channel = channelFactory.newChannel(pl);
+	}
+
+	@Test
+	public void shouldAllowSettingOfContentType()
+	throws Exception
+	{
+		sendGetEvent("/unserialized");
+		assertEquals(0, observer.getExceptionCount());
+		assertEquals(1, observer.getReceivedCount());
+		assertEquals(1, observer.getCompleteCount());
+		assertEquals(1, observer.getSuccessCount());
+//		System.out.println(responseBody.toString());
+		assertEquals("<html><body>Some kinda wonderful!</body></html>", responseBody.toString());
+		assertTrue(responseHeaders.containsKey("Content-Type"));
+		List<String> contentTypes = responseHeaders.get(HttpHeaders.Names.CONTENT_TYPE);
+		assertEquals(1, contentTypes.size());
+		assertEquals("text/html", contentTypes.get(0));
+	}
+
+	@Test
+	public void shouldAllowSettingOfContentTypeViaHeader()
+	throws Exception
+	{
+		sendGetEvent("/unserializedToo");
+		assertEquals(0, observer.getExceptionCount());
+		assertEquals(1, observer.getReceivedCount());
+		assertEquals(1, observer.getCompleteCount());
+		assertEquals(1, observer.getSuccessCount());
+//		System.out.println(responseBody.toString());
+		assertEquals("<html><body>Wow! What a fabulous HTML body...</body></html>", responseBody.toString());
+		List<String> contentTypes = responseHeaders.get(HttpHeaders.Names.CONTENT_TYPE);
+		assertEquals(1, contentTypes.size());
+		assertEquals("text/html", contentTypes.get(0));
+	}
+
+	@Test
+	public void shouldAllowSettingOfArbitraryBody()
+	throws Exception
+	{
+		sendGetEvent("/setBodyAction");
+		assertEquals(0, observer.getExceptionCount());
+		assertEquals(1, observer.getReceivedCount());
+		assertEquals(1, observer.getCompleteCount());
+		assertEquals(1, observer.getSuccessCount());
+//		System.out.println(responseBody.toString());
+		assertEquals("<html><body>Arbitrarily set HTML body...</body></html>", responseBody.toString());
+		List<String> contentTypes = responseHeaders.get(HttpHeaders.Names.CONTENT_TYPE);
+		assertEquals(1, contentTypes.size());
+		assertEquals(ContentType.HTML, contentTypes.get(0));
 	}
 
 	@Test
@@ -93,7 +149,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getSuccessCount());
 		assertEquals(0, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("{\"code\":200,\"status\":\"success\"}", httpResponse.toString());
+		assertEquals("{\"code\":200,\"status\":\"success\"}", responseBody.toString());
 	}
 
 	@Test
@@ -106,7 +162,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getExceptionCount());
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", httpResponse.toString());
+		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
 	}
 
 	@Test
@@ -119,7 +175,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getExceptionCount());
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", httpResponse.toString());
+		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
 	}
 
 	@Test
@@ -132,7 +188,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getExceptionCount());
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", httpResponse.toString());
+		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
 	}
 
 	@Test
@@ -145,7 +201,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getExceptionCount());
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("{\"code\":404,\"status\":\"error\",\"message\":\"Unresolvable URL: http://null/%bar\",\"data\":\"NotFoundException\"}", httpResponse.toString());
+		assertEquals("{\"code\":404,\"status\":\"error\",\"message\":\"Unresolvable URL: http://null/%bar\",\"data\":\"NotFoundException\"}", responseBody.toString());
 	}
 
 	@Test
@@ -157,7 +213,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getSuccessCount());
 		assertEquals(0, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("{\"code\":200,\"status\":\"success\",\"data\":{\"at\":\"2010-12-17T12:00:00.000Z\"}}", httpResponse.toString());
+		assertEquals("{\"code\":200,\"status\":\"success\",\"data\":{\"at\":\"2010-12-17T12:00:00.000Z\"}}", responseBody.toString());
 	}
 
 	@Test
@@ -169,7 +225,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getSuccessCount());
 		assertEquals(0, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("{\"code\":200,\"status\":\"success\",\"data\":{\"at\":\"2010-12-17T12:00:00.000Z\"}}", httpResponse.toString());
+		assertEquals("{\"code\":200,\"status\":\"success\",\"data\":{\"at\":\"2010-12-17T12:00:00.000Z\"}}", responseBody.toString());
 	}
 
 	@Test
@@ -181,12 +237,12 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getSuccessCount());
 		assertEquals(0, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertTrue(httpResponse.toString().startsWith("<response>"));
-		assertTrue(httpResponse.toString().contains("<code>200</code>"));
-		assertTrue(httpResponse.toString().contains("<data class=\"dated\">"));
-		assertTrue(httpResponse.toString().contains("<at>2010-12-17T12:00:00.000Z</at>"));
-		assertTrue(httpResponse.toString().contains("</data>"));
-		assertTrue(httpResponse.toString().endsWith("</response>"));
+		assertTrue(responseBody.toString().startsWith("<response>"));
+		assertTrue(responseBody.toString().contains("<code>200</code>"));
+		assertTrue(responseBody.toString().contains("<data class=\"dated\">"));
+		assertTrue(responseBody.toString().contains("<at>2010-12-17T12:00:00.000Z</at>"));
+		assertTrue(responseBody.toString().contains("</data>"));
+		assertTrue(responseBody.toString().endsWith("</response>"));
 	}
 
 	@Test
@@ -198,12 +254,12 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getSuccessCount());
 		assertEquals(0, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertTrue(httpResponse.toString().startsWith("<response>"));
-		assertTrue(httpResponse.toString().contains("<code>200</code>"));
-		assertTrue(httpResponse.toString().contains("<data class=\"dated\">"));
-		assertTrue(httpResponse.toString().contains("<at>2010-12-17T12:00:00.000Z</at>"));
-		assertTrue(httpResponse.toString().contains("</data>"));
-		assertTrue(httpResponse.toString().endsWith("</response>"));
+		assertTrue(responseBody.toString().startsWith("<response>"));
+		assertTrue(responseBody.toString().contains("<code>200</code>"));
+		assertTrue(responseBody.toString().contains("<data class=\"dated\">"));
+		assertTrue(responseBody.toString().contains("<at>2010-12-17T12:00:00.000Z</at>"));
+		assertTrue(responseBody.toString().contains("</data>"));
+		assertTrue(responseBody.toString().endsWith("</response>"));
 	}
 
 	@Test
@@ -215,11 +271,11 @@ public class DefaultRequestHandlerTest
 		assertEquals(0, observer.getSuccessCount());
 		assertEquals(1, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertTrue(httpResponse.toString().startsWith("<response>"));
-		assertTrue(httpResponse.toString().contains("<code>404</code>"));
-		assertTrue(httpResponse.toString().contains("<status>error</status>"));
-		assertTrue(httpResponse.toString().contains("<message>Unresolvable URL: http://null/xyzt.xml</message>"));
-		assertTrue(httpResponse.toString().endsWith("</response>"));
+		assertTrue(responseBody.toString().startsWith("<response>"));
+		assertTrue(responseBody.toString().contains("<code>404</code>"));
+		assertTrue(responseBody.toString().contains("<status>error</status>"));
+		assertTrue(responseBody.toString().contains("<message>Unresolvable URL: http://null/xyzt.xml</message>"));
+		assertTrue(responseBody.toString().endsWith("</response>"));
 	}
 
 	@Test
@@ -231,11 +287,11 @@ public class DefaultRequestHandlerTest
 		assertEquals(0, observer.getSuccessCount());
 		assertEquals(1, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertTrue(httpResponse.toString().startsWith("<response>"));
-		assertTrue(httpResponse.toString().contains("<code>404</code>"));
-		assertTrue(httpResponse.toString().contains("<status>error</status>"));
-		assertTrue(httpResponse.toString().contains("<message>Unresolvable URL: http://null/xyzt?format=xml</message>"));
-		assertTrue(httpResponse.toString().endsWith("</response>"));
+		assertTrue(responseBody.toString().startsWith("<response>"));
+		assertTrue(responseBody.toString().contains("<code>404</code>"));
+		assertTrue(responseBody.toString().contains("<status>error</status>"));
+		assertTrue(responseBody.toString().contains("<message>Unresolvable URL: http://null/xyzt?format=xml</message>"));
+		assertTrue(responseBody.toString().endsWith("</response>"));
 	}
 
 	private void sendGetEvent(String path)
@@ -273,6 +329,15 @@ public class DefaultRequestHandlerTest
 
         	uri("/date.{format}", controller)
     			.action("dateAction", HttpMethod.GET);
+
+        	uri("/unserialized", controller)
+        		.action("unserializedAction", HttpMethod.GET);
+
+        	uri("/unserializedToo", controller)
+        		.action("contentHeaderAction", HttpMethod.GET);
+
+        	uri("/setBodyAction", controller)
+        		.action("setBodyAction", HttpMethod.GET);
         }
 	}
 	
@@ -291,6 +356,27 @@ public class DefaultRequestHandlerTest
 		public Object dateAction(Request request, Response response)
 		{
 			return request.getBodyAs(Dated.class);
+		}
+
+		public String unserializedAction(Request request, Response response)
+		{
+			response.setContentType("text/html");
+			response.noSerialization();
+			return "<html><body>Some kinda wonderful!</body></html>";
+		}
+
+		public String contentHeaderAction(Request request, Response response)
+		{
+			response.addHeader("Content-Type", "text/html");
+			response.noSerialization();
+			return "<html><body>Wow! What a fabulous HTML body...</body></html>";
+		}
+
+		public void setBodyAction(Request request, Response response)
+		{
+			response.setContentType(ContentType.HTML);
+			response.noSerialization();
+			response.setBody("<html><body>Arbitrarily set HTML body...</body></html>");
 		}
 	}
 
