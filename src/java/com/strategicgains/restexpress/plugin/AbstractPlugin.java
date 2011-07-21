@@ -12,41 +12,23 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
- */
-package com.kickstart;
-
-import java.util.Properties;
+*/
+package com.strategicgains.restexpress.plugin;
 
 import com.strategicgains.restexpress.RestExpress;
-import com.strategicgains.restexpress.util.Environment;
+import com.strategicgains.restexpress.route.RouteBuilder;
 
 /**
  * @author toddf
- * @since Feb 10, 2011
+ * @since Jul 20, 2011
  */
-public class KickstartEnvironment
-extends Environment
+public abstract class AbstractPlugin
+implements Plugin
 {
-	private static final String NAME_PROPERTY = "name";
-	private static final String PORT_PROPERTY = "port";
-
-	private int port;
-	private String name;
-
 	@Override
-	protected void fillValues(Properties p)
+	public RouteBuilder register(RestExpress server)
 	{
-		this.name = p.getProperty(NAME_PROPERTY, RestExpress.DEFAULT_NAME);
-		this.port = Integer.parseInt(p.getProperty(PORT_PROPERTY, String.valueOf(RestExpress.DEFAULT_PORT)));
-	}
-
-	public int getPort()
-	{
-		return port;
-	}
-
-	public String getName()
-	{
-		return name;
+		server.registerPlugin(this);
+		return null;
 	}
 }
