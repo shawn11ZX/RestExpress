@@ -13,33 +13,21 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package com.strategicgains.restexpress.controller;
+package com.strategicgains.restexpress.plugin;
 
-import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.domain.console.ServerMetadata;
+import com.strategicgains.restexpress.RestExpress;
 
 /**
  * @author toddf
- * @since Jan 31, 2011
+ * @since Jul 20, 2011
  */
-public class ConsoleController
+public abstract class AbstractPlugin
+implements Plugin
 {
-	private ServerMetadata metadata;
-
-	public ConsoleController(ServerMetadata data)
+	@Override
+	public AbstractPlugin register(RestExpress server)
 	{
-		super();
-		this.metadata = data;
-	}
-
-	public ServerMetadata getRoutes(Request request, Response response)
-	{
-		return metadata;
-	}
-
-	public Object getConsole(Request request, Response response)
-	{
-		return null;
+		server.registerPlugin(this);
+		return this;
 	}
 }
