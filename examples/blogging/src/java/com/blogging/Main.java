@@ -33,14 +33,14 @@ public class Main
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		BloggingEnvironment env = loadEnvironment(args);
-		RestExpress server = new RestExpress(new Routes(env.getBlogRespository(),
-			env.getEntriesRespository(), env.getCommentsRespository()))
-		    .setName(env.getName())
-		    .setPort(env.getPort())
+		BloggingEnvironment config = loadEnvironment(args);
+		RestExpress server = new RestExpress(new Routes(config.getBlogRespository(),
+			config.getEntriesRespository(), config.getCommentsRespository()))
+		    .setName(config.getName())
+		    .setPort(config.getPort())
 		    .putSerializationProcessor(Format.JSON, new BlogJsonProcessor())
 		    .putSerializationProcessor(Format.XML, new BlogXmlProcessor())
-		    .setDefaultFormat(env.getDefaultFormat())
+		    .setDefaultFormat(config.getDefaultFormat())
 		    .addMessageObserver(new SimpleConsoleLogMessageObserver())
 		    .addPostprocessor(new DateHeaderPostprocessor())
 		    .addPostprocessor(new CacheHeaderPostprocessor())
