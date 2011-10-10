@@ -516,6 +516,8 @@ public class Request
 	// SECTION: UTILITY - PRIVATE
 
 	/**
+	 * Puts the requested format in the FORMAT_HEADER_NAME header (forcing it to lower case).
+	 * 
      * @param request
      */
     private void parseRequestedFormatToHeader(HttpRequest request)
@@ -528,7 +530,7 @@ public class Request
     	
     	if (format != null)
     	{
-    		request.addHeader(FORMAT_HEADER_NAME, format);
+    		request.addHeader(FORMAT_HEADER_NAME, format.toLowerCase());
     	}
     }
 	

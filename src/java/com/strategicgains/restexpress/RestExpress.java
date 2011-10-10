@@ -231,7 +231,9 @@ public class RestExpress
 
 	public RestExpress setDefaultFormat(String format)
 	{
-		this.defaultFormat = format;
+		if (format == null || format.trim().isEmpty()) return this;
+
+		this.defaultFormat = format.toLowerCase();
 		return this;
 	}
 
@@ -247,8 +249,7 @@ public class RestExpress
 	{
 		if (!getSerializationProcessors().containsKey(Format.JSON))
 		{
-			serializationProcessors
-			    .put(Format.JSON, new DefaultJsonProcessor());
+			serializationProcessors.put(Format.JSON, new DefaultJsonProcessor());
 		}
 
 		if (isDefault)
