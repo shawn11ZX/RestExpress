@@ -50,9 +50,9 @@ public abstract class RouteDeclaration
 	 * @param urlPattern a string specifying a URL pattern to match.
 	 * @param controller a pojo which contains implementations of the service methods (e.g. create(), read(), update(), delete()).
 	 */
-	public RouteBuilder uri(String uri, Object controller)
+	public ParameterizedRouteBuilder uri(String uri, Object controller)
 	{
-		RouteBuilder builder = new ParameterizedRouteBuilder(uri, controller);
+		ParameterizedRouteBuilder builder = new ParameterizedRouteBuilder(uri, controller);
 		routeBuilders.add(builder);
 		return builder;
 	}
@@ -63,16 +63,21 @@ public abstract class RouteDeclaration
 	 * @param regex a string specifying a regex pattern to match.
 	 * @param controller a pojo which contains implementations of service methods (e.g. create(), read(), update(), delete()).
 	 */
-	public RouteBuilder regex(String regex, Object controller)
+	public RegexRouteBuilder regex(String regex, Object controller)
 	{
-		RouteBuilder builder = new RegexRouteBuilder(regex, controller);
+		RegexRouteBuilder builder = new RegexRouteBuilder(regex, controller);
 		routeBuilders.add(builder);
 		return builder;
 	}
 	
-	public RouteBuilder route()
+	/**
+	 * Create a URL pattern segment-by-segment and map it to a controller.
+	 * 
+	 * @return
+	 */
+	public FluentRouteBuilder route()
 	{
-		RouteBuilder builder = new FluentRouteBuilder();
+		FluentRouteBuilder builder = new FluentRouteBuilder();
 		routeBuilders.add(builder);
 		return builder;
 	}
