@@ -13,33 +13,24 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package com.strategicgains.restexpress.controller;
+package com.strategicgains.restexpress;
 
-import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.domain.console.ServerMetadata;
 
 /**
+ * Constants for built-in RestExpress flag values on routes.
+ * 
  * @author toddf
- * @since Jan 31, 2011
+ * @since Jan 19, 2011
  */
-public class ConsoleController
+public abstract class Flags
 {
-	private ServerMetadata metadata;
-
-	public ConsoleController(ServerMetadata data)
+	public static final class Cache
 	{
-		super();
-		this.metadata = data;
+		public static final String DONT_CACHE = "no.caching";
 	}
-
-	public ServerMetadata getRoutes(Request request, Response response)
+	
+	private Flags()
 	{
-		return metadata;
-	}
-
-	public Object getConsole(Request request, Response response)
-	{
-		return null;
+		// prevents instantiation.
 	}
 }

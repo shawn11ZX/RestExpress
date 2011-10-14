@@ -15,24 +15,21 @@
 */
 package com.strategicgains.restexpress;
 
-import java.nio.charset.Charset;
 
 /**
+ * Constants for built-in RestExpress parameters on routes.
+ * 
  * @author toddf
  * @since Jan 19, 2011
  */
-public abstract class ContentType
+public abstract class Parameters
 {
-	public static final String ENCODING = "UTF-8";
-	public static final Charset CHARSET = Charset.forName(ENCODING);
-
-	public static final String HTML = "text/html; charset=" + ENCODING;
-	public static final String JAVASCRIPT = "application/javascript; charset=" + ENCODING;
-	public static final String JSON = "application/json; charset=" + ENCODING;
-	public static final String TEXT_PLAIN = "text/plain; charset=" + ENCODING;
-	public static final String XML = "application/xml; charset=" + ENCODING;
+	public static final class Cache
+	{
+		public static final String MAX_AGE = "max.age";
+	}
 	
-	private ContentType()
+	private Parameters()
 	{
 		// prevents instantiation.
 	}

@@ -28,12 +28,9 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.logging.LoggingHandler;
 
-import com.strategicgains.restexpress.controller.ConsoleController;
-import com.strategicgains.restexpress.domain.console.RouteMetadata;
-import com.strategicgains.restexpress.domain.console.ServerMetadata;
+import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
 import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.pipeline.DefaultRequestHandler;
@@ -41,6 +38,7 @@ import com.strategicgains.restexpress.pipeline.MessageObserver;
 import com.strategicgains.restexpress.pipeline.PipelineBuilder;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
+import com.strategicgains.restexpress.plugin.Plugin;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseWrapperFactory;
@@ -71,7 +69,6 @@ public class RestExpress
 
 	public static final int DEFAULT_PORT = 8081;
 	public static final String DEFAULT_NAME = "RestExpress";
-	private static final String DEFAULT_CONSOLE_PREFIX = "/console";
 
 	private ServerBootstrap bootstrap;
 	private String name;
@@ -86,12 +83,11 @@ public class RestExpress
 	private int connectTimeoutMillis = 10000; // netty default
 	private LogLevel logLevel = LogLevel.DEBUG; // Netty default
 	private boolean useSystemOut;
-	private boolean useConsoleRoutes;
-	private String consoleUrlPrefix;
 	private ResponseWrapperFactory responseWrapperFactory;
-	private boolean shouldUseCompression = true;
 	private boolean shouldHandleChunking = true;
+	private boolean shouldUseCompression = true;
 	private Integer maxChunkSize = null;
+	private int workerThreadCount = 0;
 
 	Map<String, SerializationProcessor> serializationProcessors = new HashMap<String, SerializationProcessor>();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
@@ -100,6 +96,7 @@ public class RestExpress
 	private Map<String, Class<?>> xmlAliases = new HashMap<String, Class<?>>();
 	private Resolver<SerializationProcessor> serializationResolver;
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
+	private List<Plugin> plugins = new ArrayList<Plugin>();
 
 	/**
 	 * Create a new RestExpress service. By default, RestExpress uses port 8081.
@@ -135,7 +132,6 @@ public class RestExpress
 		setPort(DEFAULT_PORT);
 		supportJson(true);
 		supportXml();
-//		supportConsoleRoutes();
 		useSystemOut();
 		useWrappedResponses();
 	}
@@ -235,7 +231,9 @@ public class RestExpress
 
 	public RestExpress setDefaultFormat(String format)
 	{
-		this.defaultFormat = format;
+		if (format == null || format.trim().isEmpty()) return this;
+
+		this.defaultFormat = format.toLowerCase();
 		return this;
 	}
 
@@ -251,8 +249,7 @@ public class RestExpress
 	{
 		if (!getSerializationProcessors().containsKey(Format.JSON))
 		{
-			serializationProcessors
-			    .put(Format.JSON, new DefaultJsonProcessor());
+			serializationProcessors.put(Format.JSON, new DefaultJsonProcessor());
 		}
 
 		if (isDefault)
@@ -441,6 +438,8 @@ public class RestExpress
 	 * Add a PostProcessor instance that gets call after an incoming message is
 	 * processed. A Postprocessor is useful for augmenting or transforming the
 	 * results. Postprocessors get called in the order in which they get added.
+	 * However, they do NOT get called in the case of an exception or error within
+	 * the route.
 	 * 
 	 * @param processor
 	 * @return
@@ -572,35 +571,6 @@ public class RestExpress
 		return this;
 	}
 
-	public RestExpress supportConsoleRoutes()
-	{
-		return supportConsoleRoutes(DEFAULT_CONSOLE_PREFIX);
-	}
-
-	public RestExpress supportConsoleRoutes(String urlPrefix)
-	{
-		useConsoleRoutes = true;
-		this.consoleUrlPrefix = urlPrefix;
-		return this;
-	}
-	
-	public RestExpress noConsoleRoutes()
-	{
-		this.useConsoleRoutes = false;
-		this.consoleUrlPrefix = null;
-		return this;
-	}
-
-	public boolean shouldUseConsoleRoutes()
-	{
-		return useConsoleRoutes;
-	}
-
-	public String getConsoleUrlPrefix()
-	{
-		return consoleUrlPrefix;
-	}
-
 	public RestExpress useWrappedResponses()
 	{
 		responseWrapperFactory = new DefaultResponseWrapper();
@@ -624,6 +594,17 @@ public class RestExpress
 		this.exceptionMap = mapping;
 		return this;
 	}
+	
+	public int getWorkerThreadCount()
+	{
+		return workerThreadCount;
+	}
+
+	public RestExpress setWorkerThreadCount(int value)
+	{
+		this.workerThreadCount = value;
+		return this;
+	}
 
 	/**
 	 * The last call in the building of a RestExpress server, bind() causes
@@ -634,7 +615,14 @@ public class RestExpress
 	public Channel bind()
 	{
 		// Configure the server.
-		bootstrap = Bootstraps.createServerNioBootstrap();
+		if (workerThreadCount == 0)
+		{
+			bootstrap = Bootstraps.createServerNioBootstrap();
+		}
+		else
+		{
+			bootstrap = Bootstraps.createServerNioBootstrap(workerThreadCount);
+		}
 
 		// Set up the event pipeline factory.
 		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
@@ -680,6 +668,7 @@ public class RestExpress
 
 		Channel channel = bootstrap.bind(new InetSocketAddress(getPort()));
 		allChannels.add(channel);
+		bindPlugins();
 		return channel;
 	}
 
@@ -735,45 +724,39 @@ public class RestExpress
 	private RouteResolver createRouteResolver()
 	{
 		RouteDeclaration routes = getRouteDeclarations();
-
-		if (shouldUseConsoleRoutes())
-		{
-			buildConsoleRoutes(routes, getConsoleUrlPrefix());
-		}
-
 		return new RouteResolver(routes.createRouteMapping());
-	}
-
-	/**
-	 * @param routes2
-	 * @param consoleUrlPrefix2
-	 */
-	private void buildConsoleRoutes(RouteDeclaration routes, String prefix)
-	{
-		ServerMetadata metadata = buildMetadata();
-		ConsoleController controller = new ConsoleController(metadata);
-		routes.uri(prefix + "/routes.{format}", controller)
-			.action("getRoutes", HttpMethod.GET);
-		// routes.uri(prefix + "/index.html", controller)
-		// .action("getConsole", HttpMethod.GET)
-		// .format(Format.HTML)
-		// .noSerialization();
-		alias("service", ServerMetadata.class);
-		alias("route", RouteMetadata.class);
 	}
 
 	/**
 	 * @return
 	 */
-	private ServerMetadata buildMetadata()
+	public ServerMetadata getRouteMetadata()
 	{
 		ServerMetadata m = new ServerMetadata();
 		m.setName(getName());
 		m.setPort(getPort());
 		m.setDefaultFormat(getDefaultFormat());
 		m.addAllSupportedFormats(getSerializationProcessors().keySet());
-		m.addAllRoutes(getRouteDeclarations().asMetadata());
+		m.addAllRoutes(getRouteDeclarations().getMetadata());
 		return m;
+	}
+	
+	public RestExpress registerPlugin(Plugin plugin)
+	{
+		if (!plugins.contains(plugin))
+		{
+			plugins.add(plugin);
+		}
+		
+		return this;
+	}
+
+	private void bindPlugins()
+	{
+		for (Plugin plugin : plugins)
+		{
+			plugin.bind(this);
+		}
 	}
 
 	/**
