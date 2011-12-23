@@ -30,6 +30,8 @@ extends AbstractPlugin
 	@Override
 	public CacheControlPlugin register(RestExpress server)
 	{
+		if (isRegistered()) return this;
+
 		super.register(server);
 
 		server
