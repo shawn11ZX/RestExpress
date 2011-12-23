@@ -35,8 +35,6 @@ public class Main
 			// Since this application is primarily for performance testing of RESTExpress, 
 			// we're turning off all the output and cache controls.
 //		    .addMessageObserver(new SimpleConsoleLogMessageObserver())
-//		    .addPostprocessor(new DateHeaderPostprocessor())
-//		    .addPostprocessor(new CacheHeaderPostprocessor());
 
 		new RoutesMetadataPlugin().register(server)
 			.parameter(Parameters.Cache.MAX_AGE, 86400);	// Cache for 1 day (24 hours).
