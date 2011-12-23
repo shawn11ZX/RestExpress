@@ -71,7 +71,7 @@ public abstract class RouteDeclaration
 		routeBuilders.add(builder);
 		return builder;
 	}
-	
+
 	/**
 	 * Create a URL pattern segment-by-segment and map it to a controller.
 	 * 
@@ -84,7 +84,7 @@ public abstract class RouteDeclaration
 		return builder;
 	}
 	
-	
+
 	// SECTION: MUTATORS
 	
 	public void setDefaultFormat(String format)
@@ -96,7 +96,7 @@ public abstract class RouteDeclaration
 	{
 		this.supportedFormats.addAll(supportedFormats);
 	}
-	
+
 	
 	// SECTION: UTILITY - FACTORY
 
