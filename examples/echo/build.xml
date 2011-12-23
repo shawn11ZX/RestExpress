@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="build-all" name="Blogging">
+<project basedir="." default="build-all" name="echo">
 
 	<property environment="env"/>
 	<property file="build.properties"/>
@@ -124,7 +124,7 @@
 		</manifestclasspath>
 		<jar destfile="${dir.dist}/${project.name}.jar">
 			<manifest>
-				<attribute name="Main-Class" value="com.blogging.Main"/>
+				<attribute name="Main-Class" value="com.echo.Main"/>
 				<attribute name="Class-Path" value="${jar.classpath}"/>
 			</manifest>
     		<fileset dir="${dir.compile}"/>
@@ -153,7 +153,14 @@
           target: run              
          ====================================================================== -->
     <target name="run" depends="_init, compile" description="Run the project from the command line">
-        <java fork="true" classname="com.blogging.Main">
+        <java fork="true" classname="com.echo.Main">
+			<jvmarg value="-XX:+UseConcMarkSweepGC"/>
+			<jvmarg value="-XX:+UseParNewGC"/>
+			<jvmarg value="-XX:CMSInitiatingOccupancyFraction=70"/>
+			<jvmarg value="-XX:NewSize=128m"/>
+			<jvmarg value="-XX:MaxNewSize=128m"/>
+			<jvmarg value="-Xms256m"/>
+			<jvmarg value="-Xmx256m"/>
             <classpath>
                     <path refid="runtime.classpath"/>
             </classpath>

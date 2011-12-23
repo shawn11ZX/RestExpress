@@ -45,9 +45,6 @@ public class Request
 {
 	// SECTION: CONSTANTS
 
-	private static final String METHOD_QUERY_PARAMETER = "_method";
-	private static final String FORMAT_HEADER_NAME = "format";
-	private static final String JSONP_CALLBACK_HEADER_NAME = "jsonp";
 	private static final String DEFAULT_PROTOCOL = "http";
 	
 	private static long nextCorrelationId = 0;
@@ -137,7 +134,7 @@ public class Request
     {
 		return httpRequest.getContent();
     }
-	
+
 	/**
 	 * Attempts to deserialize the request body into an instance of the given type.
 	 * 
@@ -177,6 +174,17 @@ public class Request
 		}
 		
 		return instance;
+	}
+
+	/**
+	 * Returns the body as a Map of name/value pairs from a url-form-encoded form submission.  Note that
+	 * duplicate names (value arrays using the same parameter name) are not currently supported.
+	 * 
+	 * @return
+	 */
+	public Map<String, String> getBodyAsUrlFormEncoded()
+	{
+        return StringUtils.parseQueryString(urlDecode(getBody().toString(ContentType.CHARSET)));
 	}
 
 	public SerializationProcessor getSerializationProcessor()
@@ -368,7 +376,7 @@ public class Request
 	 */
 	public String getFormat()
 	{
-		return getRawHeader(FORMAT_HEADER_NAME);
+		return getRawHeader(Parameters.Query.FORMAT);
 	}
 	
 	/**
@@ -383,7 +391,7 @@ public class Request
 	
 	public String getJsonpHeader()
 	{
-		return getRawHeader(JSONP_CALLBACK_HEADER_NAME);
+		return getRawHeader(Parameters.Query.JSONP_CALLBACK);
 	}
 	
 	public boolean hasJsonpHeader()
@@ -411,7 +419,7 @@ public class Request
 	 */
 	public boolean isFormatEqual(String format)
 	{
-		return isHeaderEqual(FORMAT_HEADER_NAME, format);
+		return isHeaderEqual(Parameters.Query.FORMAT, format);
 	}
 	
 	/**
@@ -530,7 +538,7 @@ public class Request
     	
     	if (format != null)
     	{
-    		request.addHeader(FORMAT_HEADER_NAME, format.toLowerCase());
+    		request.addHeader(Parameters.Query.FORMAT, format.toLowerCase());
     	}
     }
 	
@@ -573,7 +581,7 @@ public class Request
 	{
 		if (!HttpMethod.POST.equals(request.getMethod())) return;
 
-		String methodString = request.getHeader(METHOD_QUERY_PARAMETER);
+		String methodString = request.getHeader(Parameters.Query.METHOD_TUNNEL);
 
 		if ("PUT".equalsIgnoreCase(methodString) || "DELETE".equalsIgnoreCase(methodString))
 		{

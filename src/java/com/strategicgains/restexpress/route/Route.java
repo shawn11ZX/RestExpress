@@ -132,6 +132,16 @@ public abstract class Route
 		return shouldUseWrappedResponse;
 	}
 	
+	public boolean hasSupportedFormats()
+	{
+		return (!supportedFormats.isEmpty());
+	}
+	
+	public void addAllSupportedFormats(List<String> formats)
+	{
+		supportedFormats.addAll(formats);
+	}
+	
 	public void addSupportedFormat(String format)
 	{
 		if (!supportsFormat(format))
@@ -148,6 +158,16 @@ public abstract class Route
 	public String getDefaultFormat()
 	{
 		return defaultFormat;
+	}
+	
+	public boolean hasDefaultFormat()
+	{
+		return defaultFormat != null;
+	}
+
+	public void setDefaultFormat(String format)
+	{
+		this.defaultFormat = format;
 	}
 
 	public UrlMatch match(String url)

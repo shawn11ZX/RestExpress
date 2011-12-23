@@ -65,7 +65,8 @@ import com.strategicgains.restexpress.util.Resolver;
  */
 public class RestExpress
 {
-	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress");
+	private static final ChannelGroup allChannels = new DefaultChannelGroup(
+	    "RestExpress");
 
 	public static final int DEFAULT_PORT = 8081;
 	public static final String DEFAULT_NAME = "RestExpress";
@@ -101,9 +102,9 @@ public class RestExpress
 	/**
 	 * Create a new RestExpress service. By default, RestExpress uses port 8081.
 	 * Supports JSON, and XML, providing JSEND-style wrapped responses. And
-	 * displays some messages on System.out. These can be altered with the setPort(),
-	 * noJson(), noXml(), noSystemOut(), and useRawResponses() DSL modifiers,
-	 * respectively, as needed.
+	 * displays some messages on System.out. These can be altered with the
+	 * setPort(), noJson(), noXml(), noSystemOut(), and useRawResponses() DSL
+	 * modifiers, respectively, as needed.
 	 * 
 	 * <p/>
 	 * The default input and output format for messages is JSON. To change that,
@@ -208,7 +209,7 @@ public class RestExpress
 		return this;
 	}
 
-	/* package protected */ Map<String, SerializationProcessor> getSerializationProcessors()
+	/* package protected */Map<String, SerializationProcessor> getSerializationProcessors()
 	{
 		return serializationProcessors;
 	}
@@ -218,7 +219,8 @@ public class RestExpress
 		return serializationResolver;
 	}
 
-	public RestExpress setSerializationResolver(Resolver<SerializationProcessor> serializationResolver)
+	public RestExpress setSerializationResolver(
+	    Resolver<SerializationProcessor> serializationResolver)
 	{
 		this.serializationResolver = serializationResolver;
 		return this;
@@ -249,7 +251,8 @@ public class RestExpress
 	{
 		if (!getSerializationProcessors().containsKey(Format.JSON))
 		{
-			serializationProcessors.put(Format.JSON, new DefaultJsonProcessor());
+			serializationProcessors
+			    .put(Format.JSON, new DefaultJsonProcessor());
 		}
 
 		if (isDefault)
@@ -296,7 +299,8 @@ public class RestExpress
 	{
 		if (!getSerializationProcessors().containsKey(Format.XML))
 		{
-			getSerializationProcessors().put(Format.XML, new DefaultXmlProcessor());
+			getSerializationProcessors().put(Format.XML,
+			    new DefaultXmlProcessor());
 		}
 
 		if (isDefault)
@@ -330,7 +334,7 @@ public class RestExpress
 		serializationProcessors.remove(Format.XML);
 		return this;
 	}
-	
+
 	public RestExpress supportChunking()
 	{
 		shouldHandleChunking = true;
@@ -348,13 +352,13 @@ public class RestExpress
 		this.maxChunkSize = Integer.valueOf(size);
 		return this;
 	}
-	
+
 	public RestExpress supportCompression()
 	{
 		shouldUseCompression = true;
 		return this;
 	}
-	
+
 	public RestExpress noCompression()
 	{
 		shouldUseCompression = false;
@@ -438,8 +442,8 @@ public class RestExpress
 	 * Add a PostProcessor instance that gets call after an incoming message is
 	 * processed. A Postprocessor is useful for augmenting or transforming the
 	 * results. Postprocessors get called in the order in which they get added.
-	 * However, they do NOT get called in the case of an exception or error within
-	 * the route.
+	 * However, they do NOT get called in the case of an exception or error
+	 * within the route.
 	 * 
 	 * @param processor
 	 * @return
@@ -576,14 +580,15 @@ public class RestExpress
 		responseWrapperFactory = new DefaultResponseWrapper();
 		return this;
 	}
-	
+
 	public RestExpress useRawResponses()
 	{
 		responseWrapperFactory = new RawResponseWrapper();
 		return this;
 	}
-	
-	public <T extends Exception, U extends ServiceException> RestExpress mapException(Class<T> from, Class<U> to)
+
+	public <T extends Exception, U extends ServiceException> RestExpress mapException(
+	    Class<T> from, Class<U> to)
 	{
 		exceptionMap.map(from, to);
 		return this;
@@ -594,7 +599,7 @@ public class RestExpress
 		this.exceptionMap = mapping;
 		return this;
 	}
-	
+
 	public int getWorkerThreadCount()
 	{
 		return workerThreadCount;
@@ -630,28 +635,29 @@ public class RestExpress
 		requestHandler.setResponseWrapperFactory(responseWrapperFactory);
 
 		// Add MessageObservers to the request handler here, if desired...
-		requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));
-		
+		requestHandler.addMessageObserver(messageObservers
+		    .toArray(new MessageObserver[0]));
+
 		requestHandler.setExceptionMap(exceptionMap);
 
 		// Add pre/post processors to the request handler here...
 		addPreprocessors(requestHandler);
 		addPostprocessors(requestHandler);
 
-		PipelineBuilder pf = new PipelineBuilder()
-			.addRequestHandler(new LoggingHandler( getLogLevel().getNettyLogLevel() ))
+		PipelineBuilder pf = new PipelineBuilder().addRequestHandler(
+		    new LoggingHandler(getLogLevel().getNettyLogLevel()))
 		    .addRequestHandler(requestHandler);
-		
+
 		if (shouldHandleChunking)
 		{
 			pf.handleChunked();
-			
+
 			if (maxChunkSize != null)
 			{
 				pf.maxChunkSize(maxChunkSize.intValue());
 			}
 		}
-		
+
 		if (shouldUseCompression)
 		{
 			pf.useCompression();
@@ -663,7 +669,8 @@ public class RestExpress
 		// Bind and start to accept incoming connections.
 		if (shouldUseSystemOut())
 		{
-			System.out.println("Starting " + getName() + " Server on port " + port);
+			System.out.println("Starting " + getName() + " Server on port "
+			    + port);
 		}
 
 		Channel channel = bootstrap.bind(new InetSocketAddress(getPort()));
@@ -673,19 +680,20 @@ public class RestExpress
 	}
 
 	private void setBootstrapOptions()
-    {
-	    bootstrap.setOption("child.tcpNoDelay", isUseTcpNoDelay());
+	{
+		bootstrap.setOption("child.tcpNoDelay", isUseTcpNoDelay());
 		bootstrap.setOption("child.keepAlive", isUseKeepAlive());
 		bootstrap.setOption("reuseAddress", isReuseAddress());
 		bootstrap.setOption("child.soLinger", getSoLinger());
 		bootstrap.setOption("connectTimeoutMillis", getConnectTimeoutMillis());
 		bootstrap.setOption("receiveBufferSize", getReceiveBufferSize());
-    }
-	
+	}
+
 	/**
-	 * Used in main() to install a default JVM shutdown hook and shut down the server cleanly.
-	 * Calls shutdown() when JVM termination detected.  To utilize your own shutdown hook(s),
-	 * install your own shutdown hook(s) and call shutdown() instead of awaitShutdown().
+	 * Used in main() to install a default JVM shutdown hook and shut down the
+	 * server cleanly. Calls shutdown() when JVM termination detected. To
+	 * utilize your own shutdown hook(s), install your own shutdown hook(s) and
+	 * call shutdown() instead of awaitShutdown().
 	 */
 	public void awaitShutdown()
 	{
@@ -695,21 +703,22 @@ public class RestExpress
 		do
 		{
 			try
-	        {
-		        Thread.sleep(300);
-	        }
-	        catch (InterruptedException e)
-	        {
-	        	interrupted = true;
-	        }
+			{
+				Thread.sleep(300);
+			}
+			catch (InterruptedException e)
+			{
+				interrupted = true;
+			}
 		}
-		while(!interrupted);
+		while (!interrupted);
 	}
 
 	/**
-	 * Releases all resources associated with this server so the JVM can shutdown cleanly.
-	 * Call this method to finish using the server.  To utilize the default shutdown hook
-	 * in main() provided by RestExpress, call awaitShutdown() instead.
+	 * Releases all resources associated with this server so the JVM can
+	 * shutdown cleanly. Call this method to finish using the server. To utilize
+	 * the default shutdown hook in main() provided by RestExpress, call
+	 * awaitShutdown() instead.
 	 */
 	public void shutdown()
 	{
@@ -723,8 +732,25 @@ public class RestExpress
 	 */
 	private RouteResolver createRouteResolver()
 	{
-		RouteDeclaration routes = getRouteDeclarations();
-		return new RouteResolver(routes.createRouteMapping());
+		RouteDeclaration routeDeclarations = getRouteDeclarations();
+		routeDeclarations.setDefaultFormat(getDefaultFormat());
+		routeDeclarations.setSupportedFormats(getSupportedFormats());
+		return new RouteResolver(routeDeclarations.createRouteMapping());
+	}
+
+	/**
+	 * @return
+	 */
+	private List<String> getSupportedFormats()
+	{
+		List<String> supportedFormats = new ArrayList<String>();
+
+		for (String format : serializationProcessors.keySet())
+		{
+			supportedFormats.add(format);
+		}
+
+		return supportedFormats;
 	}
 
 	/**
@@ -740,14 +766,15 @@ public class RestExpress
 		m.addAllRoutes(getRouteDeclarations().getMetadata());
 		return m;
 	}
-	
+
 	public RestExpress registerPlugin(Plugin plugin)
 	{
 		if (!plugins.contains(plugin))
 		{
 			plugins.add(plugin);
+			plugin.register(this);
 		}
-		
+
 		return this;
 	}
 
@@ -767,7 +794,8 @@ public class RestExpress
 		DefaultSerializationResolver resolver = new DefaultSerializationResolver();
 		resolver.setDefaultFormat(getDefaultFormat());
 
-		for (Entry<String, SerializationProcessor> entry : getSerializationProcessors().entrySet())
+		for (Entry<String, SerializationProcessor> entry : getSerializationProcessors()
+		    .entrySet())
 		{
 			if (entry.getKey().equals(Format.XML))
 			{

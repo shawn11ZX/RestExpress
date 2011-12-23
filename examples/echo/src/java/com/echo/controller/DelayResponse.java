@@ -13,31 +13,23 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package com.strategicgains.restexpress;
-
+package com.echo.controller;
 
 /**
- * Constants for built-in RestExpress parameters on routes.
- * 
  * @author toddf
- * @since Jan 19, 2011
+ * @since Dec 20, 2011
  */
-public abstract class Parameters
+public class DelayResponse
 {
-	public static final class Cache
-	{
-		public static final String MAX_AGE = "max.age";
-	}
-	
-	public static final class Query
-	{
-		public static final String METHOD_TUNNEL = "_method";
-		public static final String FORMAT = "format";
-		public static final String JSONP_CALLBACK = "jsonp";
-	}
-	
-	private Parameters()
-	{
-		// prevents instantiation.
-	}
+	@SuppressWarnings("unused")
+    private String action;
+	@SuppressWarnings("unused")
+    private long delayMs;
+
+	public DelayResponse(String action, long delayMs)
+    {
+	    super();
+	    this.action = action;
+	    this.delayMs = delayMs;
+    }
 }
