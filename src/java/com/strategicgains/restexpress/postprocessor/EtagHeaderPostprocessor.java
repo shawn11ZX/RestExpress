@@ -24,13 +24,9 @@ import com.strategicgains.util.date.DateAdapter;
 import com.strategicgains.util.date.HttpHeaderTimestampAdapter;
 
 /**
- * If the response body is non-null, adds an ETag header.  In addition, if
- * the response body is a Timestamped instance, the a Last-Modified header
- * is also added.
- * <p/>
- * ETag is computed from the object hash code.  This will cause issues if
- * object caching is strictly on the ETag as different representations
- * (e.g. XML or JSON) will have the same ETag.
+ * If the response body is non-null, adds an ETag header.  ETag is
+ * computed from the body object's hash code combined with the hash
+ * code of the resulting format.
  * 
  * @author toddf
  * @since Oct 5, 2011
@@ -50,9 +46,11 @@ implements Postprocessor
 
 		if (!response.hasHeader(ETAG))
 		{
-			response.addHeader(ETAG, String.valueOf(body.hashCode()));
+			String format = request.getFormat() == null ? request.getResolvedRoute().getDefaultFormat() : request.getFormat();
+			response.addHeader(ETAG, String.valueOf(body.hashCode() ^ format.hashCode()));
 		}
 
+		// TODO: this should be in a LastModifiedHeaderPostprocessor
 //		if (!response.hasHeader(LAST_MODIFIED) && body.getClass().isAssignableFrom(Timestamped.class))
 //		{
 //			response.addHeader(LAST_MODIFIED, fmt.format(((Timestamped) body).getUpdatedAt()));
