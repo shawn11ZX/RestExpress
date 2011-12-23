@@ -40,6 +40,7 @@ public class Main
 
 		new RoutesMetadataPlugin().register(server)
 			.parameter(Parameters.Cache.MAX_AGE, 86400);	// Cache for 1 day (24 hours).
+		new CacheControlPlugin().register(server);
 
 		mapExceptions(server);
 		server.bind();
