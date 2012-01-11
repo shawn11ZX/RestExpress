@@ -28,15 +28,20 @@ public class Main
 		    .setDefaultFormat(config.getDefaultFormat())
 		    
 		    // Use JSEND-style (wrapped) responses:
-		    .useWrappedResponses()
+		    .useWrappedResponses()		// Default, this is here for documentation.
 		    .putSerializationProcessor(Format.JSON, new JsonSerializationProcessor())
 		    .putSerializationProcessor(Format.XML, new XmlSerializationProcessor());
 
 			// Since this application is primarily for performance testing of RESTExpress, 
 			// we're turning off all the output and cache controls.
-//		    .addMessageObserver(new SimpleConsoleLogMessageObserver())
+//		    .addMessageObserver(new SimpleConsoleLogMessageObserver());
 
-		new RoutesMetadataPlugin().register(server)
+	    if (config.getWorkerCount() > 0)
+	    {
+	    	server.setWorkerThreadCount(config.getWorkerCount());
+	    }
+
+	    new RoutesMetadataPlugin().register(server)
 			.parameter(Parameters.Cache.MAX_AGE, 86400);	// Cache for 1 day (24 hours).
 //		new CacheControlPlugin()
 //			.register(server);
