@@ -28,6 +28,8 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.handler.execution.ExecutionHandler;
+import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import org.jboss.netty.handler.logging.LoggingHandler;
 
 import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
@@ -70,6 +72,7 @@ public class RestExpress
 
 	public static final int DEFAULT_PORT = 8081;
 	public static final String DEFAULT_NAME = "RestExpress";
+	private static final int DEFAULT_EXECUTOR_THREAD_COUNT = 0;
 
 	private ServerBootstrap bootstrap;
 	private String name;
@@ -88,7 +91,13 @@ public class RestExpress
 	private boolean shouldHandleChunking = true;
 	private boolean shouldUseCompression = true;
 	private Integer maxChunkSize = null;
+	
+	// This controls the number of concurrent connections the application can handle.
+	// Netty default is 2 * number of processors (or cores).
 	private int workerThreadCount = 0;
+	
+	// This controls the number of concurrent requests the application can process.
+	private int executorThreadCount = DEFAULT_EXECUTOR_THREAD_COUNT;
 
 	Map<String, SerializationProcessor> serializationProcessors = new HashMap<String, SerializationProcessor>();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
@@ -600,14 +609,60 @@ public class RestExpress
 		return this;
 	}
 
+	/**
+	 * Return the number of requested NIO/HTTP-handling worker threads.
+	 * 
+	 * @return the number of requested worker threads.
+	 */
 	public int getWorkerThreadCount()
 	{
 		return workerThreadCount;
 	}
 
+	/**
+	 * Set the number of NIO/HTTP-handling worker threads.  This
+	 * value controls the number of simultaneous connections the
+	 * application can handle.
+	 * 
+	 * The default (if this value is not set, or set to zero) is
+	 * the Netty default, which is 2 times the number of processors
+	 * (or cores).
+	 * 
+	 * @param value the number of desired NIO worker threads.
+	 * @return the RestExpress instance.
+	 */
 	public RestExpress setWorkerThreadCount(int value)
 	{
 		this.workerThreadCount = value;
+		return this;
+	}
+	
+	/**
+	 * Returns the number of background request-handling (executor) threads.
+	 * 
+	 * @return the number of executor threads.
+	 */
+	public int getExecutorThreadCount()
+	{
+		return executorThreadCount;
+	}
+	
+	/**
+	 * Set the number of background request-handling (executor) threads.
+	 * This value controls the number of simultaneous requests that the
+	 * application can handle.  For longer-running requests, a higher number
+	 * may be indicated.
+	 * 
+	 * For VERY short-running requests, a value of zero will cause no
+	 * background threads to be created, causing all processing to occur in
+	 * the NIO worker.
+	 * 
+	 * @param value the number of executor threads to create.
+	 * @return the RestExpress instance.
+	 */
+	public RestExpress setExecutorThreadCount(int value)
+	{
+		this.executorThreadCount = value;
 		return this;
 	}
 
@@ -647,6 +702,13 @@ public class RestExpress
 		PipelineBuilder pf = new PipelineBuilder().addRequestHandler(
 		    new LoggingHandler(getLogLevel().getNettyLogLevel()))
 		    .addRequestHandler(requestHandler);
+		
+		if (getExecutorThreadCount() > 0)
+		{
+			ExecutionHandler executionHandler = new ExecutionHandler(
+	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
+			pf.setExecutionHandler(executionHandler);
+		}
 
 		if (shouldHandleChunking)
 		{
