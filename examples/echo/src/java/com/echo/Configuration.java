@@ -35,13 +35,16 @@ extends Environment
 	private static final String PORT_PROPERTY = "port";
 	private static final String DEFAULT_FORMAT_PROPERTY = "defaultFormat";
 	private static final String WORKER_COUNT_PROPERTY = "workerCount";
+	private static final String EXECUTOR_THREAD_COUNT_PROPERTY = "executorThreadCount";
 
-	private static final int DEFAULT_WORKER_COUNT = -1;
+	private static final int DEFAULT_WORKER_COUNT = 0;
+	private static final int DEFAULT_EXECUTOR_THREAD_COUNT = 0;
 
 	private int port;
 	private String name;
 	private String defaultFormat;
 	private int workerCount;
+	private int executorThreadCount;
 	
 	private EchoController echoController = new EchoController();
 	private SuccessController successController = new SuccessController();
@@ -54,6 +57,7 @@ extends Environment
 		this.port = Integer.parseInt(p.getProperty(PORT_PROPERTY, String.valueOf(RestExpress.DEFAULT_PORT)));
 		this.defaultFormat = p.getProperty(DEFAULT_FORMAT_PROPERTY, Format.JSON);
 		this.workerCount = Integer.parseInt(p.getProperty(WORKER_COUNT_PROPERTY, String.valueOf(DEFAULT_WORKER_COUNT)));
+		this.executorThreadCount = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_COUNT_PROPERTY, String.valueOf(DEFAULT_EXECUTOR_THREAD_COUNT)));
 	}
 
 	public String getDefaultFormat()
@@ -74,6 +78,11 @@ extends Environment
 	public int getWorkerCount()
 	{
 		return workerCount;
+	}
+	
+	public int getExecutorThreadCount()
+	{
+		return executorThreadCount;
 	}
 	
 	public EchoController getEchoController()
