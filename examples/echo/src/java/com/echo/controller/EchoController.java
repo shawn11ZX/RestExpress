@@ -12,9 +12,6 @@ import com.strategicgains.restexpress.Response;
 public class EchoController
 extends AbstractDelayingController
 {
-	/**
-     * 
-     */
     private static final String ECHO_PARAMETER_NOT_FOUND = "'echo' query-string parameter not found";
 	private static final String ECHO_HEADER = "echo";
 
@@ -22,7 +19,7 @@ extends AbstractDelayingController
 	{
 		delay(request);
 		response.setResponseCreated();
-		return request.getBody(); //.toString(ContentType.CHARSET);
+		return request.getBody();
 	}
 	
 	public String delete(Request request, Response response)
@@ -40,6 +37,6 @@ extends AbstractDelayingController
 	public ChannelBuffer update(Request request, Response response)
 	{
 		delay(request);
-		return request.getBody(); //.toString(ContentType.CHARSET);
+		return request.getBody();
 	}
 }
