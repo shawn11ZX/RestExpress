@@ -5,10 +5,8 @@ package com.strategicgains.restexpress.response;
 
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
-import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-import java.nio.charset.Charset;
-
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -27,18 +25,28 @@ import com.strategicgains.restexpress.util.HttpSpecification;
 public class DefaultHttpResponseWriter
 implements HttpResponseWriter
 {
+	private static final ChannelBuffer NEWLINE_BUFFER = ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer("\r\n".getBytes(ContentType.CHARSET)));
+
 	@Override
 	public void write(ChannelHandlerContext ctx, Request request, Response response)
 	{
-		HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1, response.getResponseStatus());
+		HttpResponse httpResponse = new DefaultHttpResponse(request.getHttpVersion(), response.getResponseStatus());
 		addHeaders(response, httpResponse);		
 
 		if (response.hasBody() && HttpSpecification.isContentAllowed(response))
 		{
-			StringBuilder builder = new StringBuilder(response.getBody().toString());
-			builder.append("\r\n");
-
-			httpResponse.setContent(ChannelBuffers.copiedBuffer(builder.toString(), Charset.forName(ContentType.ENCODING)));
+			// If the response body already contains a ChannelBuffer, use it.
+			if (ChannelBuffer.class.isAssignableFrom(response.getBody().getClass()))
+			{
+				httpResponse.setContent(ChannelBuffers.wrappedBuffer(((ChannelBuffer) response.getBody()), NEWLINE_BUFFER));
+			}
+			else // response body is assumed to be a string (e.g. JSON or XML).
+			{
+				httpResponse.setContent(ChannelBuffers.wrappedBuffer(
+					ChannelBuffers.wrappedBuffer(
+						ChannelBuffers.copiedBuffer(response.getBody().toString(), ContentType.CHARSET),
+						NEWLINE_BUFFER)));
+			}
 		}
 
 		if (request.isKeepAlive())
@@ -48,6 +56,12 @@ implements HttpResponseWriter
 	  		{
 				httpResponse.setHeader(CONTENT_LENGTH, String.valueOf(httpResponse.getContent().readableBytes()));
 	  		}
+
+			// Support "Connection: Keep-Alive" for HTTP 1.0 requests.
+			if (request.isHttpVersion1_0()) 
+			{
+				httpResponse.addHeader(CONNECTION, "Keep-Alive");
+			}
 
 	  		ctx.getChannel().write(httpResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
 	  	}
