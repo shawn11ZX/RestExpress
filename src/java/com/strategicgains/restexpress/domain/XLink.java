@@ -23,8 +23,19 @@ package com.strategicgains.restexpress.domain;
  */
 public class XLink
 {
+	/**
+	 * The ID of the object being referenced.
+	 */
 	private String id;
+	
+	/**
+	 * The relationship from the referencing object to the referenced object (e.g. rel=self).
+	 */
 	private String rel;
+	
+	/**
+	 * The URL to operate on the related object.
+	 */
 	private String href;
 
 	public XLink(String id, String href)
