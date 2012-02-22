@@ -29,6 +29,13 @@ public abstract class Parameters
 		public static final String MAX_AGE = "max.age";
 	}
 	
+	public static final class Query
+	{
+		public static final String METHOD_TUNNEL = "_method";
+		public static final String FORMAT = "format";
+		public static final String JSONP_CALLBACK = "jsonp";
+	}
+	
 	private Parameters()
 	{
 		// prevents instantiation.

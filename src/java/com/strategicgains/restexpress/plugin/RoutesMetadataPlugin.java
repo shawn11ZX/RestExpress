@@ -12,7 +12,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/
+ */
 package com.strategicgains.restexpress.plugin;
 
 import java.util.ArrayList;
@@ -40,62 +40,60 @@ extends AbstractPlugin
 		super();
 	}
 
-    @Override
-    public RoutesMetadataPlugin register(RestExpress server)
-    {
-    	super.register(server);
-    	RouteBuilder builder;
-    	
+	@Override
+	public RoutesMetadataPlugin register(RestExpress server)
+	{
+		if (isRegistered()) return this;
+
+		super.register(server);
+		RouteBuilder builder;
+
 		builder = server.getRouteDeclarations()
-			.uri("/routes/metadata.{format}", controller)
-			.action("getAllRoutes", HttpMethod.GET)
-			.name("allRoutesMetadata");
+		    .uri("/routes/metadata.{format}", controller)
+		    .action("getAllRoutes", HttpMethod.GET).name("allRoutesMetadata");
 		routeBuilders.add(builder);
 
 		builder = server.getRouteDeclarations()
-			.uri("/route/{routeName}/metadata.{format}", controller)
-			.action("getSingleRoute", HttpMethod.GET)
-			.name("singleRouteMetadata");
+		    .uri("/route/{routeName}/metadata.{format}", controller)
+		    .action("getSingleRoute", HttpMethod.GET)
+		    .name("singleRouteMetadata");
 		routeBuilders.add(builder);
 
-		server.getRouteDeclarations()
-			.uri("/routes/console.html", controller)
-			.action("getConsole", HttpMethod.GET)
-			.useRawResponse()
-			.noSerialization()
-			.name("routesConsole");
+		server.getRouteDeclarations().uri("/routes/console.html", controller)
+		    .action("getConsole", HttpMethod.GET).useRawResponse()
+		    .noSerialization().name("routesConsole");
 		routeBuilders.add(builder);
 
 		server.alias("service", ServerMetadata.class);
 		server.alias("route", RouteMetadata.class);
-    	return this;
-    }
+		return this;
+	}
 
-    @Override
-    public void bind(RestExpress server)
-    {
-    	controller.setMetadata(server.getRouteMetadata());
-    }
+	@Override
+	public void bind(RestExpress server)
+	{
+		controller.setMetadata(server.getRouteMetadata());
+	}
 
-    // RouteBuilder route augmentation delegates.
+	// RouteBuilder route augmentation delegates.
 
 	public RoutesMetadataPlugin flag(String flagValue)
-    {
+	{
 		for (RouteBuilder routeBuilder : routeBuilders)
 		{
-		    routeBuilder.flag(flagValue);
+			routeBuilder.flag(flagValue);
 		}
 
-	    return this;
-    }
+		return this;
+	}
 
 	public RoutesMetadataPlugin parameter(String name, Object value)
-    {
+	{
 		for (RouteBuilder routeBuilder : routeBuilders)
 		{
-		    routeBuilder.parameter(name, value);
+			routeBuilder.parameter(name, value);
 		}
 
-	    return this;
-    }
+		return this;
+	}
 }

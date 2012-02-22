@@ -32,7 +32,9 @@ public abstract class RouteDeclaration
 
 	private List<RouteBuilder> routeBuilders;
 	List<RouteMetadata> routeMetadata = new ArrayList<RouteMetadata>();
-	
+	private String defaultFormat;
+	private List<String> supportedFormats = new ArrayList<String>();
+
 	
 	public RouteDeclaration()
 	{
@@ -70,6 +72,19 @@ public abstract class RouteDeclaration
 	}
 	
 	
+	// SECTION: MUTATORS
+	
+	public void setDefaultFormat(String format)
+	{
+		this.defaultFormat = format;
+	}
+	
+	public void setSupportedFormats(List<String> supportedFormats)
+	{
+		this.supportedFormats.addAll(supportedFormats);
+	}
+	
+	
 	// SECTION: UTILITY - FACTORY
 
 	/**
@@ -86,12 +101,26 @@ public abstract class RouteDeclaration
 
     		for (Route route : builder.build())
 			{
+    			setRouteDefaults(route);
 				results.addRoute(route);
 			}
 		}
 
 		unDefineRoutes();
 		return results;
+	}
+	
+	private void setRouteDefaults(Route route)
+	{
+		if (!route.hasDefaultFormat())
+		{
+			route.setDefaultFormat(defaultFormat);
+		}
+		
+		if (!route.hasSupportedFormats())
+		{
+			route.addAllSupportedFormats(supportedFormats);
+		}
 	}
 
 	

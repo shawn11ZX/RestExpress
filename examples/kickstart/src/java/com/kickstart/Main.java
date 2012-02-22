@@ -9,9 +9,8 @@ import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.pipeline.SimpleConsoleLogMessageObserver;
+import com.strategicgains.restexpress.plugin.CacheControlPlugin;
 import com.strategicgains.restexpress.plugin.RoutesMetadataPlugin;
-import com.strategicgains.restexpress.postprocessor.CacheHeaderPostprocessor;
-import com.strategicgains.restexpress.postprocessor.DateHeaderPostprocessor;
 import com.strategicgains.restexpress.util.Environment;
 
 /**
@@ -31,12 +30,14 @@ public class Main
 		    .setDefaultFormat(config.getDefaultFormat())
 		    .putSerializationProcessor(Format.JSON, new JsonSerializationProcessor())
 		    .putSerializationProcessor(Format.XML, new XmlSerializationProcessor())
-		    .addMessageObserver(new SimpleConsoleLogMessageObserver())
-		    .addPostprocessor(new DateHeaderPostprocessor())
-		    .addPostprocessor(new CacheHeaderPostprocessor());
+		    .addMessageObserver(new SimpleConsoleLogMessageObserver());
 
-		new RoutesMetadataPlugin().register(server)
+		new RoutesMetadataPlugin()							// Support discoverability.
+			.register(server)
 			.parameter(Parameters.Cache.MAX_AGE, 86400);	// Cache for 1 day (24 hours).
+
+		new CacheControlPlugin()							// Support caching headers.
+			.register(server);
 
 		mapExceptions(server);
 		server.bind();

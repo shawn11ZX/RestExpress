@@ -36,7 +36,7 @@ public class XLinkUtilsTest
 	public void shouldCreateXLinks()
 	{
 		List<String> ids = Arrays.asList("one", "two", "three");
-		List<XLink> xlinks = XLinkUtils.asXLinks(ids, "id", "/strings/{id}", (String[]) null);
+		List<XLink> xlinks = XLinkUtils.asXLinks(ids, null, "id", "/strings/{id}", (String[]) null);
 		assertNotNull(xlinks);
 		assertEquals(3, xlinks.size());
 		assertEquals("one", xlinks.get(0).id());
@@ -56,20 +56,20 @@ public class XLinkUtilsTest
 	public void shouldCreateXLinksUsingPairs()
 	{
 		List<String> ids = Arrays.asList("one", "two", "three");
-		List<XLink> xlinks = XLinkUtils.asXLinks(ids, "id", "/{prefix}/{node}/{id}", "prefix", "strings", "node", "simple");
+		List<XLink> xlinks = XLinkUtils.asXLinks(ids, "related", "id", "/{prefix}/{node}/{id}", "prefix", "strings", "node", "simple");
 		assertNotNull(xlinks);
 		assertEquals(3, xlinks.size());
 		assertEquals("one", xlinks.get(0).id());
 		assertEquals("/strings/simple/one", xlinks.get(0).href());
-		assertNull(xlinks.get(0).rel());
+		assertEquals("related", xlinks.get(0).rel());
 
 		assertEquals("two", xlinks.get(1).id());
 		assertEquals("/strings/simple/two", xlinks.get(1).href());
-		assertNull(xlinks.get(1).rel());
+		assertEquals("related", xlinks.get(1).rel());
 
 		assertEquals("three", xlinks.get(2).id());
 		assertEquals("/strings/simple/three", xlinks.get(2).href());
-		assertNull(xlinks.get(2).rel());
+		assertEquals("related", xlinks.get(2).rel());
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class XLinkUtilsTest
 	{
 		XLinkFactory factory = new RelXLinkFactory();
 		List<String> ids = Arrays.asList("one", "two", "three");
-		List<XLink> xlinks = XLinkUtils.asXLinks(ids, "id", "/{prefix}/{node}/{id}", factory, "prefix", "strings", "node", "simple");
+		List<XLink> xlinks = XLinkUtils.asXLinks(ids, "related", "id", "/{prefix}/{node}/{id}", factory, "prefix", "strings", "node", "simple");
 		assertNotNull(xlinks);
 		assertEquals(3, xlinks.size());
 		assertEquals("one", xlinks.get(0).id());
@@ -97,7 +97,7 @@ public class XLinkUtilsTest
 	implements XLinkFactory
 	{
         @Override
-        public XLink create(String id, String href)
+        public XLink create(String id, String rel, String href)
         {
         	return new XLink(id, "relationValue", href);
         }

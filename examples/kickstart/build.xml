@@ -154,10 +154,18 @@
          ====================================================================== -->
     <target name="run" depends="_init, compile" description="Run the project from the command line">
         <java fork="true" classname="com.kickstart.Main">
+			<jvmarg value="-XX:+UseConcMarkSweepGC"/>
+			<jvmarg value="-XX:+UseParNewGC"/>
+			<jvmarg value="-XX:CMSInitiatingOccupancyFraction=70"/>
+			<jvmarg value="-XX:NewSize=128m"/>
+			<jvmarg value="-XX:MaxNewSize=128m"/>
+			<jvmarg value="-Xms256m"/>
+			<jvmarg value="-Xmx256m"/>
             <classpath>
                     <path refid="runtime.classpath"/>
             </classpath>
             <!-- arg value="${runtime.environment}"/ -->
+        	<jvmarg value="-Dfile.encoding=UTF-8"/>
         </java>
     </target>
 

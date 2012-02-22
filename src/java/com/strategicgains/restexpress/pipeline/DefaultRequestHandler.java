@@ -241,7 +241,6 @@ extends SimpleChannelUpstreamHandler
     {
 	    Action action = routeResolver.resolve(context.getRequest());
 		context.setAction(action);
-		context.setSerializationProcessor(serializationResolver.resolve(context.getRequest()));
     }
 
 
