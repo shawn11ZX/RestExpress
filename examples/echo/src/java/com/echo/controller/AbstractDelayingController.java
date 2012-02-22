@@ -1,5 +1,5 @@
 /*
-    Copyright 2011, Strategic Gains, Inc.
+    Copyright 2012, Strategic Gains, Inc.
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -12,22 +12,34 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/
-package com.strategicgains.restexpress.domain;
+ */
+package com.echo.controller;
 
+import com.strategicgains.restexpress.Request;
 
 /**
- * Instantiates a minimal XLink instance with id, rel and href.
- * 
  * @author toddf
- * @since Apr 19, 2011
+ * @since Jan 11, 2012
  */
-public class DefaultXLinkFactory
-implements XLinkFactory
+public abstract class AbstractDelayingController
 {
-	@Override
-	public XLink create(String id, String rel, String href)
+	private static final String TIMEOUT_MILLIS_HEADER = "delay_ms";
+
+	protected long delay(Request request)
 	{
-		return new XLink(id, rel, href);
+		long millis = Long.valueOf(request.getRawHeader(TIMEOUT_MILLIS_HEADER));
+
+		if (millis == 0l) return 0l;
+
+		try
+		{
+			Thread.sleep(millis);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		return millis;
 	}
+
 }

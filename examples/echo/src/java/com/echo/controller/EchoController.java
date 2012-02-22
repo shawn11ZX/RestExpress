@@ -1,5 +1,7 @@
 package com.echo.controller;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 
@@ -8,15 +10,33 @@ import com.strategicgains.restexpress.Response;
  * @since Aug 31, 2010
  */
 public class EchoController
+extends AbstractDelayingController
 {
-	public String create(Request request, Response response)
+    private static final String ECHO_PARAMETER_NOT_FOUND = "'echo' query-string parameter not found";
+	private static final String ECHO_HEADER = "echo";
+
+	public ChannelBuffer create(Request request, Response response)
 	{
+		delay(request);
 		response.setResponseCreated();
-		return request.getBodyAs(String.class);
+		return request.getBody();
+	}
+	
+	public String delete(Request request, Response response)
+	{
+		delay(request);
+		return request.getUrlDecodedHeader(ECHO_HEADER, ECHO_PARAMETER_NOT_FOUND);
+	}
+	
+	public String read(Request request, Response response)
+	{
+		delay(request);
+		return request.getUrlDecodedHeader(ECHO_HEADER, ECHO_PARAMETER_NOT_FOUND);
 	}
 
-	public String update(Request request, Response response)
+	public ChannelBuffer update(Request request, Response response)
 	{
-		return request.getBodyAs(String.class);
+		delay(request);
+		return request.getBody();
 	}
 }

@@ -3,25 +3,25 @@ package com.blogging;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.blogging.postprocessor.EtagHeaderPostprocessor;
+import com.blogging.postprocessor.LastModifiedHeaderPostprocessor;
 import com.blogging.serialization.BlogJsonProcessor;
 import com.blogging.serialization.BlogXmlProcessor;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.restexpress.Format;
+import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.exception.ConflictException;
 import com.strategicgains.restexpress.exception.NotFoundException;
 import com.strategicgains.restexpress.pipeline.SimpleConsoleLogMessageObserver;
+import com.strategicgains.restexpress.plugin.CacheControlPlugin;
 import com.strategicgains.restexpress.plugin.RoutesMetadataPlugin;
-import com.strategicgains.restexpress.postprocessor.CacheHeaderPostprocessor;
-import com.strategicgains.restexpress.postprocessor.DateHeaderPostprocessor;
 import com.strategicgains.restexpress.util.Environment;
 import com.strategicgains.syntaxe.ValidationException;
 
 /**
- * The main entry-point into RestExpress for the example services.
+ * The main entry-point into RestExpress for the example blog services.
  * 
  * @author toddf
  * @since Aug 31, 2009
@@ -31,9 +31,10 @@ public class Main
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) throws Exception
+	public static void main(String[] args)
+	throws Exception
 	{
-		BloggingEnvironment config = loadEnvironment(args);
+		Configuration config = loadEnvironment(args);
 		RestExpress server = new RestExpress(new Routes(config.getBlogRespository(),
 			config.getEntriesRespository(), config.getCommentsRespository()))
 		    .setName(config.getName())
@@ -42,11 +43,15 @@ public class Main
 		    .putSerializationProcessor(Format.XML, new BlogXmlProcessor())
 		    .setDefaultFormat(config.getDefaultFormat())
 		    .addMessageObserver(new SimpleConsoleLogMessageObserver())
-		    .addPostprocessor(new DateHeaderPostprocessor())
-		    .addPostprocessor(new CacheHeaderPostprocessor())
-		    .addPostprocessor(new EtagHeaderPostprocessor());
+		    .addPostprocessor(new LastModifiedHeaderPostprocessor());
 		
-		new RoutesMetadataPlugin().register(server);
+		new RoutesMetadataPlugin()
+			.register(server)
+			.parameter(Parameters.Cache.MAX_AGE, 86400);	// 24 hours, in seconds.
+		
+		new CacheControlPlugin()
+			.register(server);
+
 		mapExceptions(server);
 		server.bind();
 		server.awaitShutdown();
@@ -63,14 +68,14 @@ public class Main
     	.mapException(ValidationException.class, BadRequestException.class);
     }
 
-	private static BloggingEnvironment loadEnvironment(String[] args)
+	private static Configuration loadEnvironment(String[] args)
     throws FileNotFoundException, IOException
     {
 	    if (args.length > 0)
 		{
-			return Environment.from(args[0], BloggingEnvironment.class);
+			return Environment.from(args[0], Configuration.class);
 		}
 
-	    return Environment.fromDefault(BloggingEnvironment.class);
+	    return Environment.fromDefault(Configuration.class);
     }
 }

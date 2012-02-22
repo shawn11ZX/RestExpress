@@ -15,7 +15,6 @@
 */
 package com.blogging.postprocessor;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.ETAG;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.LAST_MODIFIED;
 
 import com.strategicgains.repoexpress.domain.Timestamped;
@@ -26,18 +25,13 @@ import com.strategicgains.util.date.DateAdapter;
 import com.strategicgains.util.date.HttpHeaderTimestampAdapter;
 
 /**
- * If the response body is non-null, adds an ETag header.  In addition, if
- * the response body is a Timestamped instance, the a Last-Modified header
- * is also added.
- * <p/>
- * ETag is computed from the object hash code.  This will cause issues if
- * object caching is strictly on the ETag as different representations
- * (e.g. XML or JSON) will have the same ETag.
+ * If the response body is a Timestamped instance, the a Last-Modified header
+ * is added.
  * 
  * @author toddf
- * @since Oct 5, 2011
+ * @since Dec 23, 2011
  */
-public class EtagHeaderPostprocessor
+public class LastModifiedHeaderPostprocessor
 implements Postprocessor
 {
 	DateAdapter fmt = new HttpHeaderTimestampAdapter();
@@ -49,11 +43,6 @@ implements Postprocessor
 		if (!response.hasBody()) return;
 
 		Object body = response.getBody();
-
-		if (!response.hasHeader(ETAG))
-		{
-			response.addHeader(ETAG, String.valueOf(body.hashCode()));
-		}
 
 		if (!response.hasHeader(LAST_MODIFIED) && body.getClass().isAssignableFrom(Timestamped.class))
 		{

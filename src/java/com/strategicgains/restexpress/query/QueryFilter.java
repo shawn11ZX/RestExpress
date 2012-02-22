@@ -27,9 +27,9 @@ import com.strategicgains.restexpress.Request;
  * a list of field name/value pairs separated by a vertical bar ('|') and the field name
  * separated from the value with two colons ('::').
  * <p/>
- * To filter on name: ?sort=name::todd
+ * To filter on name: ?filter=name::todd
  * <p/>
- * To filter on name and description: ?sort=name::todd|description::amazing
+ * To filter on name and description: ?filter=name::todd|description::amazing
  * 
  * @author toddf
  * @since Apr 12, 2011

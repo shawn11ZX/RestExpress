@@ -28,6 +28,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.exception.ServiceException;
@@ -53,6 +54,7 @@ public class Request
 	// SECTION: INSTANCE VARIABLES
 
 	private HttpRequest httpRequest;
+	private HttpVersion httpVersion;
 	private SerializationProcessor serializationProcessor;
 	private RouteResolver urlRouter;
 	private HttpMethod effectiveHttpMethod;
@@ -68,6 +70,7 @@ public class Request
 	{
 		super();
 		this.httpRequest = request;
+		this.httpVersion = request.getProtocolVersion();
 		this.effectiveHttpMethod = request.getMethod();
 		this.urlRouter = routes;
 		parseRequestedFormatToHeader(request);
@@ -518,6 +521,16 @@ public class Request
 		}
 		
 		attachments.put(name, attachment);
+	}
+	
+	public HttpVersion getHttpVersion()
+	{
+		return httpVersion;
+	}
+	
+	public boolean isHttpVersion1_0()
+	{
+		return ((httpVersion.getMajorVersion() == 1) && (httpVersion.getMinorVersion() == 0));
 	}
 
 	

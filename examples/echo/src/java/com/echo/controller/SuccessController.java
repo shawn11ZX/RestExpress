@@ -8,6 +8,7 @@ import com.strategicgains.restexpress.Response;
  * @since Aug 31, 2010
  */
 public class SuccessController
+extends AbstractDelayingController
 {
 	public Object create(Request request, Response response)
 	{
@@ -33,18 +34,4 @@ public class SuccessController
 		long delayms = delay(request);
 		return new DelayResponse("delete", delayms);
 	}
-
-	private long delay(Request request)
-    {
-	    long millis = Long.valueOf(request.getRawHeader(Constants.TIMEOUT_MILLIS_HEADER));
-		try
-        {
-	        Thread.sleep(millis);
-        }
-        catch (InterruptedException e)
-        {
-	        e.printStackTrace();
-        }
-        return millis;
-    }
 }

@@ -17,9 +17,7 @@
 
 package com.strategicgains.restexpress.serialization;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.strategicgains.restexpress.Request;
@@ -69,12 +67,12 @@ implements SerializationResolver
 			return processor;
 		}
 
-		processor = resolveViaAcceptHeaders(request);
-		
-		if (processor != null)
-		{
-			return processor;
-		}
+//		processor = resolveViaAcceptHeaders(request);
+//		
+//		if (processor != null)
+//		{
+//			return processor;
+//		}
 
 		processor = getDefault();
 		
@@ -97,23 +95,23 @@ implements SerializationResolver
 		return resolveViaSpecifiedFormat(request.getFormat());
 	}
 	
-	private SerializationProcessor resolveViaAcceptHeaders(Request request)
-	{
-		List<String> acceptHeaders = getAcceptHeaders(request);
-		SerializationProcessor processor = null;
-
-		for (String acceptHeader : acceptHeaders)
-		{
-			processor = processors.get(acceptHeader);
-			
-			if (processor != null)
-			{
-				break;
-			}
-		}
-		
-		return processor;
-	}
+//	private SerializationProcessor resolveViaAcceptHeaders(Request request)
+//	{
+//		List<String> acceptHeaders = getAcceptHeaders(request);
+//		SerializationProcessor processor = null;
+//
+//		for (String acceptHeader : acceptHeaders)
+//		{
+//			processor = processors.get(acceptHeader);
+//			
+//			if (processor != null)
+//			{
+//				break;
+//			}
+//		}
+//		
+//		return processor;
+//	}
 	
 	private SerializationProcessor resolveViaSpecifiedFormat(String format)
 	{
@@ -129,9 +127,9 @@ implements SerializationResolver
      * @param request
      * @return
      */
-    private List<String> getAcceptHeaders(Request request)
-    {
-	    // TODO retrieve the accept headers from the request as a list.
-    	return Collections.emptyList();
-    }
+//    private List<String> getAcceptHeaders(Request request)
+//    {
+//	    // TODO retrieve the accept headers from the request as a list.
+//    	return Collections.emptyList();
+//    }
 }
