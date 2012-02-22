@@ -17,7 +17,7 @@ package com.strategicgains.restexpress.domain;
 
 
 /**
- * Instantiates a minimal XLink instance with id and href.
+ * Instantiates a minimal XLink instance with id, rel and href.
  * 
  * @author toddf
  * @since Apr 19, 2011
@@ -26,8 +26,8 @@ public class DefaultXLinkFactory
 implements XLinkFactory
 {
 	@Override
-	public XLink create(String id, String href)
+	public XLink create(String id, String rel, String href)
 	{
-		return new XLink(id, href);
+		return new XLink(id, rel, href);
 	}
 }
