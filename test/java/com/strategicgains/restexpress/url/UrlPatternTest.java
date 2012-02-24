@@ -58,12 +58,13 @@ public class UrlPatternTest
 	@Test
 	public void shouldMatchRegex()
 	{
-		Pattern pattern = Pattern.compile("/xxx/([\\w-:%!',\\.\\(\\)\\~\\+\\*$]+)/yyy/([\\w-:%!',\\.\\(\\)\\~\\+\\*$]+)(?:\\.(\\S+?))(?:\\?\\S+?)?$");
+		Pattern pattern = Pattern.compile("/xxx/([\\w-:%!',\\.\\(\\)\\~\\+\\*$]+)/yyy/([\\w-:%!',\\.\\(\\)\\~\\+\\*$]+)(?:\\.(\\S+))(?:\\?\\S+?)?$");
 		Matcher m = pattern.matcher("/xxx/1.0/yyy/67a8.90b.json?x=y&a=b");
 		assertTrue(m.matches());
 		assertEquals("1.0", m.group(1));
 		assertEquals("67a8.90b", m.group(2));
 		assertEquals("json", m.group(3));
+		assertEquals("?x=y&a=b", m.group(4));
 
 		m = pattern.matcher("/xxx/1.0/yyy/67a8.90b.json");
 		assertTrue(m.matches());
