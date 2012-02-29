@@ -17,6 +17,7 @@ package com.strategicgains.restexpress.domain.metadata;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,6 +28,7 @@ public class RouteMetadata
 {
 	private String name;
 	private UriMetadata uri;
+	private List<String> aliases;
 	private List<String> supportedFormats;
 	private String defaultFormat;
 	private List<String> methods = new ArrayList<String>();
@@ -117,5 +119,31 @@ public class RouteMetadata
 	public void setSerialized(boolean isSerialized)
 	{
 		this.isSerialized = isSerialized;
+	}
+	
+	public List<String> getAliases()
+	{
+		return Collections.unmodifiableList(aliases);
+	}
+	
+	public void addAlias(String alias)
+	{
+		if (aliases == null)
+		{
+			aliases = new ArrayList<String>();
+		}
+
+		if (!aliases.contains(alias))
+		{
+			aliases.add(alias);
+		}
+	}
+	
+	public void addAllAliases(List<String> aliases)
+	{
+		for (String alias : aliases)
+		{
+			addAlias(alias);
+		}
 	}
 }

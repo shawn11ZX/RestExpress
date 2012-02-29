@@ -26,6 +26,7 @@ extends RouteDeclaration
 		// Maps /kickstart uri with optional format ('json' or 'xml'), accepting
 		// POST HTTP method only.  Calls KickStartService.create(Request, Reply).
 		uri("/kickstart.{format}", config.getKickStartController())
+			.alias("/yada/{id}/yadas/yahs.{format}")
 			.method(HttpMethod.POST);
 
 		// Maps /kickstart uri with required orderId and optional format identifier
@@ -33,6 +34,7 @@ extends RouteDeclaration
 		// Names this route to allow returning links from read resources in
 		// KickStartService methods via call to LinkUtils.asLinks().
 		uri("/kickstart/{orderId}.{format}", config.getKickStartController())
+			.alias("/blah/da/dah/{orderId}.{format}")
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name("KickstartOrderUri")
 			.parameter(Parameters.Cache.MAX_AGE, 3600);		// Cache for 3600 seconds (1 hour).

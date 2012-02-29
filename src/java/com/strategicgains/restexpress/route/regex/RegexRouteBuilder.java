@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
-import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteBuilder;
 
 /**
@@ -46,7 +45,7 @@ extends RouteBuilder
      * @see com.strategicgains.restexpress.route.RouteBuilder#newRoute(java.lang.String, java.lang.Object, java.lang.reflect.Method, org.jboss.netty.handler.codec.http.HttpMethod, boolean, java.lang.String, java.util.List, java.lang.String)
      */
     @Override
-    protected Route newRoute(String pattern, Object controller, Method action,
+    protected RegexRoute newRoute(String pattern, Object controller, Method action,
         HttpMethod method, boolean shouldSerializeResponse, boolean shouldUseWrappedResponse,
         String name, List<String> supportedFormats, String defaultFormat, Set<String> flags,
         Map<String, Object> parameters)

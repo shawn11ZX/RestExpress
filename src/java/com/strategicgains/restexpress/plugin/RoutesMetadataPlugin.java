@@ -50,7 +50,8 @@ extends AbstractPlugin
 
 		builder = server.getRouteDeclarations()
 		    .uri("/routes/metadata.{format}", controller)
-		    .action("getAllRoutes", HttpMethod.GET).name("allRoutesMetadata");
+		    .action("getAllRoutes", HttpMethod.GET)
+		    .name("allRoutesMetadata");
 		routeBuilders.add(builder);
 
 		builder = server.getRouteDeclarations()
@@ -59,9 +60,12 @@ extends AbstractPlugin
 		    .name("singleRouteMetadata");
 		routeBuilders.add(builder);
 
-		server.getRouteDeclarations().uri("/routes/console.html", controller)
-		    .action("getConsole", HttpMethod.GET).useRawResponse()
-		    .noSerialization().name("routesConsole");
+		server.getRouteDeclarations()
+			.uri("/routes/console.html", controller)
+		    .action("getConsole", HttpMethod.GET)
+		    .useRawResponse()
+		    .noSerialization()
+		    .name("routesConsole");
 		routeBuilders.add(builder);
 
 		server.alias("service", ServerMetadata.class);
