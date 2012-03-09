@@ -51,7 +51,7 @@ public class DefaultXmlProcessorTest
 	{
 		String xml = processor.serialize(new KnownObject());
 		assertNotNull(xml);
-		System.out.println(xml);
+//		System.out.println(xml);
 		assertTrue(xml.startsWith("<KnownObject>"));
 		assertTrue(xml.contains("<integer>1</integer>"));
 		assertTrue(xml.contains("<string>string value</string>"));
