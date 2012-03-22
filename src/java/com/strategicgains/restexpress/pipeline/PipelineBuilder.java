@@ -15,6 +15,7 @@ import org.jboss.netty.handler.codec.http.HttpContentCompressor;
 import org.jboss.netty.handler.codec.http.HttpContentDecompressor;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
+import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 /**
@@ -37,6 +38,7 @@ implements ChannelPipelineFactory
 	private boolean shouldUseCompression = false;
 	private int maxChunkSize = DEFAULT_MAX_CHUNK_SIZE;
 	private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
+	private ExecutionHandler executionHandler = null;
 
 	
 	// SECTION: CONSTRUCTORS
@@ -79,6 +81,12 @@ implements ChannelPipelineFactory
 		return this;
 	}
 	
+	public PipelineBuilder setExecutionHandler(ExecutionHandler handler)
+	{
+		this.executionHandler = handler;
+		return this;
+	}
+
 	public PipelineBuilder addRequestHandler(ChannelHandler handler)
 	{
 		if (!requestHandlers.contains(handler))
@@ -112,6 +120,11 @@ implements ChannelPipelineFactory
 		{
 			pipeline.addLast("deflater", new HttpContentCompressor());
 			pipeline.addLast("inflater", new HttpContentDecompressor());
+		}
+
+		if (executionHandler != null)
+		{
+			pipeline.addLast("executionHandler", executionHandler);
 		}
 
 		for (ChannelHandler handler : requestHandlers)

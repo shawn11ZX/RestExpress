@@ -209,6 +209,34 @@ public class QueryRange
 	@Override
 	public String toString()
 	{
-		return "items " + getStart() + "-" + getOffset();
+//		return "items " + getStart() + "-" + getOffset();
+		return assembleString().toString();
+	}
+	
+	/**
+	 * Creates a string in the form "items 0-24/66" using the values from this QueryRange
+	 * along with the maximum number of items available.  This value is suitable for setting
+	 * the Content-Range header on the response from Range requests.
+	 * <p/>
+	 * No range checking is performed.  It is therefore, the caller's responsibility to ensure
+	 * that maxItems is greater-than the offset.
+	 * 
+	 * @param maxItems the maximum number of items available.
+	 * @return a String of the form "items <first>-<last>/<max>"
+	 */
+	public String asContentRange(int maxItems)
+	{
+		return assembleString()
+			.append("/")
+			.append(maxItems)
+			.toString();
+	}
+	
+	private StringBuffer assembleString()
+	{
+		return new StringBuffer("items ")
+			.append(getStart())
+			.append("-")
+			.append(getOffset());
 	}
 }

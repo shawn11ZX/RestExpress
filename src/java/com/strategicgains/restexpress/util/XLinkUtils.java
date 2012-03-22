@@ -44,34 +44,31 @@ public abstract class XLinkUtils
 	 * one of the ids.
 	 * 
 	 * @param ids a Collection of identifiers to create XLink instances for.
-	 * @param paramName the URL parameter that these identifiers represent.
-	 * @param urlPath the URL that will retrieve individual ids.  There should be a parameter in it that matches the
-	 *                paramName, above.
-	 * @param nameValuePairs is a sequence of name/value pairs, where the name matches parameters in urlPath and the
-	 *                       value is what gets substituted.
+	 * @param rel the XLink relationship from the referring object to the referred object (e.g. "self" or "related"). May be null.
+	 * @param paramName the URL parameter (e.g. {personId}) that these identifiers represent.
+	 * @param urlPath the URL that will retrieve individual ids.  There should be a parameter in it that matches the paramName, above.
+	 * @param nameValuePairs is a sequence of name/value pairs, where the name matches parameters in urlPath and the value is what gets substituted.
 	 * @return a List of XLink instances.
 	 */
-	public static List<XLink> asXLinks(Collection<String> ids, String paramName, String urlPath, String... nameValuePairs)
+	public static List<XLink> asXLinks(Collection<String> ids, String rel, String paramName, String urlPath, String... nameValuePairs)
 	{
-		return asXLinks(ids, paramName, urlPath, DEFAULT_XLINK_FACTORY, nameValuePairs);
+		return asXLinks(ids, rel, paramName, urlPath, DEFAULT_XLINK_FACTORY, nameValuePairs);
 	}
 	
 
 	/**
 	 * Creates a List of XLink instances where the resulting path is the passed-in urlPath suffixed with
-	 * one of the ids.  Calls the xlinkCallback after creation of each XLink instance to allow clients of this
-	 * method to augment the values within the XLink itself.
-	 * 
+	 * one of the ids.
+	 *  
 	 * @param ids a Collection of identifiers to create XLink instances for.
-	 * @param paramName the URL parameter that these identifiers represent.
-	 * @param urlPath the URL that will retrieve individual ids.  There should be a parameter in it that matches the
-	 *                paramName, above.
+	 * @param rel the XLink relationship from the referring object to the referred object (e.g. "self" or "related"). May be null.
+	 * @param paramName the URL parameter (e.g. {personId}) that these identifiers represent.
+	 * @param urlPath the URL that will retrieve individual ids.  There should be a parameter in it that matches the paramName, above.
 	 * @param xlinkFactory a caller-provided class that creates alternate XLink forms.
-	 * @param nameValuePairs is a sequence of name/value pairs, where the name matches parameters in urlPath and the
-	 *                       value is what gets substituted.
+	 * @param nameValuePairs is a sequence of name/value pairs, where the name matches parameters in urlPath and the value is what gets substituted.
 	 * @return a List of XLink instances.
 	 */
-	public static List<XLink> asXLinks(Collection<String> ids, String paramName, String urlPath, XLinkFactory xlinkFactory, String... nameValuePairs)
+	public static List<XLink> asXLinks(Collection<String> ids, String rel, String paramName, String urlPath, XLinkFactory xlinkFactory, String... nameValuePairs)
 	{
 		MapStringFormat formatter = new MapStringFormat();
 		Map<String, String> parameters = MapStringFormat.toMap(nameValuePairs);
@@ -80,7 +77,7 @@ public abstract class XLinkUtils
 		for (String id : ids)
 		{
 			parameters.put(paramName, id);
-			results.add(xlinkFactory.create(id, formatter.format(urlPath, parameters)));
+			results.add(xlinkFactory.create(id, rel, formatter.format(urlPath, parameters)));
 		}
 
 		return results;

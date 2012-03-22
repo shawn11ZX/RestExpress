@@ -28,12 +28,15 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
+import com.strategicgains.restexpress.util.StringUtils;
+import com.strategicgains.restexpress.util.StringUtils.QueryStringCallback;
 
 /**
  * @author toddf
@@ -43,9 +46,6 @@ public class Request
 {
 	// SECTION: CONSTANTS
 
-	private static final String METHOD_QUERY_PARAMETER = "_method";
-	private static final String FORMAT_HEADER_NAME = "format";
-	private static final String JSONP_CALLBACK_HEADER_NAME = "jsonp";
 	private static final String DEFAULT_PROTOCOL = "http";
 	
 	private static long nextCorrelationId = 0;
@@ -54,6 +54,7 @@ public class Request
 	// SECTION: INSTANCE VARIABLES
 
 	private HttpRequest httpRequest;
+	private HttpVersion httpVersion;
 	private SerializationProcessor serializationProcessor;
 	private RouteResolver urlRouter;
 	private HttpMethod effectiveHttpMethod;
@@ -69,6 +70,7 @@ public class Request
 	{
 		super();
 		this.httpRequest = request;
+		this.httpVersion = request.getProtocolVersion();
 		this.effectiveHttpMethod = request.getMethod();
 		this.urlRouter = routes;
 		parseRequestedFormatToHeader(request);
@@ -135,7 +137,7 @@ public class Request
     {
 		return httpRequest.getContent();
     }
-	
+
 	/**
 	 * Attempts to deserialize the request body into an instance of the given type.
 	 * 
@@ -175,6 +177,17 @@ public class Request
 		}
 		
 		return instance;
+	}
+
+	/**
+	 * Returns the body as a Map of name/value pairs from a url-form-encoded form submission.  Note that
+	 * duplicate names (value arrays using the same parameter name) are not currently supported.
+	 * 
+	 * @return
+	 */
+	public Map<String, String> getBodyAsUrlFormEncoded()
+	{
+        return StringUtils.parseQueryString(urlDecode(getBody().toString(ContentType.CHARSET)));
 	}
 
 	public SerializationProcessor getSerializationProcessor()
@@ -366,7 +379,7 @@ public class Request
 	 */
 	public String getFormat()
 	{
-		return getRawHeader(FORMAT_HEADER_NAME);
+		return getRawHeader(Parameters.Query.FORMAT);
 	}
 	
 	/**
@@ -381,7 +394,7 @@ public class Request
 	
 	public String getJsonpHeader()
 	{
-		return getRawHeader(JSONP_CALLBACK_HEADER_NAME);
+		return getRawHeader(Parameters.Query.JSONP_CALLBACK);
 	}
 	
 	public boolean hasJsonpHeader()
@@ -409,7 +422,7 @@ public class Request
 	 */
 	public boolean isFormatEqual(String format)
 	{
-		return isHeaderEqual(FORMAT_HEADER_NAME, format);
+		return isHeaderEqual(Parameters.Query.FORMAT, format);
 	}
 	
 	/**
@@ -509,11 +522,23 @@ public class Request
 		
 		attachments.put(name, attachment);
 	}
+	
+	public HttpVersion getHttpVersion()
+	{
+		return httpVersion;
+	}
+	
+	public boolean isHttpVersion1_0()
+	{
+		return ((httpVersion.getMajorVersion() == 1) && (httpVersion.getMinorVersion() == 0));
+	}
 
 	
 	// SECTION: UTILITY - PRIVATE
 
 	/**
+	 * Puts the requested format in the FORMAT_HEADER_NAME header (forcing it to lower case).
+	 * 
      * @param request
      */
     private void parseRequestedFormatToHeader(HttpRequest request)
@@ -526,7 +551,7 @@ public class Request
     	
     	if (format != null)
     	{
-    		request.addHeader(FORMAT_HEADER_NAME, format);
+    		request.addHeader(Parameters.Query.FORMAT, format.toLowerCase());
     	}
     }
 	
@@ -534,34 +559,28 @@ public class Request
 	 * Add the query string parameters to the request as headers.
 	 * Also parses the query string into the queryStringMap, if applicable.
 	 */
-	private void parseQueryString(HttpRequest request)
+	private void parseQueryString(final HttpRequest request)
 	{
 		String uri = request.getUri();
 		int x = uri.indexOf('?');
 		String queryString = (x >= 0 ? uri.substring(x + 1) : null);
-		
-		if (queryString != null && !queryString.trim().isEmpty())
-		{
-			String[] params = queryString.split("&");
-			queryStringMap = new HashMap<String, String>(params.length);
-			
-			for (String pair : params)
+
+		StringUtils.iterateQueryString(queryString,
+			new QueryStringCallback()
 			{
-				String[] keyValue = pair.split("=");
-				String key = keyValue[0];
-				
-				if (keyValue.length == 1)
-				{
-					request.addHeader(key, "");
-					queryStringMap.put(key, "");
-				}
-				else
-				{
-					request.addHeader(key, keyValue[1]);
-					queryStringMap.put(key, keyValue[1]);
-				}
+				@Override
+	            public void assign(String key, String value)
+	            {
+					if (queryStringMap == null)
+					{
+						queryStringMap = new HashMap<String, String>();
+					}
+
+					request.addHeader(key, value);
+					queryStringMap.put(key, value);
+	            }
 			}
-		}
+		);
 	}
 
 	/**
@@ -575,7 +594,7 @@ public class Request
 	{
 		if (!HttpMethod.POST.equals(request.getMethod())) return;
 
-		String methodString = request.getHeader(METHOD_QUERY_PARAMETER);
+		String methodString = request.getHeader(Parameters.Query.METHOD_TUNNEL);
 
 		if ("PUT".equalsIgnoreCase(methodString) || "DELETE".equalsIgnoreCase(methodString))
 		{

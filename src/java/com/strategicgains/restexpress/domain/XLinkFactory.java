@@ -25,5 +25,13 @@ package com.strategicgains.restexpress.domain;
  */
 public interface XLinkFactory
 {
-	public XLink create(String id, String href);
+	/**
+	 * Create an XLink using the given id, optional rel, and href values.
+	 * 
+	 * @param id the id of the object being referenced.
+	 * @param rel the relationship of the referred object to the referring object (e.g. "self" or "related"). May be null.
+	 * @param href the link to the referred object.
+	 * @return an XLink instance.
+	 */
+	public XLink create(String id, String rel, String href);
 }
