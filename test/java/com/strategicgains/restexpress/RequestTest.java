@@ -19,8 +19,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.net.URLEncoder;
+import java.util.List;
 import java.util.Map;
 
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -207,5 +210,27 @@ public class RequestTest
 		Request deleteRequest = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=xyzt"), null);
 		assertEquals(HttpMethod.POST, deleteRequest.getHttpMethod());
 		assertEquals(HttpMethod.POST, deleteRequest.getEffectiveHttpMethod());
+	}
+	
+	@Test
+	public void shouldParseUrlFormEncodedBody()
+	throws Exception
+	{
+		DefaultHttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=xyzt");
+		String formValue1 = "http://login.berlin.ecollege-labs.com/google-service/google/sso/callback/google.JSON?successUrl=http%3A%2F%2Fdashboard.berlin.ecollege-labs.com%2Ftransfer.html&failureUrl=http%3A%2F%2Flogin.berlin.ecollege-labs.com&domain=GOOGLE_NON_MARKET_PLACE_DOMAIN";
+		String formValue2 = "https://www.google.com/accounts/o8/id?id=AItOawkHDpeMEfe_xM14z_ge7UATYOSg_QlPeDg";
+		String formValue3 = "https://www.google.com/accounts/o8/id?id=AItOawkHDpeMEfe_xM14z_ge7UATYOSg_QlPeDg";
+		httpRequest.setContent(ChannelBuffers.wrappedBuffer(("openid.return_to=" + URLEncoder.encode(formValue1, ContentType.ENCODING)
+			+ "&openid.identity=" + URLEncoder.encode(formValue2, ContentType.ENCODING)
+			+ "&openid.claimed_id=" + URLEncoder.encode(formValue3, ContentType.ENCODING)).getBytes()));
+		Request formPost = new Request(httpRequest, null);
+		Map<String, List<String>> form = formPost.getBodyFromUrlFormEncoded();
+		assertEquals(3, form.size());
+		assertNotNull(form.get("openid.return_to"));
+		assertNotNull(form.get("openid.identity"));
+		assertNotNull(form.get("openid.claimed_id"));
+		assertEquals(formValue1, form.get("openid.return_to").get(0));
+		assertEquals(formValue2, form.get("openid.identity").get(0));
+		assertEquals(formValue3, form.get("openid.claimed_id").get(0));
 	}
 }

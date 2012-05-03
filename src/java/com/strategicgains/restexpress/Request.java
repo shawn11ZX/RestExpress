@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -29,6 +30,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.exception.ServiceException;
@@ -184,10 +186,22 @@ public class Request
 	 * duplicate names (value arrays using the same parameter name) are not currently supported.
 	 * 
 	 * @return
+	 * @deprecated
 	 */
 	public Map<String, String> getBodyAsUrlFormEncoded()
 	{
         return StringUtils.parseQueryString(urlDecode(getBody().toString(ContentType.CHARSET)));
+	}
+
+	/**
+	 * Returns the body as a Map of name/value pairs from a url-form-encoded form submission.
+	 * 
+	 * @return
+	 */
+	public Map<String, List<String>> getBodyFromUrlFormEncoded()
+	{
+		QueryStringDecoder qsd = new QueryStringDecoder(getBody().toString(ContentType.CHARSET), ContentType.CHARSET, false);
+		return qsd.getParameters();
 	}
 
 	public SerializationProcessor getSerializationProcessor()
