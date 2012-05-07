@@ -21,6 +21,7 @@ import java.util.Map;
 /**
  * @author toddf
  * @since Oct 7, 2011
+ * @deprecated Use Netty's QueryStringDecoder instead.
  */
 public abstract class StringUtils
 {
@@ -29,6 +30,7 @@ public abstract class StringUtils
 	 * 
 	 * @param queryString is a delimited query string.
 	 * @return Map of name/value pairs, never null.
+	 * @deprecated Use Netty's QueryStringDecoder, which returns Map<String, List<String>> instead.
 	 */
 	public static Map<String, String> parseQueryString(String queryString)
 	{
