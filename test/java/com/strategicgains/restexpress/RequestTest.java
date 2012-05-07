@@ -79,6 +79,7 @@ public class RequestTest
 	public void shouldParseQueryStringIntoMap()
 	{
 		Map<String, String> m = request.getQueryStringMap();
+		assertNotNull(m);
 		assertEquals("bar", m.get("param1"));
 		assertEquals("blah", m.get("param2"));
 		assertEquals("", m.get("yada"));
