@@ -176,6 +176,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
 		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
+//		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"invalid escape sequence `%ta' at index 0 of: %target\",\"data\":\"IllegalArgumentException\"}", responseBody.toString());
 	}
 
 	@Test
