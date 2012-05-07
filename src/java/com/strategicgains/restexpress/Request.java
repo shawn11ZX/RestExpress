@@ -38,7 +38,6 @@ import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
 import com.strategicgains.restexpress.util.StringUtils;
-import com.strategicgains.restexpress.util.StringUtils.QueryStringCallback;
 
 /**
  * @author toddf
@@ -75,9 +74,6 @@ public class Request
 		this.httpVersion = request.getProtocolVersion();
 		this.effectiveHttpMethod = request.getMethod();
 		this.urlRouter = routes;
-		parseRequestedFormatToHeader(request);
-		parseQueryString(request);
-		determineEffectiveHttpMethod(request);
 		createCorrelationId();
 	}
 
@@ -546,6 +542,13 @@ public class Request
 	{
 		return ((httpVersion.getMajorVersion() == 1) && (httpVersion.getMinorVersion() == 0));
 	}
+	
+	public void optimize()
+	{
+		parseRequestedFormatToHeader(httpRequest);
+		parseQueryString(httpRequest);
+		determineEffectiveHttpMethod(httpRequest);
+	}
 
 	
 	// SECTION: UTILITY - PRIVATE
@@ -568,33 +571,41 @@ public class Request
     		request.addHeader(Parameters.Query.FORMAT, format.toLowerCase());
     	}
     }
-	
+
 	/**
 	 * Add the query string parameters to the request as headers.
-	 * Also parses the query string into the queryStringMap, if applicable.
+	 * Also parses the query string into the queryStringMap, if applicable. Note, if the query string
+	 * contains multiple of the same parameter name, the headers will contain them all, but the
+	 * queryStringMap will only contain the first one.  This will be fixed in a future release.
 	 */
 	private void parseQueryString(final HttpRequest request)
 	{
-		String uri = request.getUri();
-		int x = uri.indexOf('?');
-		String queryString = (x >= 0 ? uri.substring(x + 1) : null);
+		if (!request.getUri().contains("?")) return;
 
-		StringUtils.iterateQueryString(queryString,
-			new QueryStringCallback()
+		Map<String, List<String>> parameters = null;
+
+//		try
+//		{
+			parameters = new QueryStringDecoder(request.getUri(), ContentType.CHARSET, true).getParameters();
+//		}
+//		catch(IllegalArgumentException e)
+//		{
+//			// swallow hard.
+//		}
+
+		if (parameters == null || parameters.isEmpty()) return;
+
+		queryStringMap = new HashMap<String, String>(parameters.size());
+		
+		for (Entry<String, List<String>> entry : parameters.entrySet())
+		{
+			queryStringMap.put(entry.getKey(), entry.getValue().get(0));
+
+			for (String value : entry.getValue())
 			{
-				@Override
-	            public void assign(String key, String value)
-	            {
-					if (queryStringMap == null)
-					{
-						queryStringMap = new HashMap<String, String>();
-					}
-
-					request.addHeader(key, value);
-					queryStringMap.put(key, value);
-	            }
+				request.addHeader(entry.getKey(), value);
 			}
-		);
+		}
 	}
 
 	/**

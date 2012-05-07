@@ -134,8 +134,9 @@ extends SimpleChannelUpstreamHandler
 		try
 		{
 			notifyReceived(context);
-			resolveSerializationProcessor(context);
+			context.optimize();
 			resolveRoute(context);
+			resolveSerializationProcessor(context);
 			invokePreprocessors(context.getRequest());
 			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
 	
@@ -172,6 +173,7 @@ extends SimpleChannelUpstreamHandler
 	throws Exception
 	{
 		MessageContext context = (MessageContext) ctx.getAttachment();
+		resolveSerializationProcessor(context);
 		Throwable rootCause = mapServiceException(cause);
 		
 		if (rootCause != null) // is a ServiceException
@@ -220,13 +222,14 @@ extends SimpleChannelUpstreamHandler
 		Request request = createRequest((HttpRequest) event.getMessage(), ctx);
 		Response response = createResponse();
 		MessageContext context = new MessageContext(request, response);
-		context.setSerializationProcessor(serializationResolver.getDefault());
 		ctx.setAttachment(context);
 		return context;
 	}
 
 	private void resolveSerializationProcessor(MessageContext context)
 	{
+		if (context.hasSerializationProcessor()) return;
+
 		try
 		{
 			context.setSerializationProcessor(serializationResolver.resolve(context.getRequest()));
@@ -383,6 +386,7 @@ extends SimpleChannelUpstreamHandler
 			SerializationProcessor sp = context.getSerializationProcessor();
 			Request request = context.getRequest();
 			response.setBody(serializeResult(responseWrapperFactory.wrap(response), sp, request));
+			response.setContentType(sp.getResultingContentType());
 		}
 
 		if (HttpSpecification.isContentTypeAllowed(response))
@@ -390,7 +394,7 @@ extends SimpleChannelUpstreamHandler
 			if (!response.hasHeader(CONTENT_TYPE))
 			{
 				String contentType = (context.getContentType() == null ? TEXT_PLAIN : context.getContentType());
-				context.getResponse().addHeader(CONTENT_TYPE, contentType);
+				response.addHeader(CONTENT_TYPE, contentType);
 			}
 		}
 	}

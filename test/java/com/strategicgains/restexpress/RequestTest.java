@@ -47,6 +47,7 @@ public class RequestTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?param1=bar&param2=blah&yada");
 		httpRequest.addHeader("Host", "testing-host");
 		request = new Request(httpRequest, null);
+		request.optimize();
 	}
 
 	@Test
@@ -105,6 +106,7 @@ public class RequestTest
 	public void shouldHandleGoofyQueryString()
 	{
 		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo??&"), null);
+		r.optimize();
 		Map<String, String> m = r.getQueryStringMap();
 		assertNotNull(m);
 		assertEquals("", m.get("?"));
@@ -193,6 +195,7 @@ public class RequestTest
 	public void shouldBeEffectivePutRequest()
 	{
 		Request putRequest = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=pUt"), null);
+		putRequest.optimize();
 		assertEquals(HttpMethod.POST, putRequest.getHttpMethod());
 		assertEquals(HttpMethod.PUT, putRequest.getEffectiveHttpMethod());
 	}
@@ -201,6 +204,7 @@ public class RequestTest
 	public void shouldBeEffectiveDeleteRequest()
 	{
 		Request deleteRequest = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=DeLeTe"), null);
+		deleteRequest.optimize();
 		assertEquals(HttpMethod.POST, deleteRequest.getHttpMethod());
 		assertEquals(HttpMethod.DELETE, deleteRequest.getEffectiveHttpMethod());
 	}

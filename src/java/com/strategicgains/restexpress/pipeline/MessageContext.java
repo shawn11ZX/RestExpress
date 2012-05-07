@@ -19,6 +19,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
 
@@ -78,7 +79,11 @@ public class MessageContext
     public void setSerializationProcessor(SerializationProcessor processor)
     {
 		getRequest().setSerializationProcessor(processor);
-		getResponse().setContentType(processor.getResultingContentType());
+    }
+
+    public boolean hasSerializationProcessor()
+    {
+    	return (getSerializationProcessor() != null);
     }
 
     public SerializationProcessor getSerializationProcessor()
@@ -113,5 +118,17 @@ public class MessageContext
     public void setHttpStatus(HttpResponseStatus httpStatus)
     {
     	getResponse().setResponseStatus(httpStatus);
+    }
+    
+    public void optimize()
+    {
+    	try
+    	{
+    		getRequest().optimize();
+    	}
+    	catch(IllegalArgumentException e)
+    	{
+    		throw new BadRequestException(e);
+    	}
     }
 }
