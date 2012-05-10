@@ -8,7 +8,7 @@
 	<classpathentry kind="lib" path="lib/gson-1.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/DateAdapterJ-1.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/netty-3.2.5.Final.jar"/>
-	<classpathentry kind="lib" path="lib/RestExpress-0.7.2-build-45.jar"/>
+	<classpathentry kind="lib" path="lib/netty-3.4.4.Final.jar"/>
+	<classpathentry kind="lib" path="lib/RestExpress-0.7.2-build-56.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

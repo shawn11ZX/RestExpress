@@ -9,7 +9,7 @@ import com.google.code.morphia.annotations.Indexed;
 import com.strategicgains.repoexpress.domain.TimestampedIdentifiable;
 import com.strategicgains.syntaxe.AbstractValidatable;
 
-public abstract class BaseDomainObject
+public abstract class AbstractEntity
 extends AbstractValidatable
 implements TimestampedIdentifiable
 {

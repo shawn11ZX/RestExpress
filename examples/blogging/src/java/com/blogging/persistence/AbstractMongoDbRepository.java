@@ -17,6 +17,8 @@ package com.blogging.persistence;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 import com.mongodb.ServerAddress;
 import com.strategicgains.repoexpress.domain.TimestampedIdentifiable;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
@@ -28,7 +30,7 @@ import com.strategicgains.repoexpress.mongodb.ObjectIdAdapter;
  * @since Feb 17, 2011
  */
 public abstract class AbstractMongoDbRepository<T extends TimestampedIdentifiable>
-extends MongodbRepository<T>
+extends MongodbRepository<T, ObjectId>
 {
 	private static final String DATABASE_NAME = "blogging";
 

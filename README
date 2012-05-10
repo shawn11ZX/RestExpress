@@ -40,8 +40,29 @@ things on your behalf!
 On successful creation, call response.setResponseCreated() to set the returning HTTP status code to
 201.
 
-Change History/Release Notes:
 ===================================================================================================
+BTW, if you're on a Mac or Linux box, you can do the following to get Ruby on Rails "scaffolding"
+-like behavior by running the following from the RestExpress root directory:
+1) ant release
+2) ./src/scripts/install.sh
+3) cd <a new directory> (e.g. '~/src')
+4) <restexpress home>/src/scripts/restexpress.sh <name of project> (e.g. Sample)
+5) cd <new project directory> (e.g. Sample)
+6) ant run
+
+From another console, enter something like the following to test your new service suite:
+1) curl -i localhost:8081/sample/42
+
+You should see something like this:
+HTTP/1.1 404 Not Found
+Content-Type: application/json; charset=UTF-8
+Content-Length: 115
+
+{"code":404,"status":"error","message":"The order ID you requested was not found: 42","data":"NotFoundException"}
+
+===================================================================================================
+Change History/Release Notes:
+---------------------------------------------------------------------------------------------------
 Release 0.7.2 - in development (build 'master')
 * Introduced ExecutionHandler with configuration via RestExpress.setExecutorThreadCount(int)
   to off-load long-running requests from the NIO workers into a separate thread pool.
@@ -52,6 +73,11 @@ Release 0.7.2 - in development (build 'master')
 * Introduced CacheHeaderPostprocessor which support Cache-Control and other caching-related
   response header best-practices by setting Parameters.Cache.MAX_AGE or Flags.Cache.DONT_CACHE on
   a route.
+* Changed to use QueryStringDecoder over StringUtils for query-string and body parsing. This
+  mitigates HashDoS attacks, since the query-string is parsed before a request is accepted.
+* Now throws 400 if query-string or HTTP header contains invalid character encoding.
+* Deprecated StringUtils in favor of using Netty's QueryStringDecoder.
+* Refactored so SerializationProcessor.resolve(Request) is only called once.
 
 ===================================================================================================
 Release 0.7.1

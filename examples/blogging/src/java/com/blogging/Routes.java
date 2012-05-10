@@ -33,37 +33,31 @@ extends RouteDeclaration
 	protected void defineRoutes()
 	{
 		//Create a new blog.  Auto-assigned ID.
-		uri("/blog/new.{format}", blogController)
+		uri("/blogs.{format}", blogController)
 			.method(HttpMethod.POST);
 
 		// Read, update, delete a blog.
-		uri("/blog/{blogId}.{format}", blogController)
+		uri("/blogs/{blogId}.{format}", blogController)
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
-			.name("BlogUri");
+			.name(Constants.BLOG_URL_NAME);
 
 		// List the blog entries.
-		uri("/blog/{blogId}/entry/list.{format}", entryController)
-			.action("list", HttpMethod.GET);
-
-		// Create a new blog entry.
-		uri("/blog/{blogId}/entry/new.{format}", entryController)
+		uri("/blogs/{blogId}/entries.{format}", entryController)
+			.action("list", HttpMethod.GET)
 			.method(HttpMethod.POST);
 
 		// Read, update, delete a blog entry.
-		uri("/blog/{blogId}/entry/{entryId}.{format}", entryController)
+		uri("/blogs/{blogId}/entries/{entryId}.{format}", entryController)
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name("BlogEntryUri");
 
 		// List the comments for an entry.
-		uri("/blog/entry/{entryId}/comment/list.{format}", commentController)
-			.action("list", HttpMethod.GET);
-
-		// Create a new blog entry comment.
-		uri("/blog/entry/{entryId}/comment/new.{format}", commentController)
+		uri("/blogs/{blogId}/entries/{entryId}/comments.{format}", commentController)
+			.action("list", HttpMethod.GET)
 			.method(HttpMethod.POST);
 
 		// Read, update, delete a blog entry comment.
-		uri("/blog/entry/comment/{commentId}.{format}", commentController)
+		uri("/blogs/{blogId}/entries/{entryId}/comments/{commentId}.{format}", commentController)
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE);
 	}
 }
