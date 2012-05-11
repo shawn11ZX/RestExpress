@@ -25,8 +25,6 @@ import com.strategicgains.restexpress.util.HttpSpecification;
 public class DefaultHttpResponseWriter
 implements HttpResponseWriter
 {
-	private static final ChannelBuffer NEWLINE_BUFFER = ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer("\r\n".getBytes(ContentType.CHARSET)));
-
 	@Override
 	public void write(ChannelHandlerContext ctx, Request request, Response response)
 	{
@@ -38,14 +36,11 @@ implements HttpResponseWriter
 			// If the response body already contains a ChannelBuffer, use it.
 			if (ChannelBuffer.class.isAssignableFrom(response.getBody().getClass()))
 			{
-				httpResponse.setContent(ChannelBuffers.wrappedBuffer(((ChannelBuffer) response.getBody()), NEWLINE_BUFFER));
+				httpResponse.setContent(ChannelBuffers.wrappedBuffer((ChannelBuffer) response.getBody()));
 			}
 			else // response body is assumed to be a string (e.g. JSON or XML).
 			{
-				httpResponse.setContent(ChannelBuffers.wrappedBuffer(
-					ChannelBuffers.wrappedBuffer(
-						ChannelBuffers.copiedBuffer(response.getBody().toString(), ContentType.CHARSET),
-						NEWLINE_BUFFER)));
+				httpResponse.setContent(ChannelBuffers.copiedBuffer(response.getBody().toString(), ContentType.CHARSET));
 			}
 		}
 
