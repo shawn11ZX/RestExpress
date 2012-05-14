@@ -63,7 +63,7 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.7.2 - in development (build 'master')
+Release 0.7.2
 * Introduced ExecutionHandler with configuration via RestExpress.setExecutorThreadCount(int)
   to off-load long-running requests from the NIO workers into a separate thread pool.
 * Introduced CacheControlPlugin which leverages CacheHeaderPostprocessor, DateHeaderPostprocessor
@@ -73,11 +73,13 @@ Release 0.7.2 - in development (build 'master')
 * Introduced CacheHeaderPostprocessor which support Cache-Control and other caching-related
   response header best-practices by setting Parameters.Cache.MAX_AGE or Flags.Cache.DONT_CACHE on
   a route.
-* Changed to use QueryStringDecoder over StringUtils for query-string and body parsing. This
-  mitigates HashDoS attacks, since the query-string is parsed before a request is accepted.
-* Now throws 400 if query-string or HTTP header contains invalid character encoding.
-* Deprecated StringUtils in favor of using Netty's QueryStringDecoder.
-* Refactored so SerializationProcessor.resolve(Request) is only called once.
+* Changed to use QueryStringParser over StringUtils for query-string and QueryStringDecoder for 
+  body parsing. This mitigates HashDoS attacks, since the query-string is parsed before a request
+  is accepted.
+* Deprecated StringUtils in favor of using Netty's QueryStringDecoder or 
+  RestExpress's QueryStringParser.
+* Refactored so SerializationProcessor.resolve(Request) is only called once at the end of the
+  request cycle (performance enhancement).
 
 ===================================================================================================
 Release 0.7.1
