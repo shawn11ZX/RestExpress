@@ -125,6 +125,7 @@ public class RequestTest
 		String key = "validUrlDecode";
 		String value = "%20this%20that";
 		request.addHeader(key, value);
+		assertEquals(value, request.getRawHeader(key));
 		assertEquals(" this that", request.getUrlDecodedHeader(key));
 	}
 
@@ -134,6 +135,7 @@ public class RequestTest
 		String key = "validUrlDecode";
 		String value = "%20this%20that";
 		request.addHeader(key, value);
+		assertEquals(value, request.getRawHeader(key, "This should not display"));
 		assertEquals(" this that", request.getUrlDecodedHeader(key, "This should not display"));
 	}
 
