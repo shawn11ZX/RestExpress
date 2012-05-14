@@ -34,7 +34,7 @@ extends RouteDeclaration
 		// KickStartService methods via call to LinkUtils.asLinks().
 		uri("/kickstart/{orderId}.{format}", config.getKickStartController())
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
-			.name("KickstartOrderUri")
+			.name(Constants.KICKSTART_ORDER_URI)
 			.parameter(Parameters.Cache.MAX_AGE, 3600);		// Cache for 3600 seconds (1 hour).
 //			.flag(Flags.Cache.DONT_CACHE);					// Expressly deny cache-ability.
 	}
