@@ -26,7 +26,7 @@ import com.strategicgains.restexpress.Response;
  * @since Feb 10, 2011
  */
 public class RawResponseWrapper
-implements ResponseWrapperFactory
+implements ResponseWrapper
 {
 	@Override
 	public Object wrap(Response response)

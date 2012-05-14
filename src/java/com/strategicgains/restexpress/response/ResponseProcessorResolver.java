@@ -1,5 +1,5 @@
 /*
-    Copyright 2011, Strategic Gains, Inc.
+    Copyright 2012, Strategic Gains, Inc.
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -15,21 +15,20 @@
 */
 package com.strategicgains.restexpress.response;
 
-import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.domain.ResultWrapper;
+import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.util.Resolver;
 
 /**
- * Wraps the out bound Response body in a JSEND-style object.
- * 
  * @author toddf
- * @since Feb 10, 2011
+ * @since May 14, 2012
  */
-public class DefaultResponseWrapper
-implements ResponseWrapper
+public class ResponseProcessorResolver
+implements Resolver<ResponseProcessor>
 {
-	@Override
-	public Object wrap(Response response)
-	{
-		return ResultWrapper.fromResponse(response);
-	}
+    @Override
+    public ResponseProcessor resolve(Request request)
+    {
+	    // TODO Auto-generated method stub
+	    return null;
+    }
 }

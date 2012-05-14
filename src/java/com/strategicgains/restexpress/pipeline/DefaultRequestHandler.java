@@ -38,11 +38,9 @@ import com.strategicgains.restexpress.exception.ExceptionUtils;
 import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.response.HttpResponseWriter;
-import com.strategicgains.restexpress.response.ResponseWrapperFactory;
+import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.SerializationProcessor;
-import com.strategicgains.restexpress.serialization.SerializationResolver;
 import com.strategicgains.restexpress.util.HttpSpecification;
 
 /**
@@ -56,28 +54,27 @@ extends SimpleChannelUpstreamHandler
 	// SECTION: INSTANCE VARIABLES
 
 	private RouteResolver routeResolver;
-	private SerializationResolver serializationResolver;
+	private ResponseProcessorResolver responseProcessorResolver;
 	private HttpResponseWriter responseWriter;
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
-	private ResponseWrapperFactory responseWrapperFactory;
 
 
 	// SECTION: CONSTRUCTORS
 
-	public DefaultRequestHandler(RouteResolver routeResolver, SerializationResolver serializationResolver)
+	public DefaultRequestHandler(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver)
 	{
-		this(routeResolver, serializationResolver, new DefaultHttpResponseWriter());
+		this(routeResolver, responseProcessorResolver, new DefaultHttpResponseWriter());
 	}
 
-	public DefaultRequestHandler(RouteResolver routeResolver, SerializationResolver serializationResolver,
+	public DefaultRequestHandler(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver,
 		HttpResponseWriter responseWriter)
 	{
 		super();
 		this.routeResolver = routeResolver;
-		this.serializationResolver = serializationResolver;
+		this.responseProcessorResolver = responseProcessorResolver;
 		setResponseWriter(responseWriter);
 	}
 
@@ -116,11 +113,6 @@ extends SimpleChannelUpstreamHandler
 	{
 		this.responseWriter = writer;
 	}
-	
-	public void setResponseWrapperFactory(ResponseWrapperFactory factory)
-	{
-		this.responseWrapperFactory = factory;
-	}
 
 
 	// SECTION: SIMPLE-CHANNEL-UPSTREAM-HANDLER
@@ -135,7 +127,7 @@ extends SimpleChannelUpstreamHandler
 		{
 			notifyReceived(context);
 			resolveRoute(context);
-			resolveSerializationProcessor(context);
+			resolveResponseProcessor(context);
 			invokePreprocessors(context.getRequest());
 			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
 	
@@ -172,7 +164,7 @@ extends SimpleChannelUpstreamHandler
 	throws Exception
 	{
 		MessageContext context = (MessageContext) ctx.getAttachment();
-		resolveSerializationProcessor(context);
+		resolveResponseProcessor(context);
 		Throwable rootCause = mapServiceException(cause);
 		
 		if (rootCause != null) // is a ServiceException
@@ -225,13 +217,13 @@ extends SimpleChannelUpstreamHandler
 		return context;
 	}
 
-	private void resolveSerializationProcessor(MessageContext context)
+	private void resolveResponseProcessor(MessageContext context)
 	{
-		if (context.hasSerializationProcessor()) return;
+		if (context.hasResponseProcessor()) return;
 
 		try
 		{
-			context.setSerializationProcessor(serializationResolver.resolve(context.getRequest()));
+			context.setResponseProcessor(responseProcessorResolver.resolve(context.getRequest()));
 		}
 		catch(IllegalArgumentException e)
 		{
@@ -382,10 +374,7 @@ extends SimpleChannelUpstreamHandler
 
 		if (shouldSerialize(context))
 		{
-			SerializationProcessor sp = context.getSerializationProcessor();
-			Request request = context.getRequest();
-			response.setBody(serializeResult(responseWrapperFactory.wrap(response), sp, request));
-			response.setContentType(sp.getResultingContentType());
+			response.serialize();
 		}
 
 		if (HttpSpecification.isContentTypeAllowed(response))
@@ -401,51 +390,6 @@ extends SimpleChannelUpstreamHandler
     private boolean shouldSerialize(MessageContext context)
     {
     	
-        return (context.shouldSerializeResponse() && (serializationResolver != null));
-    }
-
-    /**
-     * Depending on the result, the return value is serialized and, optionally, wrapped in a jsonp callback.
-     * 
-     * @param result object to serialize.
-     * @param processor the serialization processor that will do the serializing.
-     * @param request the current request.
-     * @return a serialized result, or null if the result is null and not wrapped in jsonp callback.
-     */
-	private String serializeResult(Object result, SerializationProcessor processor, Request request)
-	{
-		String content = processor.serialize(result);
-		String callback = getJsonpCallback(request, processor);
-
-		if (callback != null) // must wrap in jsonp callback--serialization necessary.
-		{
-        	StringBuilder sb = new StringBuilder();
-        	sb.append(callback).append("(").append(content).append(")");
-        	content = sb.toString();
-		}
-		else if (result == null) // not jsonp and null result requires no serialization.
-		{
-			content = null;
-		}
-		
-		return content;
-	}
-
-	/**
-	 * If JSONP header is set and the resulting type of the serialization processor includes JSON,
-	 * then returns the JSONP header string.  Otherwise, returns null.
-	 * 
-     * @param request
-     * @param processor
-     * @return  jsonp header string value, or null.
-     */
-    private String getJsonpCallback(Request request, SerializationProcessor processor)
-    {
-    	if (processor.getResultingContentType().toLowerCase().contains("json"))
-		{
-    		return request.getJsonpHeader();
-		}
-    	
-    	return null;
+        return (context.shouldSerializeResponse() && (responseProcessorResolver != null));
     }
 }

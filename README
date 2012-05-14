@@ -63,7 +63,11 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.7.2
+Release 0.8.0 - in development (build 'master')
+* 
+
+===================================================================================================
+Release 0.7.2 - 14 May 2012
 * Introduced ExecutionHandler with configuration via RestExpress.setExecutorThreadCount(int)
   to off-load long-running requests from the NIO workers into a separate thread pool.
 * Introduced CacheControlPlugin which leverages CacheHeaderPostprocessor, DateHeaderPostprocessor
@@ -82,7 +86,7 @@ Release 0.7.2
   request cycle (performance enhancement).
 
 ===================================================================================================
-Release 0.7.1
+Release 0.7.1 - 20 Sep 2011
 * Added rootCause to ResultWrapper data area.
 * Exposed the XStream object from DefaultXmlProcessor.
 * Renamed Link to XLink.
@@ -107,12 +111,12 @@ Release 0.7.0
   RestExpress.noChunkingSupport(), supportChunking(), and setMaxChunkSize(int).
 
 ===================================================================================================
-Release 0.6.1
+Release 0.6.1.1 - 31 Mar 2011
 * Bug fix to patch erroneously writing to already closed channel in
   DefaultRequestHandler.exceptionCaught().
 
 ===================================================================================================
-Release 0.6.1
+Release 0.6.1 - 30 Mar 2011
 * Stability release.
 * Fixed issue when unable to URL Decode query string parameters or URL.
 * Introduced SerializationResolver that defines a getDefault() method. Implemented
@@ -126,7 +130,7 @@ Release 0.6.1
 * getUrlDecodedHeader(String) throws BadRequestException if URL decoding fails.
 
 ===================================================================================================
-Release 0.6.0.2
+Release 0.6.0.2 - 21 Mar 2011
 * Fixed issue with 'connection reset by peer' causing unresponsive behavior.
 * Utilized Netty logging behavior to add logging capabilities to RestExpress.
 * Made socket-level settings externally configurable:  tcpNoDelay, KeepAlive, reuseAddress,
@@ -173,14 +177,14 @@ Release 0.6.0
   all resource.
 
 ===================================================================================================
-Release 0.5.6.1
+Release 0.5.6.1 - 11 Mar 2011
 * Patch release to fix issue with HTTP response status of 204 (No Content) and 304 (Not Modified)
   where they would return a body of an empty string and content length of 2 ('\r\n').  No longer
   serializes for 204 or 304.  Also no longer serializes for null body response unless a JSONP header
   is passed in on the query string.
 
 ===================================================================================================
-Release 0.5.6
+Release 0.5.6 - 18 Jan 2011
 * Upgraded to Netty 3.2.3 final.
 * Added getProtocol(), getHost(), getPath() to Request
 * Functionality of getUrl() is now getPath() and getUrl() now returns the entire URL string,

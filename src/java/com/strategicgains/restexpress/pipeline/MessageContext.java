@@ -19,8 +19,8 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.route.Action;
-import com.strategicgains.restexpress.serialization.SerializationProcessor;
 
 /**
  * @author toddf
@@ -75,19 +75,19 @@ public class MessageContext
     	return getResponse().isSerialized();
     }
 
-    public void setSerializationProcessor(SerializationProcessor processor)
+    public void setResponseProcessor(ResponseProcessor processor)
     {
-		getRequest().setSerializationProcessor(processor);
+		getResponse().setResponseProcessor(processor);
     }
 
-    public boolean hasSerializationProcessor()
+    public boolean hasResponseProcessor()
     {
-    	return (getSerializationProcessor() != null);
+    	return getResponse().hasResponseProcessor();
     }
 
-    public SerializationProcessor getSerializationProcessor()
+    public ResponseProcessor getResponseProcessor()
     {
-	    return getRequest().getSerializationProcessor();
+	    return getResponse().getResponseProcessor();
     }
 
     public String getContentType()

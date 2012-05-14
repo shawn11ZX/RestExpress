@@ -21,7 +21,7 @@ import com.strategicgains.restexpress.Response;
  * @author toddf
  * @since Feb 10, 2011
  */
-public interface ResponseWrapperFactory
+public interface ResponseWrapper
 {
 	public Object wrap(Response response);
 }

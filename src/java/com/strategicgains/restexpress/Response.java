@@ -28,6 +28,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.query.QueryRange;
+import com.strategicgains.restexpress.response.ResponseProcessor;
 
 /**
  * @author toddf
@@ -46,6 +47,7 @@ public class Response
 	private Map<String, List<String>> headers = new HashMap<String, List<String>>();
 	private boolean isSerialized = true;
 	private Throwable exception = null;
+	private ResponseProcessor responseProcessor;
 	
 	
 	// SECTION: CONSTRUCTORS
@@ -238,4 +240,27 @@ public class Response
     {
     	this.exception = exception;
     }
+	
+	public ResponseProcessor getResponseProcessor()
+	{
+		return responseProcessor;
+	}
+	
+	public boolean hasResponseProcessor()
+	{
+		return (getResponseProcessor() != null);
+	}
+
+	public void setResponseProcessor(ResponseProcessor responseProcessor)
+	{
+		this.responseProcessor = responseProcessor;
+	}
+	
+	public void serialize()
+	{
+		if (hasResponseProcessor())
+		{
+			getResponseProcessor().process(this);
+		}
+	}
 }

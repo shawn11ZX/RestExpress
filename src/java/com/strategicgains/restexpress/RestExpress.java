@@ -43,16 +43,12 @@ import com.strategicgains.restexpress.pipeline.Preprocessor;
 import com.strategicgains.restexpress.plugin.Plugin;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
-import com.strategicgains.restexpress.response.ResponseWrapperFactory;
+import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorResolver;
+import com.strategicgains.restexpress.response.ResponseWrapper;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
-import com.strategicgains.restexpress.serialization.DefaultSerializationResolver;
-import com.strategicgains.restexpress.serialization.SerializationProcessor;
-import com.strategicgains.restexpress.serialization.SerializationResolver;
-import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
-import com.strategicgains.restexpress.serialization.text.DefaultTxtProcessor;
-import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
 import com.strategicgains.restexpress.util.Bootstraps;
 import com.strategicgains.restexpress.util.DefaultShutdownHook;
 import com.strategicgains.restexpress.util.LogLevel;
@@ -87,7 +83,6 @@ public class RestExpress
 	private int connectTimeoutMillis = 10000; // netty default
 	private LogLevel logLevel = LogLevel.DEBUG; // Netty default
 	private boolean useSystemOut;
-	private ResponseWrapperFactory responseWrapperFactory;
 	private boolean shouldHandleChunking = true;
 	private boolean shouldUseCompression = true;
 	private Integer maxChunkSize = null;
@@ -99,12 +94,12 @@ public class RestExpress
 	// This controls the number of concurrent requests the application can process.
 	private int executorThreadCount = DEFAULT_EXECUTOR_THREAD_COUNT;
 
-	Map<String, SerializationProcessor> serializationProcessors = new HashMap<String, SerializationProcessor>();
+	Map<String, ResponseProcessor> responseProcessors = new HashMap<String, ResponseProcessor>();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
 	private Map<String, Class<?>> xmlAliases = new HashMap<String, Class<?>>();
-	private Resolver<SerializationProcessor> serializationResolver;
+	private Resolver<ResponseProcessor> responseResolver;
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<Plugin> plugins = new ArrayList<Plugin>();
 
@@ -143,7 +138,6 @@ public class RestExpress
 		supportJson(true);
 		supportXml();
 		useSystemOut();
-		useWrappedResponses();
 	}
 
 	/**
@@ -211,27 +205,25 @@ public class RestExpress
 		return this;
 	}
 
-	public RestExpress putSerializationProcessor(String format,
-	    SerializationProcessor processor)
+	public RestExpress putResponseProcessor(String format, ResponseProcessor processor)
 	{
-		serializationProcessors.put(format, processor);
+		responseProcessors.put(format, processor);
 		return this;
 	}
 
-	/* package protected */Map<String, SerializationProcessor> getSerializationProcessors()
+	/* package protected */Map<String, ResponseProcessor> getResponseProcessors()
 	{
-		return serializationProcessors;
+		return responseProcessors;
 	}
 
-	public Resolver<SerializationProcessor> getSerializationResolver()
+	public Resolver<ResponseProcessor> getResponseResolver()
 	{
-		return serializationResolver;
+		return responseResolver;
 	}
 
-	public RestExpress setSerializationResolver(
-	    Resolver<SerializationProcessor> serializationResolver)
+	public RestExpress setResponseResolver(Resolver<ResponseProcessor> responseResolver)
 	{
-		this.serializationResolver = serializationResolver;
+		this.responseResolver = responseResolver;
 		return this;
 	}
 
@@ -258,10 +250,9 @@ public class RestExpress
 	 */
 	public RestExpress supportJson(boolean isDefault)
 	{
-		if (!getSerializationProcessors().containsKey(Format.JSON))
+		if (!getResponseProcessors().containsKey(Format.JSON))
 		{
-			serializationProcessors
-			    .put(Format.JSON, new DefaultJsonProcessor());
+			responseProcessors.put(Format.JSON, ResponseProcessor.defaultJsonProcessor());
 		}
 
 		if (isDefault)
@@ -292,7 +283,7 @@ public class RestExpress
 	 */
 	public RestExpress noJson()
 	{
-		serializationProcessors.remove(Format.JSON);
+		responseProcessors.remove(Format.JSON);
 		return this;
 	}
 
@@ -306,10 +297,9 @@ public class RestExpress
 	 */
 	public RestExpress supportXml(boolean isDefault)
 	{
-		if (!getSerializationProcessors().containsKey(Format.XML))
+		if (!getResponseProcessors().containsKey(Format.XML))
 		{
-			getSerializationProcessors().put(Format.XML,
-			    new DefaultXmlProcessor());
+			getResponseProcessors().put(Format.XML, ResponseProcessor.defaultXmlProcessor());
 		}
 
 		if (isDefault)
@@ -340,7 +330,7 @@ public class RestExpress
 	 */
 	public RestExpress noXml()
 	{
-		serializationProcessors.remove(Format.XML);
+		responseProcessors.remove(Format.XML);
 		return this;
 	}
 
@@ -384,10 +374,9 @@ public class RestExpress
 	 */
 	public RestExpress supportTxt(boolean isDefault)
 	{
-		if (!getSerializationProcessors().containsKey(Format.TXT))
+		if (!getResponseProcessors().containsKey(Format.TXT))
 		{
-			getSerializationProcessors().put(Format.TXT,
-			    new DefaultTxtProcessor());
+			getResponseProcessors().put(Format.TXT, ResponseProcessor.defaultTxtProcessor());
 		}
 
 		if (isDefault)
@@ -584,18 +573,6 @@ public class RestExpress
 		return this;
 	}
 
-	public RestExpress useWrappedResponses()
-	{
-		responseWrapperFactory = new DefaultResponseWrapper();
-		return this;
-	}
-
-	public RestExpress useRawResponses()
-	{
-		responseWrapperFactory = new RawResponseWrapper();
-		return this;
-	}
-
 	public <T extends Exception, U extends ServiceException> RestExpress mapException(
 	    Class<T> from, Class<U> to)
 	{
@@ -686,8 +663,7 @@ public class RestExpress
 
 		// Set up the event pipeline factory.
 		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
-		    createRouteResolver(), createSerializationResolver());
-		requestHandler.setResponseWrapperFactory(responseWrapperFactory);
+		    createRouteResolver(), createResponseProcessorResolver());
 
 		// Add MessageObservers to the request handler here, if desired...
 		requestHandler.addMessageObserver(messageObservers
@@ -807,7 +783,7 @@ public class RestExpress
 	{
 		List<String> supportedFormats = new ArrayList<String>();
 
-		for (String format : serializationProcessors.keySet())
+		for (String format : responseProcessors.keySet())
 		{
 			supportedFormats.add(format);
 		}
@@ -824,7 +800,7 @@ public class RestExpress
 		m.setName(getName());
 		m.setPort(getPort());
 		m.setDefaultFormat(getDefaultFormat());
-		m.addAllSupportedFormats(getSerializationProcessors().keySet());
+		m.addAllSupportedFormats(getResponseProcessors().keySet());
 		m.addAllRoutes(getRouteDeclarations().getMetadata());
 		return m;
 	}
@@ -851,13 +827,12 @@ public class RestExpress
 	/**
 	 * @return
 	 */
-	private SerializationResolver createSerializationResolver()
+	private ResponseProcessorResolver createResponseProcessorResolver()
 	{
-		DefaultSerializationResolver resolver = new DefaultSerializationResolver();
+		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
 		resolver.setDefaultFormat(getDefaultFormat());
 
-		for (Entry<String, SerializationProcessor> entry : getSerializationProcessors()
-		    .entrySet())
+		for (Entry<String, ResponseProcessor> entry : getResponseProcessors().entrySet())
 		{
 			if (entry.getKey().equals(Format.XML))
 			{
