@@ -55,9 +55,12 @@ import org.jboss.netty.handler.codec.http.QueryStringEncoder;
  * key-value parameter pairs, up to {@literal 1024} by default, and you can
  * configure it when you construct the decoder by passing an additional integer
  * parameter.
+ * <p/>
+ * Note that no exception is thrown if the number of parameters is exceeded. This process simply stops adding
+ * parameters over the limit.
  * 
  * <p>
- * copied from Netty {@link QueryStringDecoder} with URL decoding removed for
+ * Based on Netty {@link QueryStringDecoder} with URL decoding removed for
  * selective query-string parameter decoding.
  * </p>
  * 
