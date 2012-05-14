@@ -134,7 +134,6 @@ extends SimpleChannelUpstreamHandler
 		try
 		{
 			notifyReceived(context);
-			context.optimize();
 			resolveRoute(context);
 			resolveSerializationProcessor(context);
 			invokePreprocessors(context.getRequest());

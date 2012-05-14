@@ -166,7 +166,7 @@ public class DefaultRequestHandlerTest
 	}
 
 	@Test
-	public void shouldHandleUrlDecodeErrorInQueryString()
+	public void shouldHandleNonDecodableValueInQueryString()
 	throws Exception
 	{
 		sendGetEvent("/bar?value=%target");
@@ -174,9 +174,8 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getExceptionCount());
 		assertEquals(0, observer.getSuccessCount());
-//		System.out.println(httpResponse.toString());
-//		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
-		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"invalid escape sequence `%ta' at index 0 of: %target\",\"data\":\"IllegalArgumentException\"}", responseBody.toString());
+//		System.out.println(responseBody.toString());
+		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
 	}
 
 	@Test
@@ -190,6 +189,19 @@ public class DefaultRequestHandlerTest
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
 		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
+	}
+
+	@Test
+	public void shouldHandleInvalidDecodeInQueryString()
+	throws Exception
+	{
+		sendGetEvent("/foo?value=%target");
+		assertEquals(1, observer.getReceivedCount());
+		assertEquals(1, observer.getCompleteCount());
+		assertEquals(1, observer.getSuccessCount());
+		assertEquals(0, observer.getExceptionCount());
+//		System.out.println(httpResponse.toString());
+		assertEquals("{\"code\":200,\"status\":\"success\"}", responseBody.toString());
 	}
 
 	@Test

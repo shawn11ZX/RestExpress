@@ -37,6 +37,7 @@ import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
+import com.strategicgains.restexpress.url.QueryStringParser;
 import com.strategicgains.restexpress.util.StringUtils;
 
 /**
@@ -74,8 +75,16 @@ public class Request
 		this.httpVersion = request.getProtocolVersion();
 		this.effectiveHttpMethod = request.getMethod();
 		this.urlRouter = routes;
-		createCorrelationId();
+		initialize();
 	}
+
+	private void initialize()
+    {
+	    createCorrelationId();
+		parseRequestedFormatToHeader(httpRequest);
+		parseQueryString(httpRequest);
+		determineEffectiveHttpMethod(httpRequest);
+    }
 
 
 	// SECTION: ACCESSORS/MUTATORS
@@ -223,9 +232,13 @@ public class Request
 	/**
 	 * Gets the named header as it came in on the request (without URL decoding it).
 	 * Returns null if the header is not present.
+	 * <p/>
+	 * NOTE: because HTTP headers are handled by Netty, which processes them with
+	 *       QueryStringDecoder, HTTP headers are URL decoded. Only query-string
+	 *       parameters that get processed by RestExpress are NOT URL decoded.
 	 * 
 	 * @param name
-	 * @return
+	 * @return the requested header, or null if 'name' doesn't exist as a header.
 	 */
 	public String getRawHeader(String name)
 	{
@@ -236,8 +249,13 @@ public class Request
 	 * Gets the named header as it came in on the request (without URL decoding it).
 	 * Throws BadRequestException(message) if the header is not present.
 	 * 
+	 * NOTE: because HTTP headers are handled by Netty, which processes them with
+	 *       QueryStringDecoder, HTTP headers are URL decoded. Only query-string
+	 *       parameters that get processed by RestExpress are NOT URL decoded.
+	 * 
 	 * @param name
-	 * @return
+	 * @return the requested header
+	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
 	 */
 	public String getRawHeader(String name, String message)
 	{
@@ -250,13 +268,13 @@ public class Request
 
 		return value;
 	}
-	
+
 	/**
 	 * Gets the named header, URL decoding it before returning it.
 	 * Returns null if the header is not present.
 	 * 
 	 * @param name
-	 * @return
+	 * @return the requested header, or null if 'name' doesn't exist as a header.
 	 */
 	public String getUrlDecodedHeader(String name)
 	{
@@ -268,8 +286,8 @@ public class Request
 	 * Gets the named header, URL decoding it before returning it.
 	 * Throws BadRequestException(message) if the header is not present.
 	 * 
-	 * @param name
-	 * @return
+	 * @return the requested header
+	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
 	 */
 	public String getUrlDecodedHeader(String name, String message)
 	{
@@ -542,13 +560,6 @@ public class Request
 	{
 		return ((httpVersion.getMajorVersion() == 1) && (httpVersion.getMinorVersion() == 0));
 	}
-	
-	public void optimize()
-	{
-		parseRequestedFormatToHeader(httpRequest);
-		parseQueryString(httpRequest);
-		determineEffectiveHttpMethod(httpRequest);
-	}
 
 	
 	// SECTION: UTILITY - PRIVATE
@@ -582,16 +593,7 @@ public class Request
 	{
 		if (!request.getUri().contains("?")) return;
 
-		Map<String, List<String>> parameters = null;
-
-//		try
-//		{
-			parameters = new QueryStringDecoder(request.getUri(), ContentType.CHARSET, true).getParameters();
-//		}
-//		catch(IllegalArgumentException e)
-//		{
-//			// swallow hard.
-//		}
+		Map<String, List<String>> parameters = new QueryStringParser(request.getUri(), true).getParameters();
 
 		if (parameters == null || parameters.isEmpty()) return;
 
