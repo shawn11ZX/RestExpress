@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.query.QueryRange;
@@ -140,6 +141,11 @@ public class Response
 	public void addRangeHeader(QueryRange range, long count)
 	{
     	addHeader(CONTENT_RANGE_HEADER_NAME, range.toString() + "/" + count);
+	}
+	
+	public void addLocationHeader(String url)
+	{
+		addHeader(HttpHeaders.Names.LOCATION, url);
 	}
 
 	/**
