@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.util.Resolver;
 
 /**
@@ -57,34 +56,20 @@ implements Resolver<ResponseProcessor>
 	@Override
 	public ResponseProcessor resolve(Request request)
 	{
-		ResponseProcessor processor = null;
+		String requestFormat = request.getFormat();
 
-		processor = resolveViaRequestFormat(request);
-		
-		if (processor != null)
+		if (requestFormat == null || requestFormat.trim().isEmpty())
 		{
-			return processor;
+			return getDefault();
 		}
 
-		processor = getDefault();
-		
-		if (processor == null)
-		{
-			throw new BadRequestException("No response processor found for request.");
-		}
-		
-		return processor;
+		return resolveViaSpecifiedFormat(requestFormat);
 	}
 
     public ResponseProcessor getDefault()
     {
 		return resolveViaSpecifiedFormat(defaultFormat);
     }
-
-	private ResponseProcessor resolveViaRequestFormat(Request request)
-	{
-		return resolveViaSpecifiedFormat(request.getFormat());
-	}
 	
 	private ResponseProcessor resolveViaSpecifiedFormat(String format)
 	{

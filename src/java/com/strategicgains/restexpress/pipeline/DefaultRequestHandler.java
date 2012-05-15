@@ -38,6 +38,7 @@ import com.strategicgains.restexpress.exception.ExceptionUtils;
 import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.response.HttpResponseWriter;
+import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
@@ -127,7 +128,7 @@ extends SimpleChannelUpstreamHandler
 		{
 			notifyReceived(context);
 			resolveRoute(context);
-			resolveResponseProcessor(context);
+			resolveResponseProcessor(context, false);
 			invokePreprocessors(context.getRequest());
 			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
 	
@@ -164,7 +165,7 @@ extends SimpleChannelUpstreamHandler
 	throws Exception
 	{
 		MessageContext context = (MessageContext) ctx.getAttachment();
-		resolveResponseProcessor(context);
+		resolveResponseProcessor(context, true);
 		Throwable rootCause = mapServiceException(cause);
 		
 		if (rootCause != null) // is a ServiceException
@@ -217,18 +218,34 @@ extends SimpleChannelUpstreamHandler
 		return context;
 	}
 
-	private void resolveResponseProcessor(MessageContext context)
+	/**
+	 * Resolve the ResponseProcessor based on the requested format (or the default, if none supplied).
+	 * If 'shouldUseDefault' is false, a BadRequestException is thrown when the format does not resolve.
+	 * Otherwise, if 'shouldUseDefault' is true, the default format is used when the format does not resolve.
+	 * 
+	 * @param context the message context.
+	 * @param shouldUseDefault use the default format when requested format doesn't resolve.
+	 * @throws BadRequestException if requested format is not resolved and 'shouldUseDefault' is false.
+	 */
+	private void resolveResponseProcessor(MessageContext context, boolean shouldUseDefault)
 	{
 		if (context.hasResponseProcessor()) return;
 
-		try
+		ResponseProcessor rp = responseProcessorResolver.resolve(context.getRequest());
+		
+		if (rp == null)
 		{
-			context.setResponseProcessor(responseProcessorResolver.resolve(context.getRequest()));
+			if (shouldUseDefault)
+			{
+				rp = responseProcessorResolver.getDefault();
+			}
+			else
+			{
+				throw new BadRequestException("Requested representation format not supported: " + context.getRequest().getFormat());
+			}
 		}
-		catch(IllegalArgumentException e)
-		{
-			throw new BadRequestException(e);
-		}
+
+		context.setResponseProcessor(rp);
 	}
 
 	private void resolveRoute(MessageContext context)
