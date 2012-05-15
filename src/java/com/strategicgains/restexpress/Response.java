@@ -260,7 +260,7 @@ public class Response
 	{
 		if (hasResponseProcessor())
 		{
-			getResponseProcessor().process(this);
+			setBody(getResponseProcessor().process(this));
 		}
 	}
 }

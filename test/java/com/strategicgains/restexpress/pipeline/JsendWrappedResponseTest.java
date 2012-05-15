@@ -36,12 +36,11 @@ import org.junit.Test;
 
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
+import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.DefaultSerializationResolver;
-import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
-import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
 
 
 /**
@@ -60,15 +59,14 @@ public class JsendWrappedResponseTest
 	public void initialize()
 	throws Exception
 	{
-		DefaultSerializationResolver resolver = new DefaultSerializationResolver();
-		resolver.put(Format.JSON, new DefaultJsonProcessor());
-		resolver.put(Format.XML, new DefaultXmlProcessor());
+		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
+		resolver.put(Format.JSON, ResponseProcessor.newJsonProcessor(new DefaultResponseWrapper()));
+		resolver.put(Format.XML, ResponseProcessor.newXmlProcessor(new DefaultResponseWrapper()));
 		resolver.setDefaultFormat(Format.JSON);
 		
 		messageHandler = new DefaultRequestHandler(new RouteResolver(new DummyRoutes().createRouteMapping()), resolver);
 		observer = new WrappedResponseObserver();
 		messageHandler.addMessageObserver(observer);
-		messageHandler.setResponseWrapperFactory(new DefaultResponseWrapper());
 		httpResponse = new StringBuffer();
 		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(httpResponse));
 		PipelineBuilder pf = new PipelineBuilder()

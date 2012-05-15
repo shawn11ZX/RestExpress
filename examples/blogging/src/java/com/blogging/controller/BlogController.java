@@ -1,5 +1,7 @@
 package com.blogging.controller;
 
+import java.util.List;
+
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
@@ -38,6 +40,12 @@ public class BlogController
 	{
 		String id = request.getUrlDecodedHeader(Constants.BLOG_ID_HEADER, "Blog ID not provided.");
 		return repo.read(id);
+	}
+
+	public List<Blog> readOwnedBlogs(Request request, Response response)
+	{
+		String owner = request.getUrlDecodedHeader(Constants.AUTHOR_HEADER, "Author not provided.");
+		return repo.readOwnedBlogs(owner);
 	}
 
 	public void update(Request request, Response response)

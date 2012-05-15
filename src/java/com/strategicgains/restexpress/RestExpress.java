@@ -41,11 +41,8 @@ import com.strategicgains.restexpress.pipeline.PipelineBuilder;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
 import com.strategicgains.restexpress.plugin.Plugin;
-import com.strategicgains.restexpress.response.DefaultResponseWrapper;
-import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
-import com.strategicgains.restexpress.response.ResponseWrapper;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
@@ -63,8 +60,7 @@ import com.strategicgains.restexpress.util.Resolver;
  */
 public class RestExpress
 {
-	private static final ChannelGroup allChannels = new DefaultChannelGroup(
-	    "RestExpress");
+	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress");
 
 	public static final int DEFAULT_PORT = 8081;
 	public static final String DEFAULT_NAME = "RestExpress";
@@ -836,7 +832,7 @@ public class RestExpress
 		{
 			if (entry.getKey().equals(Format.XML))
 			{
-				setXmlAliases((AliasingSerializationProcessor) entry.getValue());
+				setXmlAliases((AliasingSerializationProcessor) entry.getValue().getSerializer());
 			}
 
 			resolver.put(entry.getKey(), entry.getValue());

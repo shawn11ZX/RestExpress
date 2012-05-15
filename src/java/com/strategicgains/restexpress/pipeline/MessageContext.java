@@ -78,6 +78,7 @@ public class MessageContext
     public void setResponseProcessor(ResponseProcessor processor)
     {
 		getResponse().setResponseProcessor(processor);
+		getRequest().setSerializationProcessor(processor.getSerializer());
     }
 
     public boolean hasResponseProcessor()

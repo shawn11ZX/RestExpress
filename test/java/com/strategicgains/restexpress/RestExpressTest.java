@@ -22,10 +22,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.route.RouteDeclaration;
-import com.strategicgains.restexpress.serialization.SerializationProcessor;
-import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
-import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
 
 
 /**
@@ -40,9 +38,9 @@ public class RestExpressTest
 	public void shouldUseDefaults()
 	{
 		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertEquals(2, server.getResponseProcessors().size());
 
 		assertEquals(8081, server.getPort());
 		assertTrue(server.getMessageObservers().isEmpty());
@@ -57,9 +55,9 @@ public class RestExpressTest
 	{
 		server.noJson();
 		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertFalse(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertEquals(1, server.getSerializationProcessors().size());
+		assertFalse(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertEquals(1, server.getResponseProcessors().size());
 	}
 	
 	@Test
@@ -67,9 +65,9 @@ public class RestExpressTest
 	{
 		server.noXml();
 		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertFalse(server.getSerializationProcessors().containsKey(Format.XML));
-		assertEquals(1, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertFalse(server.getResponseProcessors().containsKey(Format.XML));
+		assertEquals(1, server.getResponseProcessors().size());
 	}
 	
 	@Test
@@ -77,9 +75,9 @@ public class RestExpressTest
 	{
 		server.supportXml(true);
 		assertEquals(Format.XML, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertEquals(2, server.getResponseProcessors().size());
 	}
 
 	@Test
@@ -87,10 +85,10 @@ public class RestExpressTest
 	{
 		server.supportTxt();
 		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.TXT));
-		assertEquals(3, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertTrue(server.getResponseProcessors().containsKey(Format.TXT));
+		assertEquals(3, server.getResponseProcessors().size());
 	}
 
 	@Test
@@ -98,73 +96,73 @@ public class RestExpressTest
 	{
 		server.supportTxt(true);
 		assertEquals(Format.TXT, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.TXT));
-		assertEquals(3, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertTrue(server.getResponseProcessors().containsKey(Format.TXT));
+		assertEquals(3, server.getResponseProcessors().size());
 	}
 
 	@Test
 	public void shouldCustomizeJsonSerializer()
 	{
-		server.putSerializationProcessor(Format.JSON, new DefaultJsonProcessor());
+		server.putResponseProcessor(Format.JSON, ResponseProcessor.defaultJsonProcessor());
 		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertEquals(2, server.getResponseProcessors().size());
 	}
 
 	@Test
 	public void shouldCustomizeXmlSerializer()
 	{
-		server.putSerializationProcessor(Format.XML, new DefaultXmlProcessor());
+		server.putResponseProcessor(Format.XML, ResponseProcessor.defaultXmlProcessor());
 		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertEquals(2, server.getResponseProcessors().size());
 	}
 
 	@Test
 	public void shouldNotUpdateJsonSerializer()
 	{
-		SerializationProcessor sp = new DefaultJsonProcessor();
-		server.putSerializationProcessor(Format.JSON, sp);
+		ResponseProcessor rp = ResponseProcessor.defaultJsonProcessor();
+		server.putResponseProcessor(Format.JSON, rp);
 		server.supportJson(true);
 		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertEquals(2, server.getResponseProcessors().size());
 		
-		assertTrue(sp == server.getSerializationProcessors().get(Format.JSON));
+		assertTrue(rp == server.getResponseProcessors().get(Format.JSON));
 	}
 
 	@Test
 	public void shouldNotUpdateXmlSerializer()
 	{
-		SerializationProcessor sp = new DefaultXmlProcessor();
-		server.putSerializationProcessor(Format.XML, sp);
+		ResponseProcessor rp = ResponseProcessor.defaultXmlProcessor();
+		server.putResponseProcessor(Format.XML, rp);
 		server.supportXml(true);
 		assertEquals(Format.XML, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertEquals(2, server.getResponseProcessors().size());
 		
-		assertTrue(sp == server.getSerializationProcessors().get(Format.XML));
+		assertTrue(rp == server.getResponseProcessors().get(Format.XML));
 	}
 
 	@Test
 	public void shouldNotUpdateTxtSerializer()
 	{
-		SerializationProcessor sp = new DefaultXmlProcessor();
-		server.putSerializationProcessor(Format.TXT, sp);
+		ResponseProcessor rp = ResponseProcessor.defaultTxtProcessor();
+		server.putResponseProcessor(Format.TXT, rp);
 		server.supportTxt(true);
 		assertEquals(Format.TXT, server.getDefaultFormat());
-		assertTrue(server.getSerializationProcessors().containsKey(Format.JSON));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.XML));
-		assertTrue(server.getSerializationProcessors().containsKey(Format.TXT));
-		assertEquals(3, server.getSerializationProcessors().size());
+		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+		assertTrue(server.getResponseProcessors().containsKey(Format.TXT));
+		assertEquals(3, server.getResponseProcessors().size());
 		
-		assertTrue(sp == server.getSerializationProcessors().get(Format.TXT));
+		assertTrue(rp == server.getResponseProcessors().get(Format.TXT));
 	}
 	
 	@Test

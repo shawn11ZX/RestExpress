@@ -3,8 +3,8 @@ package com.kickstart;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.kickstart.serialization.JsonSerializationProcessor;
-import com.kickstart.serialization.XmlSerializationProcessor;
+import com.kickstart.postprocessor.LastModifiedHeaderPostprocessor;
+import com.kickstart.serialization.ResponseProcessors;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.RestExpress;
@@ -28,8 +28,11 @@ public class Main
 		    .setName(config.getName())
 		    .setPort(config.getPort())
 		    .setDefaultFormat(config.getDefaultFormat())
-		    .putSerializationProcessor(Format.JSON, new JsonSerializationProcessor())
-		    .putSerializationProcessor(Format.XML, new XmlSerializationProcessor())
+		    .putResponseProcessor(Format.JSON, ResponseProcessors.json())
+		    .putResponseProcessor(Format.XML, ResponseProcessors.xml())
+		    .putResponseProcessor(Format.WRAPPED_JSON, ResponseProcessors.wrappedJson())
+		    .putResponseProcessor(Format.WRAPPED_XML, ResponseProcessors.wrappedXml())
+		    .addPostprocessor(new LastModifiedHeaderPostprocessor())
 		    .addMessageObserver(new SimpleConsoleLogMessageObserver());
 
 		new RoutesMetadataPlugin()							// Support discoverability.

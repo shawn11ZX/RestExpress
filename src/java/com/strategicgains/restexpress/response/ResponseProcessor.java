@@ -36,12 +36,28 @@ public class ResponseProcessor
 		this.serializer = serializer;
 		this.wrapper = wrapper;
 	}
+	
+	public SerializationProcessor getSerializer()
+	{
+		return serializer;
+	}
+	
+	public ResponseWrapper getWrapper()
+	{
+		return wrapper;
+	}
 
 	public String process(Response response)
 	{
 		Object wrapped = wrapper.wrap(response);
-		response.setContentType(serializer.getResultingContentType());
-		return serializer.serialize(wrapped);
+		
+		if (wrapped != null)
+		{
+			response.setContentType(serializer.getResultingContentType());
+			return serializer.serialize(wrapped);
+		}
+		
+		return null;
 	}
 	
 
@@ -49,16 +65,31 @@ public class ResponseProcessor
 
 	public static ResponseProcessor defaultJsonProcessor()
 	{
-		return new ResponseProcessor(new DefaultJsonProcessor(), new RawResponseWrapper());
+		return newJsonProcessor(new RawResponseWrapper());
+	}
+
+	public static ResponseProcessor newJsonProcessor(ResponseWrapper wrapper)
+	{
+		return new ResponseProcessor(new DefaultJsonProcessor(), wrapper);
 	}
 
 	public static ResponseProcessor defaultXmlProcessor()
 	{
-		return new ResponseProcessor(new DefaultXmlProcessor(), new RawResponseWrapper());
+		return newXmlProcessor(new RawResponseWrapper());
+	}
+
+	public static ResponseProcessor newXmlProcessor(ResponseWrapper wrapper)
+	{
+		return new ResponseProcessor(new DefaultXmlProcessor(), wrapper);
 	}
 
 	public static ResponseProcessor defaultTxtProcessor()
 	{
-		return new ResponseProcessor(new DefaultTxtProcessor(), new RawResponseWrapper());
+		return newTxtProcessor(new RawResponseWrapper());
+	}
+	
+	public static ResponseProcessor newTxtProcessor(ResponseWrapper wrapper)
+	{
+		return new ResponseProcessor(new DefaultTxtProcessor(), wrapper);		
 	}
 }

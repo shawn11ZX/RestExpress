@@ -35,6 +35,9 @@ extends RouteDeclaration
 		//Create a new blog.  Auto-assigned ID.
 		uri("/blogs.{format}", blogController)
 			.method(HttpMethod.POST);
+		
+		uri("/blogs/authors/{author}.{format}", blogController)
+			.action("readOwnedBlogs", HttpMethod.GET);
 
 		// Read, update, delete a blog.
 		uri("/blogs/{blogId}.{format}", blogController)

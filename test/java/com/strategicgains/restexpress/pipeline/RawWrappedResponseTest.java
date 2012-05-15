@@ -34,13 +34,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Format;
-import com.strategicgains.restexpress.response.RawResponseWrapper;
+import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.DefaultSerializationResolver;
-import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
-import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
 
 
 /**
@@ -59,15 +57,14 @@ public class RawWrappedResponseTest
 	public void initialize()
 	throws Exception
 	{
-		DefaultSerializationResolver resolver = new DefaultSerializationResolver();
-		resolver.put(Format.JSON, new DefaultJsonProcessor());
-		resolver.put(Format.XML, new DefaultXmlProcessor());
+		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
+		resolver.put(Format.JSON, ResponseProcessor.defaultJsonProcessor());
+		resolver.put(Format.XML, ResponseProcessor.defaultXmlProcessor());
 		resolver.setDefaultFormat(Format.JSON);
 		
 		messageHandler = new DefaultRequestHandler(new RouteResolver(new DummyRoutes().createRouteMapping()), resolver);
 		observer = new WrappedResponseObserver();
 		messageHandler.addMessageObserver(observer);
-		messageHandler.setResponseWrapperFactory(new RawResponseWrapper());
 		httpResponse = new StringBuffer();
 		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(httpResponse));
 		PipelineBuilder pf = new PipelineBuilder()
@@ -437,7 +434,7 @@ public class RawWrappedResponseTest
 	}
 
 	@Test
-	public void shouldDeleteWrappingInJsonp()
+	public void shouldDeleteIgnoringJsonp()
 	{
 		sendEvent(HttpMethod.DELETE, "/normal_delete.json?jsonp=jsonp_callback", null);
 		assertEquals(1, observer.getReceivedCount());
@@ -445,7 +442,7 @@ public class RawWrappedResponseTest
 		assertEquals(1, observer.getSuccessCount());
 		assertEquals(0, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("jsonp_callback(\"Normal DELETE action\")", httpResponse.toString());
+		assertEquals("\"Normal DELETE action\"", httpResponse.toString());
 	}
 
 	private void sendEvent(HttpMethod method, String path, String body)

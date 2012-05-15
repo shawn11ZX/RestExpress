@@ -1,6 +1,5 @@
-package com.strategicgains.restexpress.postprocessor;
 /*
-    Copyright 2011, Strategic Gains, Inc.
+    Copyright 2012, Strategic Gains, Inc.
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -14,36 +13,38 @@ package com.strategicgains.restexpress.postprocessor;
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
+package com.kickstart.postprocessor;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.ETAG;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.LAST_MODIFIED;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
+import com.strategicgains.util.date.DateAdapter;
+import com.strategicgains.util.date.HttpHeaderTimestampAdapter;
 
 /**
- * If the response body is non-null, adds an ETag header.  ETag is
- * computed from the body object's hash code combined with the hash
- * code of the resulting format.
+ * Assigns the Last-Modified HTTP header on the response for GET responses, if applicable.
  * 
  * @author toddf
- * @since Oct 5, 2011
+ * @since May 15, 2012
  */
-public class EtagHeaderPostprocessor
+public class LastModifiedHeaderPostprocessor
 implements Postprocessor
 {
+	DateAdapter fmt = new HttpHeaderTimestampAdapter();
+
 	@Override
 	public void process(Request request, Response response)
 	{
 		if (!request.isMethodGet()) return;
 		if (!response.hasBody()) return;
 
-		Object body = response.getBody();
-
-		if (!response.hasHeader(ETAG))
-		{
-			String format = request.getFormat() == null ? request.getResolvedRoute().getDefaultFormat() : request.getFormat();
-			response.addHeader(ETAG, String.valueOf(body.hashCode() ^ format.hashCode()));
-		}
+//		Object body = response.getBody();
+//
+//		if (!response.hasHeader(LAST_MODIFIED) && body.getClass().isAssignableFrom(Timestamped.class))
+//		{
+//			response.addHeader(LAST_MODIFIED, fmt.format(((Timestamped) body).getUpdatedAt()));
+//		}
 	}
 }

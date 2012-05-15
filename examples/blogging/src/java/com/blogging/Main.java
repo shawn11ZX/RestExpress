@@ -4,8 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import com.blogging.postprocessor.LastModifiedHeaderPostprocessor;
-import com.blogging.serialization.BlogJsonProcessor;
-import com.blogging.serialization.BlogXmlProcessor;
+import com.blogging.serialization.ResponseProcessors;
 import com.strategicgains.repoexpress.exception.DuplicateItemException;
 import com.strategicgains.repoexpress.exception.ItemNotFoundException;
 import com.strategicgains.restexpress.Format;
@@ -22,6 +21,9 @@ import com.strategicgains.syntaxe.ValidationException;
 
 /**
  * The main entry-point into RestExpress for the example blog services.
+ * <p/>
+ * This Blogging example is a full-up project with MongoDB persistence. It supports
+ * raw JSON and XML responses as well as wrapped XML and JSON responses.
  * 
  * @author toddf
  * @since Aug 31, 2009
@@ -39,8 +41,10 @@ public class Main
 			config.getEntriesRespository(), config.getCommentsRespository()))
 		    .setName(config.getName())
 		    .setPort(config.getPort())
-		    .putSerializationProcessor(Format.JSON, new BlogJsonProcessor())
-		    .putSerializationProcessor(Format.XML, new BlogXmlProcessor())
+		    .putResponseProcessor(Format.JSON, ResponseProcessors.json())
+		    .putResponseProcessor(Format.XML, ResponseProcessors.xml())
+		    .putResponseProcessor(Format.WRAPPED_JSON, ResponseProcessors.wrappedJson())
+		    .putResponseProcessor(Format.WRAPPED_XML, ResponseProcessors.wrappedXml())
 		    .setDefaultFormat(config.getDefaultFormat())
 		    .addMessageObserver(new SimpleConsoleLogMessageObserver())
 		    .addPostprocessor(new LastModifiedHeaderPostprocessor());

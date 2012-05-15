@@ -13,4 +13,10 @@ implements BlogRepository
     {
 	    super(bootstraps, Blog.class);
     }
+
+    @Override
+    public List<Blog> readOwnedBlogs(String author)
+    {
+    	return getDataStore().find(Blog.class, "author", author).asList();
+    }
 }

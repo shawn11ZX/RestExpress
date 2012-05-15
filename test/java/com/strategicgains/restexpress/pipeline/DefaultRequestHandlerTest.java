@@ -44,12 +44,12 @@ import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
+import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.DefaultSerializationResolver;
-import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
-import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
+import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
 
 
 /**
@@ -69,17 +69,17 @@ public class DefaultRequestHandlerTest
 	public void initialize()
 	throws Exception
 	{
-		DefaultSerializationResolver resolver = new DefaultSerializationResolver();
-		resolver.put(Format.JSON, new DefaultJsonProcessor());
-		DefaultXmlProcessor xmlProcessor = new DefaultXmlProcessor();
-		xmlProcessor.alias("dated", Dated.class);
+		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
+		resolver.put(Format.JSON, ResponseProcessor.newJsonProcessor(new DefaultResponseWrapper()));
+		ResponseProcessor xmlProcessor = ResponseProcessor.newXmlProcessor(new DefaultResponseWrapper());
+		AliasingSerializationProcessor xmlSerializer = (AliasingSerializationProcessor) xmlProcessor.getSerializer();
+		xmlSerializer.alias("dated", Dated.class);
 		resolver.put(Format.XML, xmlProcessor);
 		resolver.setDefaultFormat(Format.JSON);
 		
 		messageHandler = new DefaultRequestHandler(new RouteResolver(new DummyRoutes().createRouteMapping()), resolver);
 		observer = new DummyObserver();
 		messageHandler.addMessageObserver(observer);
-		messageHandler.setResponseWrapperFactory(new DefaultResponseWrapper());
 		responseBody = new StringBuffer();
 		responseHeaders = new HashMap<String, List<String>>();
 		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(responseHeaders, responseBody));

@@ -54,7 +54,7 @@ extends AbstractPlugin
 		routeBuilders.add(builder);
 
 		builder = server.getRouteDeclarations()
-		    .uri("/route/{routeName}/metadata.{format}", controller)
+		    .uri("/routes/{routeName}/metadata.{format}", controller)
 		    .action("getSingleRoute", HttpMethod.GET)
 		    .name("singleRouteMetadata");
 		routeBuilders.add(builder);

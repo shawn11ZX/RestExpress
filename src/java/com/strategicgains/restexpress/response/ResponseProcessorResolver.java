@@ -15,7 +15,11 @@
 */
 package com.strategicgains.restexpress.response;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.util.Resolver;
 
 /**
@@ -25,10 +29,70 @@ import com.strategicgains.restexpress.util.Resolver;
 public class ResponseProcessorResolver
 implements Resolver<ResponseProcessor>
 {
-    @Override
-    public ResponseProcessor resolve(Request request)
+	private Map<String, ResponseProcessor> processors = new HashMap<String, ResponseProcessor>();
+	private String defaultFormat;
+	
+	public ResponseProcessorResolver()
+	{
+		super();
+	}
+	
+	public ResponseProcessorResolver(Map<String, ResponseProcessor> processors, String defaultFormat)
+	{
+		super();
+		this.processors.putAll(processors);
+		this.defaultFormat = defaultFormat;
+	}
+	
+	public ResponseProcessor put(String format, ResponseProcessor processor)
+	{
+		return processors.put(format, processor);
+	}
+	
+	public void setDefaultFormat(String format)
+	{
+		this.defaultFormat = format;
+	}
+
+	@Override
+	public ResponseProcessor resolve(Request request)
+	{
+		ResponseProcessor processor = null;
+
+		processor = resolveViaRequestFormat(request);
+		
+		if (processor != null)
+		{
+			return processor;
+		}
+
+		processor = getDefault();
+		
+		if (processor == null)
+		{
+			throw new BadRequestException("No response processor found for request.");
+		}
+		
+		return processor;
+	}
+
+    public ResponseProcessor getDefault()
     {
-	    // TODO Auto-generated method stub
-	    return null;
+		return resolveViaSpecifiedFormat(defaultFormat);
     }
+
+	private ResponseProcessor resolveViaRequestFormat(Request request)
+	{
+		return resolveViaSpecifiedFormat(request.getFormat());
+	}
+	
+	private ResponseProcessor resolveViaSpecifiedFormat(String format)
+	{
+		if (format == null || format.trim().isEmpty())
+		{
+			return null;
+		}
+		
+		return processors.get(format);
+	}
 }

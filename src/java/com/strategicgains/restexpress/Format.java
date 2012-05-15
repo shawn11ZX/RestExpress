@@ -23,11 +23,19 @@ package com.strategicgains.restexpress;
  */
 public abstract class Format
 {
+	// PRIMARY FORMATS
+
 	public static final String HTML = "html";
 	public static final String JAVASCRIPT = "js";
 	public static final String JSON = "json";
 	public static final String TXT = "txt";
 	public static final String XML = "xml";
+
+
+	// ALTERNATIVE/SPECIALIZED FORMATS
+
+	public static final String WRAPPED_JSON = "wjson";
+	public static final String WRAPPED_XML = "wxml";
 
 	private Format()
 	{
