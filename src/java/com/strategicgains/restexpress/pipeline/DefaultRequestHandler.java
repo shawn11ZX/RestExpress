@@ -168,7 +168,7 @@ extends SimpleChannelUpstreamHandler
 		resolveResponseProcessor(context, true);
 		Throwable rootCause = mapServiceException(cause);
 		
-		if (rootCause != null) // is a ServiceException
+		if (rootCause != null) // was/is a ServiceException
 		{
 			context.setHttpStatus(((ServiceException) rootCause).getHttpStatus());
 			
