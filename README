@@ -63,8 +63,16 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.8.0 - in development (build 'master')
-* 
+Release 0.8.0 - in development (branch 'v0.8.0')
+* Changed to support multiple response types with wrapping or not, etc. Now can support wrapped
+  JSON (.wjson) and XML (.wxml) as well as un-wrapped JSON (.json) and XML (.xml) depending on the
+  format specifier.
+* Now throws BadRequestException (400) if the specified format (e.f. .json) isn't supported by the 
+  service suite.
+* Now throws MethodNotAllowedException (405) if the requested URL matches a route but not for the
+  requested HTTP method.  Sets the HTTP Allow header to a comma-delimited list of accepted methods.
+* Removed StringUtils.parseQueryString() as it was previously deprecated--use QueryStringParser.
+* Introduced String.join() methods (2).
 
 ===================================================================================================
 Release 0.7.2 - 14 May 2012
