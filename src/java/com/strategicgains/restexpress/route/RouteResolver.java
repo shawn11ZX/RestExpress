@@ -15,11 +15,13 @@
 */
 package com.strategicgains.restexpress.route;
 
+import java.util.List;
+
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.exception.MethodNotAllowedException;
 import com.strategicgains.restexpress.exception.NotFoundException;
-import com.strategicgains.restexpress.url.UrlMatch;
 import com.strategicgains.restexpress.util.Resolver;
 
 /**
@@ -45,14 +47,15 @@ implements Resolver<Action>
 	@Override
 	public Action resolve(Request request)
 	{
-		for (Route route : routeMapping.getRoutesFor(request.getEffectiveHttpMethod()))
-		{
-			UrlMatch match = route.match(request.getPath());
+		Action action = routeMapping.getActionFor(request.getEffectiveHttpMethod(), request.getPath());
+		
+		if (action != null) return action;
 
-			if (match != null)
-			{
-				return new Action(route, match);
-			}
+		List<HttpMethod> allowedMethods = routeMapping.getAllowedMethods(request.getPath());
+
+		if (allowedMethods != null && !allowedMethods.isEmpty())
+		{
+			throw new MethodNotAllowedException(request.getUrl(), allowedMethods);
 		}
 
 		throw new NotFoundException("Unresolvable URL: " + request.getUrl());

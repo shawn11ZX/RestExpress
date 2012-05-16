@@ -26,7 +26,8 @@ public class RouteDeclarationTest
     private static RouteMapping routeMapping;
 	
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception
+	public static void setUpBeforeClass()
+	throws Exception
 	{
 		routeDeclarations = new Routes();
 		routeMapping = routeDeclarations.createRouteMapping();
@@ -140,7 +141,37 @@ public class RouteDeclarationTest
 		assertEquals("CRUD_ROUTE", r.getName());
 		assertEquals("delete", r.getAction().getName());
 	}
+
+	@Test
+	public void shouldFindGetMethod()
+	{
+		List<HttpMethod> methods = routeMapping.getAllowedMethods("/foo/bar/42.json");
+		assertNotNull(methods);
+		assertEquals(1, methods.size());
+		assertEquals(HttpMethod.GET, methods.get(0));
+	}
+
+	@Test
+	public void shouldFindPostMethod()
+	{
+		List<HttpMethod> methods = routeMapping.getAllowedMethods("/foo.json");
+		assertNotNull(methods);
+		assertEquals(1, methods.size());
+		assertEquals(HttpMethod.POST, methods.get(0));
+	}
 	
+	@Test
+	public void shouldFindMultipleMethods()
+	{
+		List<HttpMethod> methods = routeMapping.getAllowedMethods("/foo/foo42.json");
+		assertNotNull(methods);
+		assertEquals(4, methods.size());
+		assertTrue(methods.contains(HttpMethod.GET));
+		assertTrue(methods.contains(HttpMethod.PUT));
+		assertTrue(methods.contains(HttpMethod.POST));
+		assertTrue(methods.contains(HttpMethod.DELETE));
+	}
+
 	private static class Routes
 	extends RouteDeclaration
 	{
