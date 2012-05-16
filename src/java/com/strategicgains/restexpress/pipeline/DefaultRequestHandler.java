@@ -171,6 +171,11 @@ extends SimpleChannelUpstreamHandler
 		if (rootCause != null) // is a ServiceException
 		{
 			context.setHttpStatus(((ServiceException) rootCause).getHttpStatus());
+			
+			if (ServiceException.class.isAssignableFrom(rootCause.getClass()))
+			{
+				((ServiceException) rootCause).augmentResponse(context.getResponse());
+			}
 		}
 		else
 		{
