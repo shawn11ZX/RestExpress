@@ -18,8 +18,12 @@ package com.strategicgains.restexpress.exception;
 import java.util.Collections;
 import java.util.List;
 
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+
+import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.util.StringUtils;
 
 /**
  * @author toddf
@@ -75,5 +79,14 @@ extends ServiceException
 	public List<HttpMethod> getAllowedMethods()
 	{
 		return allowedMethods;
+	}
+	
+	/**
+	 * Adds Allow HTTP header to the response with a list of the appropriate HTTP methods for the route.
+	 */
+	@Override
+	public void augmentResponse(Response response)
+	{
+		response.addHeader(HttpHeaders.Names.ALLOW, StringUtils.join(",", getAllowedMethods()));
 	}
 }
