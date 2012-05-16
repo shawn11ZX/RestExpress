@@ -15,68 +15,45 @@
 */
 package com.strategicgains.restexpress.util;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author toddf
  * @since Oct 7, 2011
- * @deprecated Use Netty's QueryStringDecoder instead.
  */
 public abstract class StringUtils
 {
-	/**
-	 * Parses a delimited query-string into a Map. Also works for url-form-encoded request bodies.
-	 * 
-	 * @param queryString is a delimited query string.
-	 * @return Map of name/value pairs, never null.
-	 * @deprecated Use Netty's QueryStringDecoder, which returns Map<String, List<String>> instead.
-	 */
-	public static Map<String, String> parseQueryString(String queryString)
-	{
-		final Map<String, String> queryStringMap = new HashMap<String, String>();
-		iterateQueryString(queryString, new QueryStringCallback()
-		{
-			@Override
-			public void assign(String key, String value)
-			{
-				queryStringMap.put(key, value);
-			}
-		});
+	public static final String EMPTY_STRING = "";
 
-		return queryStringMap;
+	public static String join(String delimiter, Collection<? extends Object> objects)
+	{
+		if (objects == null || objects.isEmpty())
+		{
+			return EMPTY_STRING;
+		}
+		
+		Iterator<? extends Object> iterator = objects.iterator();
+		StringBuilder builder = new StringBuilder();
+		builder.append(iterator.next());
+
+		while(iterator.hasNext())
+		{
+			builder.append(delimiter)
+				.append(iterator.next());
+		}
+		
+		return builder.toString();
 	}
 	
-	public static void iterateQueryString(String queryString, QueryStringCallback callback)
+	public static String join(String delimiter, Object... objects)
 	{
-		if (queryString != null && !queryString.trim().isEmpty())
-		{
-			String[] params = queryString.split("&");
-			
-			for (String pair : params)
-			{
-				String[] keyValue = pair.split("=");
-				String key = keyValue[0];
-				
-				if (keyValue.length == 1)
-				{
-					callback.assign(key, "");
-				}
-				else
-				{
-					callback.assign(key, keyValue[1]);
-				}
-			}
-		}
+		return join(delimiter, Arrays.asList(objects));
 	}
 
 	private StringUtils()
 	{
 		// prevents instantiation.
-	}
-	
-	public interface QueryStringCallback
-	{
-		public void assign(String key, String value);
 	}
 }

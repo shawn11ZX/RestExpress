@@ -38,7 +38,6 @@ import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
 import com.strategicgains.restexpress.url.QueryStringParser;
-import com.strategicgains.restexpress.util.StringUtils;
 
 /**
  * @author toddf
@@ -184,18 +183,6 @@ public class Request
 		}
 		
 		return instance;
-	}
-
-	/**
-	 * Returns the body as a Map of name/value pairs from a url-form-encoded form submission.  Note that
-	 * duplicate names (value arrays using the same parameter name) are not currently supported.
-	 * 
-	 * @return
-	 * @deprecated
-	 */
-	public Map<String, String> getBodyAsUrlFormEncoded()
-	{
-        return StringUtils.parseQueryString(urlDecode(getBody().toString(ContentType.CHARSET)));
 	}
 
 	/**
