@@ -189,7 +189,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
 //		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
-		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"Requested representation format not supported: %target\",\"data\":\"BadRequestException\"}", responseBody.toString());
+		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"Requested representation format not supported: %target. Supported formats: json, xml\",\"data\":\"BadRequestException\"}", responseBody.toString());
 	}
 
 	@Test
@@ -202,7 +202,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getExceptionCount());
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"Requested representation format not supported: unsupported\",\"data\":\"BadRequestException\"}", responseBody.toString());
+		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"Requested representation format not supported: unsupported. Supported formats: json, xml\",\"data\":\"BadRequestException\"}", responseBody.toString());
 	}
 
 	@Test

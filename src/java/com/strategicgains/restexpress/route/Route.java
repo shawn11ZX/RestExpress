@@ -18,6 +18,8 @@ package com.strategicgains.restexpress.route;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -125,6 +127,11 @@ public abstract class Route
 	{
 		return shouldSerializeResponse;
 	}
+
+    public Collection<String> getSupportedFormats()
+    {
+	    return Collections.unmodifiableList(supportedFormats);
+    }
 	
 	public boolean hasSupportedFormats()
 	{

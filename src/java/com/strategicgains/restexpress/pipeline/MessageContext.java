@@ -15,6 +15,8 @@
  */
 package com.strategicgains.restexpress.pipeline;
 
+import java.util.Collection;
+
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.Request;
@@ -53,12 +55,12 @@ public class MessageContext
 	{
 		return action;
 	}
-	
+
 	public boolean hasAction()
 	{
 		return (getAction() != null);
 	}
-	
+
 	public void setAction(Action action)
 	{
 		this.action = action;
@@ -68,55 +70,71 @@ public class MessageContext
 	}
 
 	/**
-     * @return
-     */
-    public boolean shouldSerializeResponse()
-    {
-    	return getResponse().isSerialized();
-    }
+	 * @return
+	 */
+	public boolean shouldSerializeResponse()
+	{
+		return getResponse().isSerialized();
+	}
 
-    public void setResponseProcessor(ResponseProcessor processor)
-    {
+	public void setResponseProcessor(ResponseProcessor processor)
+	{
 		getResponse().setResponseProcessor(processor);
 		getRequest().setSerializationProcessor(processor.getSerializer());
-    }
+	}
 
-    public boolean hasResponseProcessor()
-    {
-    	return getResponse().hasResponseProcessor();
-    }
+	public boolean hasResponseProcessor()
+	{
+		return getResponse().hasResponseProcessor();
+	}
 
-    public ResponseProcessor getResponseProcessor()
-    {
-	    return getResponse().getResponseProcessor();
-    }
+	public ResponseProcessor getResponseProcessor()
+	{
+		return getResponse().getResponseProcessor();
+	}
 
-    public String getContentType()
-    {
-    	return getResponse().getContentType();
-    }
+	public String getContentType()
+	{
+		return getResponse().getContentType();
+	}
+
+	/**
+	 * @return
+	 */
+	public Throwable getException()
+	{
+		return getResponse().getException();
+	}
+
+	/**
+	 * @param rootCause
+	 */
+	public void setException(Throwable throwable)
+	{
+		getResponse().setException(throwable);
+	}
+
+	/**
+	 * @param httpStatus
+	 */
+	public void setHttpStatus(HttpResponseStatus httpStatus)
+	{
+		getResponse().setResponseStatus(httpStatus);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean supportsRequestedFormat()
+	{
+		return getAction().getRoute().supportsFormat(getRequest().getFormat());
+	}
 
 	/**
      * @return
      */
-    public Throwable getException()
+    public Collection<String> getSupportedRouteFormats()
     {
-    	return getResponse().getException();
-    }
-
-	/**
-     * @param rootCause
-     */
-    public void setException(Throwable throwable)
-    {
-    	getResponse().setException(throwable);
-    }
-
-	/**
-     * @param httpStatus
-     */
-    public void setHttpStatus(HttpResponseStatus httpStatus)
-    {
-    	getResponse().setResponseStatus(httpStatus);
+    	return getAction().getRoute().getSupportedFormats();
     }
 }

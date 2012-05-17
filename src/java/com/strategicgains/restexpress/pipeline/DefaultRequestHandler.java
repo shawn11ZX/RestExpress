@@ -20,6 +20,7 @@ import static com.strategicgains.restexpress.ContentType.TEXT_PLAIN;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.netty.channel.ChannelHandler.Sharable;
@@ -43,6 +44,7 @@ import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.util.HttpSpecification;
+import com.strategicgains.restexpress.util.StringUtils;
 
 /**
  * @author toddf
@@ -139,12 +141,11 @@ extends SimpleChannelUpstreamHandler
 	
 			invokePostprocessors(context.getRequest(), context.getResponse());
 
-			if (!isResponseProcessorResolved)
+			if (!isResponseProcessorResolved && !context.supportsRequestedFormat())
 			{
-				if (!context.getAction().getRoute().supportsFormat(context.getRequest().getFormat()))
-				{
-					throw new BadRequestException("Requested representation format not supported: " + context.getRequest().getFormat());
-				}
+				throw new BadRequestException("Requested representation format not supported: " 
+					+ context.getRequest().getFormat() 
+					+ ". Supported formats: " + StringUtils.join(", ", getSupportedFormats(context)));
 			}
 
 			serializeResponse(context);
@@ -161,6 +162,22 @@ extends SimpleChannelUpstreamHandler
 			notifyComplete(context);
 		}
 	}
+
+	/**
+     * @return
+     */
+    private Collection<String> getSupportedFormats(MessageContext context)
+    {
+	    Collection<String> routeFormats = context.getSupportedRouteFormats();
+	    
+	    if (routeFormats != null && !routeFormats.isEmpty())
+	    {
+	    	return routeFormats;
+	    }
+	    
+	    return responseProcessorResolver.getSupportedFormats();
+    }
+
 
 	/**
      * @param context
@@ -234,34 +251,11 @@ extends SimpleChannelUpstreamHandler
 
 	/**
 	 * Resolve the ResponseProcessor based on the requested format (or the default, if none supplied).
-	 * If 'shouldUseDefault' is false, a BadRequestException is thrown when the format does not resolve.
-	 * Otherwise, if 'shouldUseDefault' is true, the default format is used when the format does not resolve.
-	 * 
+	 *  
 	 * @param context the message context.
-	 * @param shouldUseDefault use the default format when requested format doesn't resolve.
-	 * @throws BadRequestException if requested format is not resolved and 'shouldUseDefault' is false.
+	 * @return true if the ResponseProcessor was resolved.  False if the ResponseProcessor was
+	 *         resolved to the 'default' because it was unresolvable.
 	 */
-//	private void resolveResponseProcessor(MessageContext context, boolean shouldUseDefault)
-//	{
-//		if (context.hasResponseProcessor()) return;
-//
-//		ResponseProcessor rp = responseProcessorResolver.resolve(context.getRequest());
-//		
-//		if (rp == null)
-//		{
-//			if (shouldUseDefault)
-//			{
-//				rp = responseProcessorResolver.getDefault();
-//			}
-//			else
-//			{
-//				throw new BadRequestException("Requested representation format not supported: " + context.getRequest().getFormat());
-//			}
-//		}
-//
-//		context.setResponseProcessor(rp);
-//	}
-
 	private boolean resolveResponseProcessor(MessageContext context)
 	{
 		boolean isResolved = true;

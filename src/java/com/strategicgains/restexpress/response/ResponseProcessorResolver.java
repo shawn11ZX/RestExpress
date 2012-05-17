@@ -15,6 +15,7 @@
 */
 package com.strategicgains.restexpress.response;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,4 +81,12 @@ implements Resolver<ResponseProcessor>
 		
 		return processors.get(format);
 	}
+
+	/**
+     * @return
+     */
+    public Collection<String> getSupportedFormats()
+    {
+    	return processors.keySet();
+    }
 }
