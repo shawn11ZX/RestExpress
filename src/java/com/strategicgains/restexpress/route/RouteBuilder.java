@@ -67,7 +67,6 @@ public abstract class RouteBuilder
 	private String name;
 	private Set<String> flags = new HashSet<String>();
 	private Map<String, Object> parameters = new HashMap<String, Object>();
-	private boolean shouldUseWrappedResponse = true;
 	
 	/**
 	 * Create a RouteBuilder instance for the given URI pattern. URIs that match the pattern
@@ -145,18 +144,6 @@ public abstract class RouteBuilder
 	public RouteBuilder performSerialization()
 	{
 		this.shouldSerializeResponse = true;
-		return this;
-	}
-
-	public RouteBuilder useRawResponse()
-	{
-		this.shouldUseWrappedResponse = false;
-		return this;
-	}
-
-	public RouteBuilder useWrappedResponse()
-	{
-		this.shouldUseWrappedResponse = false;
 		return this;
 	}
 
@@ -255,7 +242,7 @@ public abstract class RouteBuilder
 			}
 			
 			Method action = determineActionMethod(controller, actionName);
-			routes.add(newRoute(pattern, controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse, name, supportedFormats, defaultFormat, flags, parameters));
+			routes.add(newRoute(pattern, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters));
 		}
 		
 		return routes;
@@ -306,7 +293,7 @@ public abstract class RouteBuilder
      * @return
      */
     protected abstract Route newRoute(String pattern, Object controller, Method action,
-    	HttpMethod method, boolean shouldSerializeResponse, boolean shouldUseWrappedResponse,
+    	HttpMethod method, boolean shouldSerializeResponse,
     	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags,
     	Map<String, Object> parameters);
 

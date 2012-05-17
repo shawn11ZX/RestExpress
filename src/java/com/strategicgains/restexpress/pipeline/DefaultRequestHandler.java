@@ -128,7 +128,7 @@ extends SimpleChannelUpstreamHandler
 		{
 			notifyReceived(context);
 			resolveRoute(context);
-			resolveResponseProcessor(context, false);
+			boolean isResponseProcessorResolved = resolveResponseProcessor(context);
 			invokePreprocessors(context.getRequest());
 			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
 	
@@ -138,6 +138,15 @@ extends SimpleChannelUpstreamHandler
 			}
 	
 			invokePostprocessors(context.getRequest(), context.getResponse());
+
+			if (!isResponseProcessorResolved)
+			{
+				if (!context.getAction().getRoute().supportsFormat(context.getRequest().getFormat()))
+				{
+					throw new BadRequestException("Requested representation format not supported: " + context.getRequest().getFormat());
+				}
+			}
+
 			serializeResponse(context);
 			enforceHttpSpecification(context);
 			writeResponse(ctx, context);
@@ -165,7 +174,7 @@ extends SimpleChannelUpstreamHandler
 	throws Exception
 	{
 		MessageContext context = (MessageContext) ctx.getAttachment();
-		resolveResponseProcessor(context, true);
+		resolveResponseProcessor(context);
 		Throwable rootCause = mapServiceException(cause);
 		
 		if (rootCause != null) // was/is a ServiceException
@@ -232,25 +241,42 @@ extends SimpleChannelUpstreamHandler
 	 * @param shouldUseDefault use the default format when requested format doesn't resolve.
 	 * @throws BadRequestException if requested format is not resolved and 'shouldUseDefault' is false.
 	 */
-	private void resolveResponseProcessor(MessageContext context, boolean shouldUseDefault)
+//	private void resolveResponseProcessor(MessageContext context, boolean shouldUseDefault)
+//	{
+//		if (context.hasResponseProcessor()) return;
+//
+//		ResponseProcessor rp = responseProcessorResolver.resolve(context.getRequest());
+//		
+//		if (rp == null)
+//		{
+//			if (shouldUseDefault)
+//			{
+//				rp = responseProcessorResolver.getDefault();
+//			}
+//			else
+//			{
+//				throw new BadRequestException("Requested representation format not supported: " + context.getRequest().getFormat());
+//			}
+//		}
+//
+//		context.setResponseProcessor(rp);
+//	}
+
+	private boolean resolveResponseProcessor(MessageContext context)
 	{
-		if (context.hasResponseProcessor()) return;
+		boolean isResolved = true;
+		if (context.hasResponseProcessor()) return isResolved;
 
 		ResponseProcessor rp = responseProcessorResolver.resolve(context.getRequest());
 		
 		if (rp == null)
 		{
-			if (shouldUseDefault)
-			{
-				rp = responseProcessorResolver.getDefault();
-			}
-			else
-			{
-				throw new BadRequestException("Requested representation format not supported: " + context.getRequest().getFormat());
-			}
+			rp = responseProcessorResolver.getDefault();
+			isResolved = false;
 		}
 
 		context.setResponseProcessor(rp);
+		return isResolved;
 	}
 
 	private void resolveRoute(MessageContext context)

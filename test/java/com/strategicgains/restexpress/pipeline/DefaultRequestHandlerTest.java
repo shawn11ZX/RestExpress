@@ -127,7 +127,7 @@ public class DefaultRequestHandlerTest
 	public void shouldAllowSettingOfArbitraryBody()
 	throws Exception
 	{
-		sendGetEvent("/setBodyAction");
+		sendGetEvent("/setBodyAction.html");
 		assertEquals(0, observer.getExceptionCount());
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -182,12 +182,13 @@ public class DefaultRequestHandlerTest
 	public void shouldHandleUrlDecodeErrorInFormat()
 	throws Exception
 	{
-		sendGetEvent("/bar.%target");
+		sendGetEvent("/foo.%target");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getExceptionCount());
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
+//		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
 		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"Requested representation format not supported: %target\",\"data\":\"BadRequestException\"}", responseBody.toString());
 	}
 
@@ -322,21 +323,35 @@ public class DefaultRequestHandlerTest
 
 	private void sendGetEvent(String path)
     {
-	    pl.sendUpstream(new UpstreamMessageEvent(
-	    	channel,
-	    	new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path),
-	    	new InetSocketAddress(1)));
+		try
+		{
+		    pl.sendUpstream(new UpstreamMessageEvent(
+		    	channel,
+		    	new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path),
+		    	new InetSocketAddress(1)));
+		}
+		catch(Throwable t)
+		{
+			System.out.println(t.getMessage());
+		}
     }
 
 	private void sendGetEvent(String path, String body)
     {
-		HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path);
-		request.setContent(ChannelBuffers.copiedBuffer(body, Charset.defaultCharset()));
-
-	    pl.sendUpstream(new UpstreamMessageEvent(
-	    	channel,
-	    	request,
-	    	new InetSocketAddress(1)));
+		try
+		{
+			HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path);
+			request.setContent(ChannelBuffers.copiedBuffer(body, Charset.defaultCharset()));
+	
+		    pl.sendUpstream(new UpstreamMessageEvent(
+		    	channel,
+		    	request,
+		    	new InetSocketAddress(1)));
+		}
+		catch(Throwable t)
+		{
+			System.out.println(t.getMessage());
+		}
     }
 	
 	public class DummyRoutes
@@ -362,8 +377,9 @@ public class DefaultRequestHandlerTest
         	uri("/unserializedToo", controller)
         		.action("contentHeaderAction", HttpMethod.GET);
 
-        	uri("/setBodyAction", controller)
-        		.action("setBodyAction", HttpMethod.GET);
+        	uri("/setBodyAction.html", controller)
+        		.action("setBodyAction", HttpMethod.GET)
+        		.format(Format.HTML);
         }
 	}
 	

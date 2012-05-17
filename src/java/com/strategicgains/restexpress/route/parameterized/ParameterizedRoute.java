@@ -16,6 +16,7 @@
 package com.strategicgains.restexpress.route.parameterized;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,9 +42,9 @@ extends Route
      * @param name
      */
     public ParameterizedRoute(UrlPattern urlMatcher, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-    	boolean shouldUseWrappedResponse, String name, Set<String> flags, Map<String, Object> parameters)
+    	String name, List<String> supportedFormats, Set<String> flags, Map<String, Object> parameters)
     {
-	    super(urlMatcher, controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse, name, flags, parameters);
+	    super(urlMatcher, controller, action, method, shouldSerializeResponse, name, supportedFormats, flags, parameters);
     }
 
     /**
@@ -55,8 +56,8 @@ extends Route
      * @param name
      */
     public ParameterizedRoute(String urlPattern, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-    	boolean shouldUseWrappedResponse, String name, Set<String> flags, Map<String, Object> parameters)
+    	String name, List<String> supportedFormats, Set<String> flags, Map<String, Object> parameters)
     {
-	    this(new UrlPattern(urlPattern), controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse, name, flags, parameters);
+	    this(new UrlPattern(urlPattern), controller, action, method, shouldSerializeResponse, name, supportedFormats, flags, parameters);
     }
 }

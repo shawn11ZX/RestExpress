@@ -47,10 +47,10 @@ extends RouteBuilder
      */
     @Override
     protected Route newRoute(String pattern, Object controller, Method action,
-        HttpMethod method, boolean shouldSerializeResponse, boolean shouldUseWrappedResponse,
+        HttpMethod method, boolean shouldSerializeResponse,
         String name, List<String> supportedFormats, String defaultFormat, Set<String> flags,
         Map<String, Object> parameters)
     {
-    	return new RegexRoute(pattern, controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse, name, flags, parameters);
+    	return new RegexRoute(pattern, controller, action, method, shouldSerializeResponse, name, supportedFormats, flags, parameters);
     }
 }
