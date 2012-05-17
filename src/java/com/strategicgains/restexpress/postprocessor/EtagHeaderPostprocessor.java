@@ -43,7 +43,7 @@ implements Postprocessor
 		if (!response.hasHeader(ETAG))
 		{
 			String format = request.getFormat() == null ? request.getResolvedRoute().getDefaultFormat() : request.getFormat();
-			response.addHeader(ETAG, String.valueOf(body.hashCode() ^ format.hashCode()));
+			response.addHeader(ETAG, String.format("\"%d%d\"", body.hashCode(), format.hashCode()));
 		}
 	}
 }
