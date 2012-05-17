@@ -18,6 +18,7 @@ package com.strategicgains.restexpress;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -406,7 +407,7 @@ public class RestExpress
 
 	public List<MessageObserver> getMessageObservers()
 	{
-		return messageObservers;
+		return Collections.unmodifiableList(messageObservers);
 	}
 
 	/**
@@ -429,7 +430,7 @@ public class RestExpress
 
 	public List<Preprocessor> getPreprocessors()
 	{
-		return preprocessors;
+		return Collections.unmodifiableList(preprocessors);
 	}
 
 	/**
@@ -454,7 +455,7 @@ public class RestExpress
 
 	public List<Postprocessor> getPostprocessors()
 	{
-		return postprocessors;
+		return Collections.unmodifiableList(postprocessors);
 	}
 
 	public boolean shouldUseSystemOut()
@@ -784,7 +785,7 @@ public class RestExpress
 			supportedFormats.add(format);
 		}
 
-		return supportedFormats;
+		return Collections.unmodifiableList(supportedFormats);
 	}
 
 	/**
