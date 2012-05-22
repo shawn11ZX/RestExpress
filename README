@@ -63,7 +63,7 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.8.0 - in development (branch 'v0.8.0')
+Release 0.8.0 - in development (branch 'master')
 * Changed to support multiple response types with wrapping or not, etc. Now can support wrapped
   JSON (.wjson) and XML (.wxml) as well as un-wrapped JSON (.json) and XML (.xml) depending on the
   format specifier.
