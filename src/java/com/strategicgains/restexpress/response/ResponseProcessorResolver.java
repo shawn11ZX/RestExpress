@@ -19,15 +19,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.util.Resolver;
-
 /**
  * @author toddf
  * @since May 14, 2012
  */
 public class ResponseProcessorResolver
-implements Resolver<ResponseProcessor>
 {
 	private Map<String, ResponseProcessor> processors = new HashMap<String, ResponseProcessor>();
 	private String defaultFormat;
@@ -54,11 +50,8 @@ implements Resolver<ResponseProcessor>
 		this.defaultFormat = format;
 	}
 
-	@Override
-	public ResponseProcessor resolve(Request request)
+	public ResponseProcessor resolve(String requestFormat)
 	{
-		String requestFormat = request.getFormat();
-
 		if (requestFormat == null || requestFormat.trim().isEmpty())
 		{
 			return getDefault();

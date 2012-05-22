@@ -80,7 +80,7 @@ public class Request
 	private void initialize()
     {
 	    createCorrelationId();
-		parseRequestedFormatToHeader(httpRequest);
+//		parseRequestedFormatToHeader(httpRequest);
 		parseQueryString(httpRequest);
 		determineEffectiveHttpMethod(httpRequest);
     }
@@ -550,25 +550,6 @@ public class Request
 
 	
 	// SECTION: UTILITY - PRIVATE
-
-	/**
-	 * Puts the requested format in the FORMAT_HEADER_NAME header (forcing it to lower case).
-	 * 
-     * @param request
-     */
-    private void parseRequestedFormatToHeader(HttpRequest request)
-    {
-    	String uri = request.getUri();
-		int queryDelimiterIndex = uri.indexOf('?');
-		String path = (queryDelimiterIndex > 0 ? uri.substring(0, queryDelimiterIndex) : uri);
-    	int formatDelimiterIndex = path.indexOf('.');
-    	String format = (formatDelimiterIndex > 0 ? path.substring(formatDelimiterIndex + 1) : null);
-    	
-    	if (format != null)
-    	{
-    		request.addHeader(Parameters.Query.FORMAT, format.toLowerCase());
-    	}
-    }
 
 	/**
 	 * Add the query string parameters to the request as headers.

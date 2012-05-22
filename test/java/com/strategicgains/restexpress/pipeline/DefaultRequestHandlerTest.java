@@ -297,7 +297,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
 		assertEquals(1, observer.getExceptionCount());
-//		System.out.println(httpResponse.toString());
+//		System.out.println(responseBody.toString());
 		assertTrue(responseBody.toString().startsWith("<response>"));
 		assertTrue(responseBody.toString().contains("<code>404</code>"));
 		assertTrue(responseBody.toString().contains("<status>error</status>"));
