@@ -30,7 +30,7 @@ import com.strategicgains.restexpress.Request;
  * <p/>
  * To sort on name (descending): ?sort=-name
  * <p/>
- * To sort on name (descending), description (ascending), creation date (descsending): ?sort=-name|description|-createdAt
+ * To sort on name (descending), description (ascending), creation date (descending): ?sort=-name|description|-createdAt
  * 
  * @author toddf
  * @since Apr 12, 2011
