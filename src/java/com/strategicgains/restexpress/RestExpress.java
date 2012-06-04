@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, Strategic Gains, Inc.
+ * Copyright 2009-2012, Strategic Gains, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,9 @@ import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import org.jboss.netty.handler.logging.LoggingHandler;
 
+import com.strategicgains.restexpress.bean.RouteConfig;
+import com.strategicgains.restexpress.bean.ServerConfig;
+import com.strategicgains.restexpress.bean.SocketConfig;
 import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
 import com.strategicgains.restexpress.exception.ServiceException;
@@ -63,39 +66,21 @@ public class RestExpress
 {
 	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress");
 
-	public static final int DEFAULT_PORT = 8081;
 	public static final String DEFAULT_NAME = "RestExpress";
-	private static final int DEFAULT_EXECUTOR_THREAD_COUNT = 0;
+	public static final int DEFAULT_PORT = 8081;
 
 	private ServerBootstrap bootstrap;
-	private String name;
-	private int port;
 	private RouteDeclaration routeDeclarations;
-	private String defaultFormat;
-	private boolean useTcpNoDelay = true;
-	private boolean useKeepAlive = true;
-	private boolean reuseAddress = true;
-	private int soLinger = -1; // disabled by default
-	private int receiveBufferSize = 262140; // Java default
-	private int connectTimeoutMillis = 10000; // netty default
+	private SocketConfig socketConfig = new SocketConfig();
+	private ServerConfig serverConfig = new ServerConfig();
+	private RouteConfig routeConfig = new RouteConfig();
 	private LogLevel logLevel = LogLevel.DEBUG; // Netty default
 	private boolean useSystemOut;
-	private boolean shouldHandleChunking = true;
-	private boolean shouldUseCompression = true;
-	private Integer maxChunkSize = null;
-	
-	// This controls the number of concurrent connections the application can handle.
-	// Netty default is 2 * number of processors (or cores).
-	private int workerThreadCount = 0;
-	
-	// This controls the number of concurrent requests the application can process.
-	private int executorThreadCount = DEFAULT_EXECUTOR_THREAD_COUNT;
 
 	Map<String, ResponseProcessor> responseProcessors = new HashMap<String, ResponseProcessor>();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
-	private Map<String, Class<?>> xmlAliases = new HashMap<String, Class<?>>();
 	private Resolver<ResponseProcessor> responseResolver;
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<Plugin> plugins = new ArrayList<Plugin>();
@@ -131,7 +116,6 @@ public class RestExpress
 		super();
 		setRoutes(routes);
 		setName(DEFAULT_NAME);
-		setPort(DEFAULT_PORT);
 		supportJson(true);
 		supportXml();
 		useSystemOut();
@@ -144,7 +128,7 @@ public class RestExpress
 	 */
 	public String getName()
 	{
-		return name;
+		return serverConfig.getName();
 	}
 
 	/**
@@ -156,31 +140,18 @@ public class RestExpress
 	 */
 	public RestExpress setName(String name)
 	{
-		this.name = name;
+		serverConfig.setName(name);
 		return this;
 	}
-
-	/**
-	 * Get the port that this RestExpress service suite is listening on.
-	 * 
-	 * @return the HTTP port.
-	 */
+	
 	public int getPort()
 	{
-		return port;
+		return serverConfig.getPort();
 	}
 
-	/**
-	 * Set the port that this RestExpress service suite should listen on. The
-	 * default is 8081.
-	 * 
-	 * @param port
-	 *            the HTTP port RestExpress will listen on.
-	 * @return the RestExpress instance to facilitate DSL-style method chaining.
-	 */
 	public RestExpress setPort(int port)
 	{
-		this.port = port;
+		serverConfig.setPort(port);
 		return this;
 	}
 
@@ -226,14 +197,14 @@ public class RestExpress
 
 	public String getDefaultFormat()
 	{
-		return defaultFormat;
+		return routeConfig.getDefaultFormat();
 	}
 
 	public RestExpress setDefaultFormat(String format)
 	{
 		if (format == null || format.trim().isEmpty()) return this;
 
-		this.defaultFormat = format.toLowerCase();
+		routeConfig.setDefaultFormat(format.trim().toLowerCase());
 		return this;
 	}
 
@@ -333,31 +304,31 @@ public class RestExpress
 
 	public RestExpress supportChunking()
 	{
-		shouldHandleChunking = true;
+		serverConfig.setHandleChunking(true);
 		return this;
 	}
 
 	public RestExpress noChunking()
 	{
-		shouldHandleChunking = false;
+		serverConfig.setHandleChunking(false);
 		return this;
 	}
 
 	public RestExpress setMaxChunkSize(int size)
 	{
-		this.maxChunkSize = Integer.valueOf(size);
+		serverConfig.setMaxChunkSize(size);
 		return this;
 	}
 
 	public RestExpress supportCompression()
 	{
-		shouldUseCompression = true;
+		serverConfig.setUseCompression(true);
 		return this;
 	}
 
 	public RestExpress noCompression()
 	{
-		shouldUseCompression = false;
+		serverConfig.setUseCompression(false);
 		return this;
 	}
 
@@ -481,25 +452,25 @@ public class RestExpress
 		return this;
 	}
 
-	public boolean isUseTcpNoDelay()
+	public boolean useTcpNoDelay()
 	{
-		return useTcpNoDelay;
+		return socketConfig.useTcpNoDelay();
 	}
 
 	public RestExpress setUseTcpNoDelay(boolean useTcpNoDelay)
 	{
-		this.useTcpNoDelay = useTcpNoDelay;
+		socketConfig.setUseTcpNoDelay(useTcpNoDelay);
 		return this;
 	}
 
-	public boolean isUseKeepAlive()
+	public boolean useKeepAlive()
 	{
-		return useKeepAlive;
+		return serverConfig.isKeepAlive();
 	}
 
-	public RestExpress setUseKeepAlive(boolean useKeepAlive)
+	public RestExpress setKeepAlive(boolean useKeepAlive)
 	{
-		this.useKeepAlive = useKeepAlive;
+		serverConfig.setKeepAlive(useKeepAlive);
 		return this;
 	}
 
@@ -514,47 +485,47 @@ public class RestExpress
 		return this;
 	}
 
-	public boolean isReuseAddress()
+	public boolean shouldReuseAddress()
 	{
-		return reuseAddress;
+		return serverConfig.isReuseAddress();
 	}
 
 	public RestExpress setReuseAddress(boolean reuseAddress)
 	{
-		this.reuseAddress = reuseAddress;
+		serverConfig.setReuseAddress(reuseAddress);
 		return this;
 	}
 
 	public int getSoLinger()
 	{
-		return soLinger;
+		return socketConfig.getSoLinger();
 	}
 
 	public RestExpress setSoLinger(int soLinger)
 	{
-		this.soLinger = soLinger;
+		socketConfig.setSoLinger(soLinger);
 		return this;
 	}
 
 	public int getReceiveBufferSize()
 	{
-		return receiveBufferSize;
+		return socketConfig.getReceiveBufferSize();
 	}
 
 	public RestExpress setReceiveBufferSize(int receiveBufferSize)
 	{
-		this.receiveBufferSize = receiveBufferSize;
+		socketConfig.setReceiveBufferSize(receiveBufferSize);
 		return this;
 	}
 
 	public int getConnectTimeoutMillis()
 	{
-		return connectTimeoutMillis;
+		return socketConfig.getConnectTimeoutMillis();
 	}
 
 	public RestExpress setConnectTimeoutMillis(int connectTimeoutMillis)
 	{
-		this.connectTimeoutMillis = connectTimeoutMillis;
+		socketConfig.setConnectTimeoutMillis(connectTimeoutMillis);
 		return this;
 	}
 
@@ -566,7 +537,7 @@ public class RestExpress
 	 */
 	public RestExpress alias(String elementName, Class<?> theClass)
 	{
-		xmlAliases.put(elementName, theClass);
+		routeConfig.addXmlAlias(elementName, theClass);
 		return this;
 	}
 
@@ -588,9 +559,9 @@ public class RestExpress
 	 * 
 	 * @return the number of requested worker threads.
 	 */
-	public int getWorkerThreadCount()
+	public int getIoThreadCount()
 	{
-		return workerThreadCount;
+		return serverConfig.getIoThreadCount();
 	}
 
 	/**
@@ -605,9 +576,9 @@ public class RestExpress
 	 * @param value the number of desired NIO worker threads.
 	 * @return the RestExpress instance.
 	 */
-	public RestExpress setWorkerThreadCount(int value)
+	public RestExpress setIoThreadCount(int value)
 	{
-		this.workerThreadCount = value;
+		serverConfig.setIoThreadCount(value);
 		return this;
 	}
 	
@@ -616,9 +587,9 @@ public class RestExpress
 	 * 
 	 * @return the number of executor threads.
 	 */
-	public int getExecutorThreadCount()
+	public int getProcessingThreadCount()
 	{
-		return executorThreadCount;
+		return serverConfig.getProcessingThreadCount();
 	}
 	
 	/**
@@ -636,8 +607,13 @@ public class RestExpress
 	 */
 	public RestExpress setExecutorThreadCount(int value)
 	{
-		this.executorThreadCount = value;
+		serverConfig.setProcessingThreadCount(value);
 		return this;
+	}
+
+	public Channel bind()
+	{
+		return bind((getPort() > 0 ? getPort() : DEFAULT_PORT));
 	}
 
 	/**
@@ -646,16 +622,18 @@ public class RestExpress
 	 * 
 	 * @return Channel
 	 */
-	public Channel bind()
+	public Channel bind(int port)
 	{
+		setPort(port);
+
 		// Configure the server.
-		if (workerThreadCount == 0)
+		if (getIoThreadCount() == 0)
 		{
 			bootstrap = Bootstraps.createServerNioBootstrap();
 		}
 		else
 		{
-			bootstrap = Bootstraps.createServerNioBootstrap(workerThreadCount);
+			bootstrap = Bootstraps.createServerNioBootstrap(getIoThreadCount());
 		}
 
 		// Set up the event pipeline factory.
@@ -676,24 +654,24 @@ public class RestExpress
 		    new LoggingHandler(getLogLevel().getNettyLogLevel()))
 		    .addRequestHandler(requestHandler);
 		
-		if (getExecutorThreadCount() > 0)
+		if (getProcessingThreadCount() > 0)
 		{
 			ExecutionHandler executionHandler = new ExecutionHandler(
-	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
+	             new OrderedMemoryAwareThreadPoolExecutor(getProcessingThreadCount(), 0, 0));
 			pf.setExecutionHandler(executionHandler);
 		}
 
-		if (shouldHandleChunking)
+		if (serverConfig.isHandleChunking())
 		{
 			pf.handleChunked();
 
-			if (maxChunkSize != null)
+			if (serverConfig.getMaxChunkSize() != null)
 			{
-				pf.maxChunkSize(maxChunkSize.intValue());
+				pf.maxChunkSize(serverConfig.getMaxChunkSize().intValue());
 			}
 		}
 
-		if (shouldUseCompression)
+		if (serverConfig.isUseCompression())
 		{
 			pf.useCompression();
 		}
@@ -708,7 +686,7 @@ public class RestExpress
 			    + port);
 		}
 
-		Channel channel = bootstrap.bind(new InetSocketAddress(getPort()));
+		Channel channel = bootstrap.bind(new InetSocketAddress(port));
 		allChannels.add(channel);
 		bindPlugins();
 		return channel;
@@ -716,9 +694,9 @@ public class RestExpress
 
 	private void setBootstrapOptions()
 	{
-		bootstrap.setOption("child.tcpNoDelay", isUseTcpNoDelay());
-		bootstrap.setOption("child.keepAlive", isUseKeepAlive());
-		bootstrap.setOption("reuseAddress", isReuseAddress());
+		bootstrap.setOption("child.tcpNoDelay", useTcpNoDelay());
+		bootstrap.setOption("child.keepAlive", serverConfig.isKeepAlive());
+		bootstrap.setOption("reuseAddress", shouldReuseAddress());
 		bootstrap.setOption("child.soLinger", getSoLinger());
 		bootstrap.setOption("connectTimeoutMillis", getConnectTimeoutMillis());
 		bootstrap.setOption("receiveBufferSize", getReceiveBufferSize());
@@ -843,14 +821,11 @@ public class RestExpress
 	}
 
 	/**
-	 * @param value
+	 * @param processor
 	 */
-	private void setXmlAliases(AliasingSerializationProcessor value)
+	private void setXmlAliases(AliasingSerializationProcessor processor)
 	{
-		for (Entry<String, Class<?>> entry : xmlAliases.entrySet())
-		{
-			value.alias(entry.getKey(), entry.getValue());
-		}
+		routeConfig.setXmlAliases(processor);
 	}
 
 	/**

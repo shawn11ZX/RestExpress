@@ -42,7 +42,8 @@ public class RestExpressTest
 		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
 		assertEquals(2, server.getResponseProcessors().size());
 
-		assertEquals(8081, server.getPort());
+//		assertEquals(8081, server.getPort());
+		assertEquals(0, server.getPort());
 		assertTrue(server.getMessageObservers().isEmpty());
 		assertTrue(server.getPostprocessors().isEmpty());
 		assertTrue(server.getPreprocessors().isEmpty());

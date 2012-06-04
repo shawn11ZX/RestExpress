@@ -26,7 +26,6 @@ public class Main
 		Configuration config = loadEnvironment(args);
 		RestExpress server = new RestExpress(new Routes(config))
 		    .setName(config.getName())
-		    .setPort(config.getPort())
 		    .setDefaultFormat(config.getDefaultFormat())
 		    .putResponseProcessor(Format.JSON, ResponseProcessors.json())
 		    .putResponseProcessor(Format.XML, ResponseProcessors.xml())
@@ -43,7 +42,7 @@ public class Main
 			.register(server);
 
 		mapExceptions(server);
-		server.bind();
+		server.bind(config.getPort());
 		server.awaitShutdown();
 	}
 
