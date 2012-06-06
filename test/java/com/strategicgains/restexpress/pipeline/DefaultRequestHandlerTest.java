@@ -42,6 +42,7 @@ import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.bean.RouteConfig;
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseProcessor;
@@ -77,7 +78,9 @@ public class DefaultRequestHandlerTest
 		resolver.put(Format.XML, xmlProcessor);
 		resolver.setDefaultFormat(Format.JSON);
 		
-		messageHandler = new DefaultRequestHandler(new RouteResolver(new DummyRoutes().createRouteMapping()), resolver);
+		DummyRoutes routes = new DummyRoutes();
+		routes.defineRoutes();
+		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteConfig())), resolver);
 		observer = new DummyObserver();
 		messageHandler.addMessageObserver(observer);
 		responseBody = new StringBuffer();
@@ -359,8 +362,7 @@ public class DefaultRequestHandlerTest
 	{
 		private Object controller = new FooBarController();
 
-        @Override
-        protected void defineRoutes()
+        public void defineRoutes()
         {
         	uri("/foo.{format}", controller)
         		.action("fooAction", HttpMethod.GET);

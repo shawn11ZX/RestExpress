@@ -49,6 +49,8 @@ import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
+import com.strategicgains.restexpress.route.parameterized.ParameterizedRouteBuilder;
+import com.strategicgains.restexpress.route.regex.RegexRouteBuilder;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
 import com.strategicgains.restexpress.util.Bootstraps;
 import com.strategicgains.restexpress.util.DefaultShutdownHook;
@@ -70,7 +72,6 @@ public class RestExpress
 	public static final int DEFAULT_PORT = 8081;
 
 	private ServerBootstrap bootstrap;
-	private RouteDeclaration routeDeclarations;
 	private SocketConfig socketConfig = new SocketConfig();
 	private ServerConfig serverConfig = new ServerConfig();
 	private RouteConfig routeConfig = new RouteConfig();
@@ -84,6 +85,7 @@ public class RestExpress
 	private Resolver<ResponseProcessor> responseResolver;
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<Plugin> plugins = new ArrayList<Plugin>();
+	private RouteDeclaration routeDeclarations = new RouteDeclaration();
 
 	/**
 	 * Create a new RestExpress service. By default, RestExpress uses port 8081.
@@ -111,10 +113,9 @@ public class RestExpress
 	 *            a RouteDeclaration that declares the URL routes that this
 	 *            service supports.
 	 */
-	public RestExpress(RouteDeclaration routes)
+	public RestExpress()
 	{
 		super();
-		setRoutes(routes);
 		setName(DEFAULT_NAME);
 		supportJson(true);
 		supportXml();
@@ -152,24 +153,6 @@ public class RestExpress
 	public RestExpress setPort(int port)
 	{
 		serverConfig.setPort(port);
-		return this;
-	}
-
-	public RouteDeclaration getRouteDeclarations()
-	{
-		return routeDeclarations;
-	}
-
-	/**
-	 * Set the routes (URLs) that this RestExpress service suite supports.
-	 * 
-	 * @param routes
-	 *            a RouteDeclaration
-	 * @return the RestExpress instance to facilitate DSL-style method chaining.
-	 */
-	private RestExpress setRoutes(RouteDeclaration routes)
-	{
-		this.routeDeclarations = routes;
 		return this;
 	}
 
@@ -745,26 +728,23 @@ public class RestExpress
 	 */
 	private RouteResolver createRouteResolver()
 	{
-		RouteDeclaration routeDeclarations = getRouteDeclarations();
-		routeDeclarations.setDefaultFormat(getDefaultFormat());
-		routeDeclarations.setSupportedFormats(getSupportedFormats());
-		return new RouteResolver(routeDeclarations.createRouteMapping());
+		return new RouteResolver(routeDeclarations.createRouteMapping(routeConfig));
 	}
 
 	/**
 	 * @return
 	 */
-	private List<String> getSupportedFormats()
-	{
-		List<String> supportedFormats = new ArrayList<String>();
-
-		for (String format : responseProcessors.keySet())
-		{
-			supportedFormats.add(format);
-		}
-
-		return Collections.unmodifiableList(supportedFormats);
-	}
+//	private List<String> getSupportedFormats()
+//	{
+//		List<String> supportedFormats = new ArrayList<String>();
+//
+//		for (String format : responseProcessors.keySet())
+//		{
+//			supportedFormats.add(format);
+//		}
+//
+//		return Collections.unmodifiableList(supportedFormats);
+//	}
 
 	/**
 	 * @return
@@ -776,7 +756,7 @@ public class RestExpress
 		m.setPort(getPort());
 		m.setDefaultFormat(getDefaultFormat());
 		m.addAllSupportedFormats(getResponseProcessors().keySet());
-		m.addAllRoutes(getRouteDeclarations().getMetadata());
+		m.addAllRoutes(routeDeclarations.getMetadata());
 		return m;
 	}
 
@@ -848,5 +828,17 @@ public class RestExpress
 		{
 			requestHandler.addPostprocessor(processor);
 		}
+	}
+
+	// SECTION: ROUTE CREATION
+
+	public ParameterizedRouteBuilder uri(String uriPattern, Object controller)
+	{
+		return routeDeclarations.uri(uriPattern, controller);
+	}
+
+	public RegexRouteBuilder regex(String uriPattern, Object controller)
+	{
+		return routeDeclarations.regex(uriPattern, controller);
 	}
 }

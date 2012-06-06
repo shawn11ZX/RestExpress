@@ -3,6 +3,8 @@ package com.kickstart;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.jboss.netty.handler.codec.http.HttpMethod;
+
 import com.kickstart.postprocessor.LastModifiedHeaderPostprocessor;
 import com.kickstart.serialization.ResponseProcessors;
 import com.strategicgains.restexpress.Format;
@@ -24,7 +26,7 @@ public class Main
 	public static void main(String[] args) throws Exception
 	{
 		Configuration config = loadEnvironment(args);
-		RestExpress server = new RestExpress(new Routes(config))
+		RestExpress server = new RestExpress()
 		    .setName(config.getName())
 		    .setDefaultFormat(config.getDefaultFormat())
 		    .putResponseProcessor(Format.JSON, ResponseProcessors.json())
@@ -33,6 +35,8 @@ public class Main
 		    .putResponseProcessor(Format.WRAPPED_XML, ResponseProcessors.wrappedXml())
 		    .addPostprocessor(new LastModifiedHeaderPostprocessor())
 		    .addMessageObserver(new SimpleConsoleLogMessageObserver());
+
+		defineRoutes(config, server);
 
 		new RoutesMetadataPlugin()							// Support discoverability.
 			.register(server)
@@ -44,6 +48,24 @@ public class Main
 		mapExceptions(server);
 		server.bind(config.getPort());
 		server.awaitShutdown();
+	}
+
+	private static void defineRoutes(Configuration config, RestExpress server)
+	{
+		// Maps /kickstart uri with optional format ('json' or 'xml'), accepting
+		// POST HTTP method only.  Calls KickStartService.create(Request, Reply).
+		server.uri("/kickstart.{format}", config.getKickStartController())
+			.method(HttpMethod.POST);
+
+		// Maps /kickstart uri with required orderId and optional format identifier
+		// to the KickStartService.  Accepts only GET, PUT, DELETE HTTP methods.
+		// Names this route to allow returning links from read resources in
+		// KickStartService methods via call to LinkUtils.asLinks().
+		server.uri("/kickstart/{orderId}.{format}", config.getKickStartController())
+			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
+			.name(Constants.KICKSTART_ORDER_URI)
+			.parameter(Parameters.Cache.MAX_AGE, 3600);		// Cache for 3600 seconds (1 hour).
+//			.flag(Flags.Cache.DONT_CACHE);					// Expressly deny cache-ability.
 	}
 
 	/**

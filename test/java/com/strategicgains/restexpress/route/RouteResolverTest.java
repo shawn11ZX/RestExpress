@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.bean.RouteConfig;
 import com.strategicgains.restexpress.exception.MethodNotAllowedException;
 
 /**
@@ -47,7 +48,8 @@ public class RouteResolverTest
 	throws Exception
 	{
 		routeDeclarations = new Routes();
-		routeMapping = routeDeclarations.createRouteMapping();
+		((Routes) routeDeclarations).defineRoutes();
+		routeMapping = routeDeclarations.createRouteMapping(new RouteConfig());
 		resolver = new RouteResolver(routeMapping);
 	}
 
@@ -200,8 +202,7 @@ public class RouteResolverTest
 			service = new InnerService();
 		}
 
-        @Override
-        protected void defineRoutes()
+        public void defineRoutes()
         {
     		uri("/foo/bar/{barId}.{format}", service)
     			.action("readBar", HttpMethod.GET);

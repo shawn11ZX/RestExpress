@@ -17,13 +17,11 @@ package com.strategicgains.restexpress;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.route.RouteDeclaration;
 
 
 /**
@@ -32,7 +30,7 @@ import com.strategicgains.restexpress.route.RouteDeclaration;
  */
 public class RestExpressTest
 {
-	private RestExpress server = new RestExpress(new Routes());
+	private RestExpress server = new RestExpress();
 
 	@Test
 	public void shouldUseDefaults()
@@ -48,7 +46,7 @@ public class RestExpressTest
 		assertTrue(server.getPostprocessors().isEmpty());
 		assertTrue(server.getPreprocessors().isEmpty());
 		assertTrue(server.shouldUseSystemOut());
-		assertNotNull(server.getRouteDeclarations());
+//		assertNotNull(server.getRouteDeclarations());
 	}
 	
 	@Test
@@ -171,14 +169,5 @@ public class RestExpressTest
 	{
 		server.noSystemOut();
 		assertFalse(server.shouldUseSystemOut());
-	}
-
-	private class Routes
-	extends RouteDeclaration
-	{
-        @Override
-        protected void defineRoutes()
-        {
-        }
 	}
 }

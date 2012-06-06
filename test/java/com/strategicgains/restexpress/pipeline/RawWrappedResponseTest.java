@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Format;
+import com.strategicgains.restexpress.bean.RouteConfig;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
@@ -62,7 +63,9 @@ public class RawWrappedResponseTest
 		resolver.put(Format.XML, ResponseProcessor.defaultXmlProcessor());
 		resolver.setDefaultFormat(Format.JSON);
 		
-		messageHandler = new DefaultRequestHandler(new RouteResolver(new DummyRoutes().createRouteMapping()), resolver);
+		DummyRoutes routes = new DummyRoutes();
+		routes.defineRoutes();
+		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteConfig())), resolver);
 		observer = new WrappedResponseObserver();
 		messageHandler.addMessageObserver(observer);
 		httpResponse = new StringBuffer();
@@ -465,8 +468,7 @@ public class RawWrappedResponseTest
 	{
 		private Object controller = new WrappedResponseController();
 
-        @Override
-        protected void defineRoutes()
+        public void defineRoutes()
         {
         	uri("/normal_get.{format}", controller)
         		.action("normalGetAction", HttpMethod.GET);

@@ -49,19 +49,19 @@ extends AbstractPlugin
 		super.register(server);
 		RouteBuilder builder;
 
-		builder = server.getRouteDeclarations()
+		builder = server
 		    .uri("/routes/metadata.{format}", controller)
 		    .action("getAllRoutes", HttpMethod.GET)
 		    .name("allRoutesMetadata");
 		routeBuilders.add(builder);
 
-		builder = server.getRouteDeclarations()
+		builder = server
 		    .uri("/routes/{routeName}/metadata.{format}", controller)
 		    .action("getSingleRoute", HttpMethod.GET)
 		    .name("singleRouteMetadata");
 		routeBuilders.add(builder);
 
-		server.getRouteDeclarations().uri("/routes/console.html", controller)
+		server.uri("/routes/console.html", controller)
 		    .action("getConsole", HttpMethod.GET)
 		    .noSerialization()
 		    .name("routesConsole")

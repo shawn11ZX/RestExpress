@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
 
 /**
@@ -27,7 +28,7 @@ import com.strategicgains.restexpress.serialization.AliasingSerializationProcess
  */
 public class RouteConfig
 {
-	private String defaultFormat;
+	private String defaultFormat = ContentType.JSON;
 	private Map<String, Class<?>> xmlAliases = new HashMap<String, Class<?>>();
 
 	public String getDefaultFormat()

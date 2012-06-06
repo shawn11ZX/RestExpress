@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.bean.RouteConfig;
 
 /**
  * @author toddf
@@ -30,7 +31,8 @@ public class RouteDeclarationTest
 	throws Exception
 	{
 		routeDeclarations = new Routes();
-		routeMapping = routeDeclarations.createRouteMapping();
+		((Routes) routeDeclarations).defineRoutes();
+		routeMapping = routeDeclarations.createRouteMapping(new RouteConfig());
 	}
 	
 	@Test
@@ -183,8 +185,7 @@ public class RouteDeclarationTest
 			service = new InnerService();
 		}
 
-        @Override
-        protected void defineRoutes()
+        public void defineRoutes()
         {
     		uri("/foo/bar/{barId}.{format}", service)
     			.action("readBar", HttpMethod.GET);

@@ -209,6 +209,18 @@ public abstract class RouteBuilder
 		return this;
 	}
 	
+//	public RouteBuilder supportMultipartUpload()
+//	{
+//		// TODO: complete supportMultipart()
+//		return this;
+//	}
+	
+	public RouteBuilder useStreamingDownload()
+	{
+		// TODO: complete useStreamingdownload()
+		return this;
+	}
+	
 	
 	// SECTION - BUILDER
 
