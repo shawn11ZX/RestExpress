@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.bean.RouteConfig;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**
  * @author toddf
@@ -32,7 +32,7 @@ public class RouteDeclarationTest
 	{
 		routeDeclarations = new Routes();
 		((Routes) routeDeclarations).defineRoutes();
-		routeMapping = routeDeclarations.createRouteMapping(new RouteConfig());
+		routeMapping = routeDeclarations.createRouteMapping(new RouteDefaults());
 	}
 	
 	@Test

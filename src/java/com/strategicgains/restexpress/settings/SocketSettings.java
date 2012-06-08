@@ -13,13 +13,13 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
  */
-package com.strategicgains.restexpress.bean;
+package com.strategicgains.restexpress.settings;
 
 /**
  * @author toddf
  * @since May 31, 2012
  */
-public class SocketConfig
+public class SocketSettings
 {
 	private boolean useTcpNoDelay = true;
 	private int soLinger = -1; // disabled by default

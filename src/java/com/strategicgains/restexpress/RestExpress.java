@@ -33,9 +33,6 @@ import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import org.jboss.netty.handler.logging.LoggingHandler;
 
-import com.strategicgains.restexpress.bean.RouteConfig;
-import com.strategicgains.restexpress.bean.ServerConfig;
-import com.strategicgains.restexpress.bean.SocketConfig;
 import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
 import com.strategicgains.restexpress.exception.ServiceException;
@@ -52,6 +49,9 @@ import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.route.parameterized.ParameterizedRouteBuilder;
 import com.strategicgains.restexpress.route.regex.RegexRouteBuilder;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
+import com.strategicgains.restexpress.settings.RouteDefaults;
+import com.strategicgains.restexpress.settings.ServerSettings;
+import com.strategicgains.restexpress.settings.SocketSettings;
 import com.strategicgains.restexpress.util.Bootstraps;
 import com.strategicgains.restexpress.util.DefaultShutdownHook;
 import com.strategicgains.restexpress.util.LogLevel;
@@ -72,9 +72,9 @@ public class RestExpress
 	public static final int DEFAULT_PORT = 8081;
 
 	private ServerBootstrap bootstrap;
-	private SocketConfig socketConfig = new SocketConfig();
-	private ServerConfig serverConfig = new ServerConfig();
-	private RouteConfig routeConfig = new RouteConfig();
+	private SocketSettings socketSettings = new SocketSettings();
+	private ServerSettings serverSettings = new ServerSettings();
+	private RouteDefaults routeDefaults = new RouteDefaults();
 	private LogLevel logLevel = LogLevel.DEBUG; // Netty default
 	private boolean useSystemOut;
 
@@ -129,7 +129,7 @@ public class RestExpress
 	 */
 	public String getName()
 	{
-		return serverConfig.getName();
+		return serverSettings.getName();
 	}
 
 	/**
@@ -141,18 +141,18 @@ public class RestExpress
 	 */
 	public RestExpress setName(String name)
 	{
-		serverConfig.setName(name);
+		serverSettings.setName(name);
 		return this;
 	}
 	
 	public int getPort()
 	{
-		return serverConfig.getPort();
+		return serverSettings.getPort();
 	}
 
 	public RestExpress setPort(int port)
 	{
-		serverConfig.setPort(port);
+		serverSettings.setPort(port);
 		return this;
 	}
 
@@ -180,14 +180,14 @@ public class RestExpress
 
 	public String getDefaultFormat()
 	{
-		return routeConfig.getDefaultFormat();
+		return routeDefaults.getDefaultFormat();
 	}
 
 	public RestExpress setDefaultFormat(String format)
 	{
 		if (format == null || format.trim().isEmpty()) return this;
 
-		routeConfig.setDefaultFormat(format.trim().toLowerCase());
+		routeDefaults.setDefaultFormat(format.trim().toLowerCase());
 		return this;
 	}
 
@@ -287,31 +287,31 @@ public class RestExpress
 
 	public RestExpress supportChunking()
 	{
-		serverConfig.setHandleChunking(true);
+		serverSettings.setHandleChunking(true);
 		return this;
 	}
 
 	public RestExpress noChunking()
 	{
-		serverConfig.setHandleChunking(false);
+		serverSettings.setHandleChunking(false);
 		return this;
 	}
 
 	public RestExpress setMaxChunkSize(int size)
 	{
-		serverConfig.setMaxChunkSize(size);
+		serverSettings.setMaxChunkSize(size);
 		return this;
 	}
 
 	public RestExpress supportCompression()
 	{
-		serverConfig.setUseCompression(true);
+		serverSettings.setUseCompression(true);
 		return this;
 	}
 
 	public RestExpress noCompression()
 	{
-		serverConfig.setUseCompression(false);
+		serverSettings.setUseCompression(false);
 		return this;
 	}
 
@@ -437,23 +437,23 @@ public class RestExpress
 
 	public boolean useTcpNoDelay()
 	{
-		return socketConfig.useTcpNoDelay();
+		return socketSettings.useTcpNoDelay();
 	}
 
 	public RestExpress setUseTcpNoDelay(boolean useTcpNoDelay)
 	{
-		socketConfig.setUseTcpNoDelay(useTcpNoDelay);
+		socketSettings.setUseTcpNoDelay(useTcpNoDelay);
 		return this;
 	}
 
 	public boolean useKeepAlive()
 	{
-		return serverConfig.isKeepAlive();
+		return serverSettings.isKeepAlive();
 	}
 
 	public RestExpress setKeepAlive(boolean useKeepAlive)
 	{
-		serverConfig.setKeepAlive(useKeepAlive);
+		serverSettings.setKeepAlive(useKeepAlive);
 		return this;
 	}
 
@@ -470,45 +470,45 @@ public class RestExpress
 
 	public boolean shouldReuseAddress()
 	{
-		return serverConfig.isReuseAddress();
+		return serverSettings.isReuseAddress();
 	}
 
 	public RestExpress setReuseAddress(boolean reuseAddress)
 	{
-		serverConfig.setReuseAddress(reuseAddress);
+		serverSettings.setReuseAddress(reuseAddress);
 		return this;
 	}
 
 	public int getSoLinger()
 	{
-		return socketConfig.getSoLinger();
+		return socketSettings.getSoLinger();
 	}
 
 	public RestExpress setSoLinger(int soLinger)
 	{
-		socketConfig.setSoLinger(soLinger);
+		socketSettings.setSoLinger(soLinger);
 		return this;
 	}
 
 	public int getReceiveBufferSize()
 	{
-		return socketConfig.getReceiveBufferSize();
+		return socketSettings.getReceiveBufferSize();
 	}
 
 	public RestExpress setReceiveBufferSize(int receiveBufferSize)
 	{
-		socketConfig.setReceiveBufferSize(receiveBufferSize);
+		socketSettings.setReceiveBufferSize(receiveBufferSize);
 		return this;
 	}
 
 	public int getConnectTimeoutMillis()
 	{
-		return socketConfig.getConnectTimeoutMillis();
+		return socketSettings.getConnectTimeoutMillis();
 	}
 
 	public RestExpress setConnectTimeoutMillis(int connectTimeoutMillis)
 	{
-		socketConfig.setConnectTimeoutMillis(connectTimeoutMillis);
+		socketSettings.setConnectTimeoutMillis(connectTimeoutMillis);
 		return this;
 	}
 
@@ -520,7 +520,7 @@ public class RestExpress
 	 */
 	public RestExpress alias(String elementName, Class<?> theClass)
 	{
-		routeConfig.addXmlAlias(elementName, theClass);
+		routeDefaults.addXmlAlias(elementName, theClass);
 		return this;
 	}
 
@@ -544,7 +544,7 @@ public class RestExpress
 	 */
 	public int getIoThreadCount()
 	{
-		return serverConfig.getIoThreadCount();
+		return serverSettings.getIoThreadCount();
 	}
 
 	/**
@@ -561,7 +561,7 @@ public class RestExpress
 	 */
 	public RestExpress setIoThreadCount(int value)
 	{
-		serverConfig.setIoThreadCount(value);
+		serverSettings.setIoThreadCount(value);
 		return this;
 	}
 	
@@ -572,7 +572,7 @@ public class RestExpress
 	 */
 	public int getProcessingThreadCount()
 	{
-		return serverConfig.getProcessingThreadCount();
+		return serverSettings.getProcessingThreadCount();
 	}
 	
 	/**
@@ -590,7 +590,7 @@ public class RestExpress
 	 */
 	public RestExpress setExecutorThreadCount(int value)
 	{
-		serverConfig.setProcessingThreadCount(value);
+		serverSettings.setProcessingThreadCount(value);
 		return this;
 	}
 
@@ -644,17 +644,17 @@ public class RestExpress
 			pf.setExecutionHandler(executionHandler);
 		}
 
-		if (serverConfig.isHandleChunking())
+		if (serverSettings.isHandleChunking())
 		{
 			pf.handleChunked();
 
-			if (serverConfig.getMaxChunkSize() != null)
+			if (serverSettings.getMaxChunkSize() != null)
 			{
-				pf.maxChunkSize(serverConfig.getMaxChunkSize().intValue());
+				pf.maxChunkSize(serverSettings.getMaxChunkSize().intValue());
 			}
 		}
 
-		if (serverConfig.isUseCompression())
+		if (serverSettings.isUseCompression())
 		{
 			pf.useCompression();
 		}
@@ -678,7 +678,7 @@ public class RestExpress
 	private void setBootstrapOptions()
 	{
 		bootstrap.setOption("child.tcpNoDelay", useTcpNoDelay());
-		bootstrap.setOption("child.keepAlive", serverConfig.isKeepAlive());
+		bootstrap.setOption("child.keepAlive", serverSettings.isKeepAlive());
 		bootstrap.setOption("reuseAddress", shouldReuseAddress());
 		bootstrap.setOption("child.soLinger", getSoLinger());
 		bootstrap.setOption("connectTimeoutMillis", getConnectTimeoutMillis());
@@ -728,7 +728,7 @@ public class RestExpress
 	 */
 	private RouteResolver createRouteResolver()
 	{
-		return new RouteResolver(routeDeclarations.createRouteMapping(routeConfig));
+		return new RouteResolver(routeDeclarations.createRouteMapping(routeDefaults));
 	}
 
 	/**
@@ -805,7 +805,7 @@ public class RestExpress
 	 */
 	private void setXmlAliases(AliasingSerializationProcessor processor)
 	{
-		routeConfig.setXmlAliases(processor);
+		routeDefaults.setXmlAliases(processor);
 	}
 
 	/**
@@ -834,11 +834,15 @@ public class RestExpress
 
 	public ParameterizedRouteBuilder uri(String uriPattern, Object controller)
 	{
-		return routeDeclarations.uri(uriPattern, controller);
+		ParameterizedRouteBuilder rb = routeDeclarations.uri(uriPattern, controller);
+		routeDefaults.applyDefaults(rb);
+		return rb;
 	}
 
 	public RegexRouteBuilder regex(String uriPattern, Object controller)
 	{
-		return routeDeclarations.regex(uriPattern, controller);
+		RegexRouteBuilder rb = routeDeclarations.regex(uriPattern, controller);
+		routeDefaults.applyDefaults(rb);
+		return rb;
 	}
 }

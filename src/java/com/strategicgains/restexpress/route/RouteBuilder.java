@@ -208,12 +208,12 @@ public abstract class RouteBuilder
 		parameters.put(name, value);
 		return this;
 	}
-	
-//	public RouteBuilder supportMultipartUpload()
-//	{
-//		// TODO: complete supportMultipart()
-//		return this;
-//	}
+
+	public RouteBuilder useStreamingMultipartUpload()
+	{
+		// TODO: complete supportMultipart()
+		return this;
+	}
 	
 	public RouteBuilder useStreamingDownload()
 	{

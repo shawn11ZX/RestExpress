@@ -13,13 +13,13 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
  */
-package com.strategicgains.restexpress.bean;
+package com.strategicgains.restexpress.settings;
 
 /**
  * @author toddf
  * @since May 31, 2012
  */
-public class ServerConfig
+public class ServerSettings
 {
 	private static final int DEFAULT_EXECUTOR_THREAD_COUNT = 0;
 

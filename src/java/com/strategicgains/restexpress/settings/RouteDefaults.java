@@ -13,20 +13,21 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package com.strategicgains.restexpress.bean;
+package com.strategicgains.restexpress.settings;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.strategicgains.restexpress.ContentType;
+import com.strategicgains.restexpress.route.RouteBuilder;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
 
 /**
  * @author toddf
  * @since May 31, 2012
  */
-public class RouteConfig
+public class RouteDefaults
 {
 	private String defaultFormat = ContentType.JSON;
 	private Map<String, Class<?>> xmlAliases = new HashMap<String, Class<?>>();
@@ -45,7 +46,7 @@ public class RouteConfig
 	{
 		xmlAliases.put(elementName, classToAlias);
 	}
-	
+
 	public void setXmlAliases(AliasingSerializationProcessor processor)
 	{
 		for (Entry<String, Class<?>> entry : xmlAliases.entrySet())
@@ -53,4 +54,12 @@ public class RouteConfig
 			processor.alias(entry.getKey(), entry.getValue());
 		}
 	}
+
+	/**
+     * @param rb
+     */
+    public void applyDefaults(RouteBuilder rb)
+    {
+    	rb.defaultFormat(defaultFormat);
+    }
 }

@@ -18,10 +18,10 @@ package com.strategicgains.restexpress.route;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.strategicgains.restexpress.bean.RouteConfig;
 import com.strategicgains.restexpress.domain.metadata.RouteMetadata;
 import com.strategicgains.restexpress.route.parameterized.ParameterizedRouteBuilder;
 import com.strategicgains.restexpress.route.regex.RegexRouteBuilder;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**
  * @author toddf
@@ -76,7 +76,7 @@ public class RouteDeclaration
 	/**
 	 * Generate a RouteMapping (utilized by RouteResolver) from the declared routes.
 	 */
-	public RouteMapping createRouteMapping(RouteConfig defaults)
+	public RouteMapping createRouteMapping(RouteDefaults defaults)
 	{
 		RouteMapping results = new RouteMapping();
 
