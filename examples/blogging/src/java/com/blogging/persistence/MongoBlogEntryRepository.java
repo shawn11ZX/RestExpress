@@ -6,15 +6,15 @@ import org.bson.types.ObjectId;
 
 import com.blogging.domain.BlogEntry;
 import com.google.code.morphia.query.Query;
-import com.mongodb.ServerAddress;
+import com.mongodb.Mongo;
 
 public class MongoBlogEntryRepository
 extends AbstractMongoDbRepository<BlogEntry>
 implements BlogEntryRepository
 {
-	public MongoBlogEntryRepository(List<ServerAddress> bootstraps)
+	public MongoBlogEntryRepository(Mongo mongo)
 	{
-		super(bootstraps, BlogEntry.class);
+		super(mongo, BlogEntry.class);
 	}
 
 	@Override

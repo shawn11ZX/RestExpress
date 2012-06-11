@@ -15,11 +15,9 @@
 */
 package com.blogging.persistence;
 
-import java.util.List;
-
 import org.bson.types.ObjectId;
 
-import com.mongodb.ServerAddress;
+import com.mongodb.Mongo;
 import com.strategicgains.repoexpress.domain.TimestampedIdentifiable;
 import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
 import com.strategicgains.repoexpress.mongodb.MongodbRepository;
@@ -35,9 +33,9 @@ extends MongodbRepository<T, ObjectId>
 	private static final String DATABASE_NAME = "blogging";
 
 	@SuppressWarnings("unchecked")
-    public AbstractMongoDbRepository(List<ServerAddress> bootstraps, Class<T> type)
+    public AbstractMongoDbRepository(Mongo mongo, Class<T> type)
     {
-	    super(bootstraps, DATABASE_NAME, type);
+	    super(mongo, DATABASE_NAME, type);
 	    initializeObservers();
 	    setIdentifierAdapter(new ObjectIdAdapter());
     }

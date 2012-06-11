@@ -3,15 +3,15 @@ package com.blogging.persistence;
 import java.util.List;
 
 import com.blogging.domain.Blog;
-import com.mongodb.ServerAddress;
+import com.mongodb.Mongo;
 
 public class MongoBlogRepository
 extends AbstractMongoDbRepository<Blog>
 implements BlogRepository
 {
-    public MongoBlogRepository(List<ServerAddress> bootstraps)
+    public MongoBlogRepository(Mongo mongo)
     {
-	    super(bootstraps, Blog.class);
+	    super(mongo, Blog.class);
     }
 
     @Override

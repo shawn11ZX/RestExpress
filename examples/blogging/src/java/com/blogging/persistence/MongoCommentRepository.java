@@ -6,15 +6,15 @@ import org.bson.types.ObjectId;
 
 import com.blogging.domain.Comment;
 import com.google.code.morphia.query.Query;
-import com.mongodb.ServerAddress;
+import com.mongodb.Mongo;
 
 public class MongoCommentRepository
 extends AbstractMongoDbRepository<Comment>
 implements CommentRepository
 {
-	public MongoCommentRepository(List<ServerAddress> bootstraps)
+	public MongoCommentRepository(Mongo mongo)
 	{
-		super(bootstraps, Comment.class);
+		super(mongo, Comment.class);
 	}
 
 	@Override
