@@ -23,6 +23,7 @@ import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.domain.metadata.RouteMetadata;
 import com.strategicgains.restexpress.domain.metadata.UriMetadata;
 import com.strategicgains.restexpress.exception.ConfigurationException;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**
  * Builds a route for a single URI.  If a URI is given with no methods or actions, the builder
@@ -75,13 +76,14 @@ public abstract class RouteBuilder
 	 * @param uri a URI pattern
 	 * @param controller the POJO service controller.
 	 */
-	public RouteBuilder(String uri, Object controller)
+	public RouteBuilder(String uri, Object controller, RouteDefaults defaults)
 	{
 		super();
 		this.uri = uri;
 		this.controller = controller;
+		applyDefaults(defaults);
 	}
-	
+
 	/**
 	 * Map a service method name (action) to a particular HTTP method (e.g. GET, POST, PUT, DELETE, HEAD, OPTIONS)
 	 * 
@@ -332,4 +334,14 @@ public abstract class RouteBuilder
 			throw new ConfigurationException(e);
 		}
 	}
+
+	/**
+     * @param defaults
+     */
+    protected void applyDefaults(RouteDefaults defaults)
+    {
+    	if (defaults == null) return;
+
+    	defaultFormat(defaults.getDefaultFormat());
+    }
 }

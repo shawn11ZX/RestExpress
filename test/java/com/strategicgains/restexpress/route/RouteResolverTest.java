@@ -195,6 +195,7 @@ public class RouteResolverTest
 	extends RouteDeclaration
 	{
 		private InnerService service;
+		private RouteDefaults defaults = new RouteDefaults();
 		
 		public Routes()
 		{
@@ -204,13 +205,13 @@ public class RouteResolverTest
 
         public void defineRoutes()
         {
-    		uri("/foo/bar/{barId}.{format}", service)
+    		uri("/foo/bar/{barId}.{format}", service, defaults)
     			.action("readBar", HttpMethod.GET);
 
-    		uri("/foo.{format}", service)
+    		uri("/foo.{format}", service, defaults)
     			.method(HttpMethod.POST);
 
-    		uri("/foo/{fooId}.{format}", service)
+    		uri("/foo/{fooId}.{format}", service, defaults)
     			.name("CRUD_ROUTE");
         }
 	}

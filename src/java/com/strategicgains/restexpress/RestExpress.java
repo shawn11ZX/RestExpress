@@ -830,19 +830,16 @@ public class RestExpress
 		}
 	}
 
+
 	// SECTION: ROUTE CREATION
 
 	public ParameterizedRouteBuilder uri(String uriPattern, Object controller)
 	{
-		ParameterizedRouteBuilder rb = routeDeclarations.uri(uriPattern, controller);
-		routeDefaults.applyDefaults(rb);
-		return rb;
+		return routeDeclarations.uri(uriPattern, controller, routeDefaults);
 	}
 
 	public RegexRouteBuilder regex(String uriPattern, Object controller)
 	{
-		RegexRouteBuilder rb = routeDeclarations.regex(uriPattern, controller);
-		routeDefaults.applyDefaults(rb);
-		return rb;
+		return routeDeclarations.regex(uriPattern, controller, routeDefaults);
 	}
 }

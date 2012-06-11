@@ -64,7 +64,7 @@ public abstract class Route
 	 * @param controller
 	 */
 	public Route(UrlMatcher urlMatcher, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-		String name, List<String> supportedFormats, Set<String> flags, Map<String, Object> parameters)
+		String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters)
 	{
 		super();
 		this.urlMatcher = urlMatcher;
@@ -74,6 +74,7 @@ public abstract class Route
 		this.shouldSerializeResponse = shouldSerializeResponse;
 		this.name = name;
 		this.supportedFormats.addAll(supportedFormats);
+		this.defaultFormat = defaultFormat;
 		this.flags.addAll(flags);
 		this.parameters.putAll(parameters);
 	}

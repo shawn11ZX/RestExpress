@@ -25,5 +25,6 @@ public class KnownObject
 {
 	public int integer = 1;
 	public String string = "string value";
-	public Date date = new Date(64, 11, 17, 16, 30);
+	@SuppressWarnings("deprecation")
+    public Date date = new Date(64, 11, 17, 16, 30);
 }

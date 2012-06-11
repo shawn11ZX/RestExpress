@@ -178,6 +178,7 @@ public class RouteDeclarationTest
 	extends RouteDeclaration
 	{
 		private InnerService service;
+		private RouteDefaults defaults = new RouteDefaults();
 		
 		public Routes()
 		{
@@ -187,23 +188,23 @@ public class RouteDeclarationTest
 
         public void defineRoutes()
         {
-    		uri("/foo/bar/{barId}.{format}", service)
+    		uri("/foo/bar/{barId}.{format}", service, defaults)
     			.action("readBar", HttpMethod.GET);
 
-    		uri("/foo/bat/{batId}.{format}", service)
+    		uri("/foo/bat/{batId}.{format}", service, defaults)
     			.action("readBat", HttpMethod.GET);
 
-    		uri("/foo.{format}", service)
+    		uri("/foo.{format}", service, defaults)
     			.method(HttpMethod.POST);
 
-    		uri("/foo/{fooId}.{format}", service)
+    		uri("/foo/{fooId}.{format}", service, defaults)
     			.name("CRUD_ROUTE");
 
-    		uri("/foo/rah/{rahId}.{format}", service)
+    		uri("/foo/rah/{rahId}.{format}", service, defaults)
     			.action("createRah", HttpMethod.POST)
     			.name(RAH_ROUTE_NAME);
 
-    		uri("/foo/yada/{yadaId}.{format}", service)
+    		uri("/foo/yada/{yadaId}.{format}", service, defaults)
     			.action("readYada", HttpMethod.GET);
         }
 	}

@@ -50,9 +50,9 @@ public class RouteDeclaration
 	 * @param urlPattern a string specifying a URL pattern to match.
 	 * @param controller a pojo which contains implementations of the service methods (e.g. create(), read(), update(), delete()).
 	 */
-	public ParameterizedRouteBuilder uri(String uri, Object controller)
+	public ParameterizedRouteBuilder uri(String uri, Object controller, RouteDefaults defaults)
 	{
-		ParameterizedRouteBuilder builder = new ParameterizedRouteBuilder(uri, controller);
+		ParameterizedRouteBuilder builder = new ParameterizedRouteBuilder(uri, controller, defaults);
 		routeBuilders.add(builder);
 		return builder;
 	}
@@ -63,9 +63,9 @@ public class RouteDeclaration
 	 * @param regex a string specifying a regex pattern to match.
 	 * @param controller a pojo which contains implementations of service methods (e.g. create(), read(), update(), delete()).
 	 */
-	public RegexRouteBuilder regex(String regex, Object controller)
+	public RegexRouteBuilder regex(String regex, Object controller, RouteDefaults defaults)
 	{
-		RegexRouteBuilder builder = new RegexRouteBuilder(regex, controller);
+		RegexRouteBuilder builder = new RegexRouteBuilder(regex, controller, defaults);
 		routeBuilders.add(builder);
 		return builder;
 	}

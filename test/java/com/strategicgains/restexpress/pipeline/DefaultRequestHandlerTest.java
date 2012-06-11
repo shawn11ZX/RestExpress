@@ -361,25 +361,26 @@ public class DefaultRequestHandlerTest
 	extends RouteDeclaration
 	{
 		private Object controller = new FooBarController();
+		private RouteDefaults defaults = new RouteDefaults();
 
         public void defineRoutes()
         {
-        	uri("/foo.{format}", controller)
+        	uri("/foo.{format}", controller, defaults)
         		.action("fooAction", HttpMethod.GET);
 
-        	uri("/bar.{format}", controller)
+        	uri("/bar.{format}", controller, defaults)
         		.action("barAction", HttpMethod.GET);
 
-        	uri("/date.{format}", controller)
+        	uri("/date.{format}", controller, defaults)
     			.action("dateAction", HttpMethod.GET);
 
-        	uri("/unserialized", controller)
+        	uri("/unserialized", controller, defaults)
         		.action("unserializedAction", HttpMethod.GET);
 
-        	uri("/unserializedToo", controller)
+        	uri("/unserializedToo", controller, defaults)
         		.action("contentHeaderAction", HttpMethod.GET);
 
-        	uri("/setBodyAction.html", controller)
+        	uri("/setBodyAction.html", controller, defaults)
         		.action("setBodyAction", HttpMethod.GET)
         		.format(Format.HTML);
         }

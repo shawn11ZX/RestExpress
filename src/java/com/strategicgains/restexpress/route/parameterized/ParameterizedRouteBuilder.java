@@ -24,6 +24,7 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteBuilder;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**
  * @author toddf
@@ -38,9 +39,9 @@ extends RouteBuilder
 	 * @param controller
 	 * @param routeType
 	 */
-	public ParameterizedRouteBuilder(String uri, Object controller)
+	public ParameterizedRouteBuilder(String uri, Object controller, RouteDefaults defaults)
 	{
-		super(uri, controller);
+		super(uri, controller, defaults);
 	}
 
     @Override
@@ -49,6 +50,6 @@ extends RouteBuilder
         String name, List<String> supportedFormats, String defaultFormat, Set<String> flags,
         Map<String, Object> parameters)
     {
-    	return new ParameterizedRoute(pattern, controller, action, method, shouldSerializeResponse, name, supportedFormats, flags, parameters);
+    	return new ParameterizedRoute(pattern, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters);
     }
 }

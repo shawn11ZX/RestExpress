@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.strategicgains.restexpress.ContentType;
-import com.strategicgains.restexpress.route.RouteBuilder;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
 
 /**
@@ -54,12 +53,4 @@ public class RouteDefaults
 			processor.alias(entry.getKey(), entry.getValue());
 		}
 	}
-
-	/**
-     * @param rb
-     */
-    public void applyDefaults(RouteBuilder rb)
-    {
-    	rb.defaultFormat(defaultFormat);
-    }
 }

@@ -467,31 +467,32 @@ public class RawWrappedResponseTest
 	extends RouteDeclaration
 	{
 		private Object controller = new WrappedResponseController();
+		private RouteDefaults defaults = new RouteDefaults();
 
         public void defineRoutes()
         {
-        	uri("/normal_get.{format}", controller)
+        	uri("/normal_get.{format}", controller, defaults)
         		.action("normalGetAction", HttpMethod.GET);
 
-        	uri("/normal_put.{format}", controller)
+        	uri("/normal_put.{format}", controller, defaults)
     		.action("normalPutAction", HttpMethod.PUT);
 
-        	uri("/normal_post.{format}", controller)
+        	uri("/normal_post.{format}", controller, defaults)
     		.action("normalPostAction", HttpMethod.POST);
 
-        	uri("/normal_delete.{format}", controller)
+        	uri("/normal_delete.{format}", controller, defaults)
     		.action("normalDeleteAction", HttpMethod.DELETE);
 
-        	uri("/no_content_delete.{format}", controller)
+        	uri("/no_content_delete.{format}", controller, defaults)
     		.action("noContentDeleteAction", HttpMethod.DELETE);
 
-        	uri("/no_content_with_body_delete.{format}", controller)
+        	uri("/no_content_with_body_delete.{format}", controller, defaults)
     		.action("noContentWithBodyDeleteAction", HttpMethod.DELETE);
 
-        	uri("/not_found.{format}", controller)
+        	uri("/not_found.{format}", controller, defaults)
         		.action("notFoundAction", HttpMethod.GET);
 
-        	uri("/null_pointer.{format}", controller)
+        	uri("/null_pointer.{format}", controller, defaults)
         		.action("nullPointerAction", HttpMethod.GET);
         }
 	}
