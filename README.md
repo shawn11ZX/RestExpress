@@ -73,6 +73,11 @@ Release 0.8.0 - in development (branch 'master')
   requested HTTP method.  Sets the HTTP Allow header to a comma-delimited list of accepted methods.
 * Removed StringUtils.parseQueryString() as it was previously deprecated--use QueryStringParser.
 * Introduced String.join() methods (2).
+* Removed JSONP handling, favoring use of CORS instead, introducing CorsHeaderPlugin and corresponding post-processor.
+* Wraps ETAG header in quotes.
+* Renamed QueryRange.stop to QueryRange.limit.
+* Removed need for RouteDefinition class, moving that functionality into the RestExpress builder.
+* Changed example apps to reflect above elimination of RouteDefinition class.
 
 ===================================================================================================
 Release 0.7.2 - 14 May 2012
