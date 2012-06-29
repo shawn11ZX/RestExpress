@@ -70,6 +70,7 @@ public abstract class Route
 		this.urlMatcher = urlMatcher;
 		this.controller = controller;
 		this.action = action;
+		this.action.setAccessible(true);
 		this.method = method;
 		this.shouldSerializeResponse = shouldSerializeResponse;
 		this.name = name;
