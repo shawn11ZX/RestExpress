@@ -28,11 +28,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
+import com.strategicgains.restexpress.util.StringUtils;
 import com.strategicgains.util.date.DateAdapterConstants;
 
 /**
- * A SerializationProcessor to handle JSON input/output.  It anticipates ISO 8601-compatible time points for date instances
- * and outputs dates as ISO 8601 time points.
+ * A SerializationProcessor to handle JSON input/output. It anticipates ISO
+ * 8601-compatible time points for date instances and outputs dates as ISO 8601
+ * time points.
  * 
  * @author toddf
  * @since Mar 16, 2010
@@ -41,18 +43,18 @@ public class DefaultJsonProcessor
 implements SerializationProcessor
 {
 	private Gson gson;
-	
+
 	public DefaultJsonProcessor()
 	{
 		super();
 		gson = new GsonBuilder()
-			.disableHtmlEscaping()
-			.registerTypeAdapter(Date.class, new GsonTimestampSerializer())
-			.setDateFormat(DateAdapterConstants.TIMESTAMP_OUTPUT_FORMAT)
-			.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-			.create();
+		    .disableHtmlEscaping()
+		    .registerTypeAdapter(Date.class, new GsonTimestampSerializer())
+		    .setDateFormat(DateAdapterConstants.TIMESTAMP_OUTPUT_FORMAT)
+		    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+		    .create();
 	}
-	
+
 	public DefaultJsonProcessor(Gson gson)
 	{
 		super();
@@ -62,23 +64,25 @@ implements SerializationProcessor
 
 	// SECTION: SERIALIZATION PROCESSOR
 
-    @Override
-    public <T> T deserialize(String string, Class<T> type)
-    {
-    	return gson.fromJson((String) string, type);
-    }
+	@Override
+	public <T> T deserialize(String string, Class<T> type)
+	{
+		return gson.fromJson((String) string, type);
+	}
 
-    @Override
-    public <T> T deserialize(ChannelBuffer buffer, Class<T> type)
-    {
-    	return gson.fromJson(new InputStreamReader(new ChannelBufferInputStream(buffer)), type);
-    }
+	@Override
+	public <T> T deserialize(ChannelBuffer buffer, Class<T> type)
+	{
+		return gson.fromJson(new InputStreamReader(new ChannelBufferInputStream(buffer)), type);
+	}
 
-    @Override
-    public String serialize(Object object)
-    {
-    	return gson.toJson(object);
-    }
+	@Override
+	public String serialize(Object object)
+	{
+		if (object == null) return StringUtils.EMPTY_STRING;
+
+		return gson.toJson(object);
+	}
 
 	@Override
 	public String getResultingContentType()
