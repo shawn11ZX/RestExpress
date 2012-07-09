@@ -319,8 +319,7 @@ public class RestExpress
 	 * Tell RestExpress to support TXT format specifiers in routes, outgoing
 	 * only at present.
 	 * 
-	 * @param isDefault
-	 *            true to make TXT the default format.
+	 * @param isDefault true to make TXT the default format.
 	 * @return the RestExpress instance.
 	 */
 	public RestExpress supportTxt(boolean isDefault)
@@ -730,21 +729,6 @@ public class RestExpress
 	{
 		return new RouteResolver(routeDeclarations.createRouteMapping(routeDefaults));
 	}
-
-	/**
-	 * @return
-	 */
-//	private List<String> getSupportedFormats()
-//	{
-//		List<String> supportedFormats = new ArrayList<String>();
-//
-//		for (String format : responseProcessors.keySet())
-//		{
-//			supportedFormats.add(format);
-//		}
-//
-//		return Collections.unmodifiableList(supportedFormats);
-//	}
 
 	/**
 	 * @return
