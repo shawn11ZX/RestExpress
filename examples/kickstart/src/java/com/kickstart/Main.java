@@ -15,12 +15,6 @@ import com.strategicgains.restexpress.plugin.CacheControlPlugin;
 import com.strategicgains.restexpress.plugin.RoutesMetadataPlugin;
 import com.strategicgains.restexpress.util.Environment;
 
-/**
- * The main entry-point into RestExpress for the example services.
- * 
- * @author toddf
- * @since Aug 31, 2009
- */
 public class Main
 {
 	public static void main(String[] args) throws Exception

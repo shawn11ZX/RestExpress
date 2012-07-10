@@ -10,10 +10,6 @@ import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.util.XLinkUtils;
 
-/**
- * @author toddf
- * @since Aug 31, 2010
- */
 public class KickStartController
 {
 	/**
