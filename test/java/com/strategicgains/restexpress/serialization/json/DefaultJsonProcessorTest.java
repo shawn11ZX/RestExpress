@@ -113,9 +113,9 @@ public class DefaultJsonProcessorTest
 	}
 
 	@Test
-	public void shouldDeserializeUTF8Json()
+	public void shouldDeserializeUTF8ChannelBuffer()
 	{
-		KnownObject o = processor.deserialize(JSON_UTF8, KnownObject.class);
+		KnownObject o = processor.deserialize(ChannelBuffers.wrappedBuffer(JSON_UTF8.getBytes(ContentType.CHARSET)), KnownObject.class);
 		assertNotNull(o);
 		assertTrue(o.getClass().isAssignableFrom(KnownObject.class));
 		assertEquals(2, o.integer);

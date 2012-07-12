@@ -71,7 +71,7 @@ implements SerializationProcessor
     @Override
     public <T> T deserialize(ChannelBuffer buffer, Class<T> type)
     {
-    	return gson.fromJson(new InputStreamReader(new ChannelBufferInputStream(buffer)), type);
+    	return gson.fromJson(new InputStreamReader(new ChannelBufferInputStream(buffer), ContentType.CHARSET), type);
     }
 
     @Override
