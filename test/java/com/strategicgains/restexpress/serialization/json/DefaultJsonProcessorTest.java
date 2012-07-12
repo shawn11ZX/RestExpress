@@ -36,6 +36,7 @@ import com.strategicgains.restexpress.serialization.KnownObject;
 public class DefaultJsonProcessorTest
 {
 	private static final String JSON = "{\"integer\":2,\"string\":\"another string value\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
+	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"我能吞下\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
 
 	private DefaultJsonProcessor processor = new DefaultJsonProcessor();
 
@@ -109,5 +110,20 @@ public class DefaultJsonProcessorTest
 		ChannelBuffer buf = ChannelBuffers.EMPTY_BUFFER;
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNull(o);
+	}
+
+	@Test
+	public void shouldDeserializeUTF8Json()
+	{
+		KnownObject o = processor.deserialize(JSON_UTF8, KnownObject.class);
+		assertNotNull(o);
+		assertTrue(o.getClass().isAssignableFrom(KnownObject.class));
+		assertEquals(2, o.integer);
+		assertEquals("我能吞下", o.string);
+		Calendar c = Calendar.getInstance();
+		c.setTime(o.date);
+		assertEquals(11, c.get(Calendar.MONTH));
+		assertEquals(6, c.get(Calendar.DAY_OF_MONTH));
+		assertEquals(1963, c.get(Calendar.YEAR));
 	}
 }

@@ -93,7 +93,8 @@
     <target name="unit-test" depends="_init, compile" description="--> Execute RestExpress unit tests">
         <delete dir="${dir.test.results}"/>
     	<mkdir dir="${dir.test.results}"/>
-    	<junit printsummary="true">
+    	<junit printsummary="true" fork="yes">
+    		<jvmarg value="-Dfile.encoding=US-ASCII"/>
     		<classpath refid="unit_test.classpath"/>
     		<formatter type="xml" usefile="true"/>
     		<batchtest errorproperty="test.failure" failureproperty="test.failure" fork="yes" todir="${dir.test.results}">
