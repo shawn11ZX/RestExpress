@@ -80,6 +80,12 @@ Release 0.8.0 - in development (branch 'master')
 * Changed example apps to reflect above elimination of RouteDefinition class.
 
 ===================================================================================================
+Release 0.7.3 - 12 July 2012 (branch 'v0.7.3')
+* Patch release to fix an issue with i18n. Fixed issue with
+  DefaultJsonProcessor.deserialize(ChannelBuffer, Class) where underlying InputStreamReader was
+  not UTF-8.
+
+==================================================================================================
 Release 0.7.2 - 14 May 2012
 * Introduced ExecutionHandler with configuration via RestExpress.setExecutorThreadCount(int)
   to off-load long-running requests from the NIO workers into a separate thread pool.
