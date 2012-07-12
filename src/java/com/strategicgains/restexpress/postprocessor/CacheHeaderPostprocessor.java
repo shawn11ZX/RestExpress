@@ -35,7 +35,7 @@ import com.strategicgains.util.date.HttpHeaderTimestampAdapter;
  * <p/>
  * If the route has a Parameters.Cache.MAX_AGE parameter, whose value is the
  * max-age in seconds then the following are added:
- * Cache-Control: max-age<br/>
+ * Cache-Control: max-age=<seconds><br/>
  * Expires: now + max-age
  * <p/>
  * If the route has a Flags.Cache.NO_CACHE flag, then the following
@@ -67,7 +67,7 @@ implements Postprocessor
 
 		if (maxAge != null)
 		{
-			response.addHeader(CACHE_CONTROL, String.valueOf(maxAge));
+			response.addHeader(CACHE_CONTROL, String.format("max-age=%s", maxAge));
 			response.addHeader(EXPIRES, fmt.format(computeExpiresDate((Integer) maxAge)));
 		}
 		else
