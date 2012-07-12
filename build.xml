@@ -97,7 +97,7 @@
     		<jvmarg value="-Dfile.encoding=US-ASCII"/>
     		<classpath refid="unit_test.classpath"/>
     		<formatter type="xml" usefile="true"/>
-    		<batchtest errorproperty="test.failure" failureproperty="test.failure" fork="yes" todir="${dir.test.results}">
+    		<batchtest errorproperty="test.failure" failureproperty="test.failure" todir="${dir.test.results}">
     			<fileset dir="${dir.src.test}">
     				<include name="**/*Test.java"/>
     				<include name="**/*TestCase.java"/>
