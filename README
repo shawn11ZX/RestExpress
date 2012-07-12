@@ -63,6 +63,12 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+Release 0.7.3 - 12 July 2012
+* Patch release to fix an issue with i18n. Fixed issue with
+  DefaultJsonProcessor.deserialize(ChannelBuffer, Class) where underlying InputStreamReader was
+  not UTF-8.
+
+==================================================================================================
 Release 0.7.2
 * Introduced ExecutionHandler with configuration via RestExpress.setExecutorThreadCount(int)
   to off-load long-running requests from the NIO workers into a separate thread pool.
