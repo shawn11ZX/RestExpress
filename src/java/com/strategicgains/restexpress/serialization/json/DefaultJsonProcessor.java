@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, Strategic Gains, Inc.
+ * Copyright 2010-2012, Strategic Gains, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ implements SerializationProcessor
 	@Override
 	public <T> T deserialize(ChannelBuffer buffer, Class<T> type)
 	{
-		return gson.fromJson(new InputStreamReader(new ChannelBufferInputStream(buffer)), type);
+    	return gson.fromJson(new InputStreamReader(new ChannelBufferInputStream(buffer), ContentType.CHARSET), type);
 	}
 
 	@Override
