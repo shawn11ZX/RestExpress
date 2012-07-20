@@ -180,10 +180,15 @@ public class Response
 	
 	/**
 	 * Sets the HTTP response status code to 204 - no content.
+	 * Note, however, if a wrapped response is requested, then
+	 * this method has no effect (as the body will contain content).
 	 */
 	public void setResponseNoContent()
 	{
-		setResponseStatus(HttpResponseStatus.NO_CONTENT);
+		if (!responseProcessor.getWrapper().addsBodyContent())
+		{
+			setResponseStatus(HttpResponseStatus.NO_CONTENT);
+		}
 	}
 	
 	/**
