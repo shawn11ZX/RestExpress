@@ -13,9 +13,11 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package com.strategicgains.restexpress.postprocessor;
+package com.strategicgains.restexpress.query;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -23,7 +25,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.query.QueryRange;
+import com.strategicgains.restexpress.exception.BadRequestException;
 
 /**
  * @author toddf
@@ -42,6 +44,27 @@ public class QueryRangeTest
 		assertEquals(0, r.getStart());
 		assertEquals(24, r.getEnd());
 	}
+
+	@Test(expected=BadRequestException.class)
+	public void shouldThrowExceptionOnNonNumericRange()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("Range", "items=A-24");
+		Request request = new Request(httpRequest, null);
+		QueryRange r = QueryRange.parseFrom(request);
+		fail("Did not throw exception as expected.");
+	}
+
+	@Test(expected=BadRequestException.class)
+	public void shouldThrowExceptionOnReversedRange()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("Range", "items=24-0");
+		Request request = new Request(httpRequest, null);
+		QueryRange r = QueryRange.parseFrom(request);
+		fail("Did not throw exception as expected.");
+	}
+
 	@Test
 	public void shouldParseNextPageRange()
 	{
@@ -76,13 +99,28 @@ public class QueryRangeTest
 	public void shouldFavorQueryStringParameters()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("Range", "items=0-24");
+		// RestExpress parses the query-string into headers.
 		httpRequest.addHeader("limit", "100");
 		httpRequest.addHeader("offset", "200");
-		httpRequest.addHeader("Range", "items=0-24");
 		Request request = new Request(httpRequest, null);
 		QueryRange r = QueryRange.parseFrom(request);
 		assertEquals(100, r.getLimit());
 		assertEquals(200, r.getStart());
 		assertEquals(299, r.getEnd());
+	}
+
+	@Test
+	public void shouldAssembleStringRangeUsingEnd()
+	{
+		QueryRange r = new QueryRange(1, 25l);
+		assertEquals("items 0-25", r.toString());
+	}
+
+	@Test
+	public void shouldAssembleStringRangeUsingLimit()
+	{
+		QueryRange r = new QueryRange(0, 25);
+		assertEquals("items 0-24", r.toString());
 	}
 }

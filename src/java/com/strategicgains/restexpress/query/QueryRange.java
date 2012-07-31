@@ -124,7 +124,7 @@ public class QueryRange
 
 	public long getEnd()
 	{
-		return (end == null ? 0 : end.intValue());
+		return (end == null ? 0 : end.longValue());
 	}
 
 	public boolean hasEnd()
@@ -276,7 +276,7 @@ public class QueryRange
 	 * the Content-Range header on the response from Range requests.
 	 * <p/>
 	 * No range checking is performed.  It is therefore, the caller's responsibility to ensure
-	 * that maxItems is greater-than the offset.
+	 * that maxItems is greater-than the end value.
 	 * 
 	 * @param maxItems the maximum number of items available.
 	 * @return a String of the form "items <first>-<last>/<max>"
@@ -294,6 +294,6 @@ public class QueryRange
 		return new StringBuffer("items ")
 			.append(getStart())
 			.append("-")
-			.append(getLimit());
+			.append(getEnd());
 	}
 }
