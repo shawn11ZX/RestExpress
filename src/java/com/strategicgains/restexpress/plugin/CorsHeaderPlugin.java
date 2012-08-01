@@ -43,7 +43,7 @@ extends AbstractPlugin
 		if (isRegistered()) return this;
 
 		super.register(server);
-		server.addPostprocessor(new CorsHeaderPostprocessor(originDomains));
+		server.addFinallyProcessor(new CorsHeaderPostprocessor(originDomains));
 		return this;
 	}
 
@@ -69,7 +69,7 @@ extends AbstractPlugin
 		@Override
 		public void process(Request request, Response response)
 		{
-			if (request.isMethodGet() && corsHeader != null)
+			if (request.isMethodGet() && !response.hasHeader(CORS_ORIGIN_HEADER) && corsHeader != null)
 			{
 				response.addHeader(CORS_ORIGIN_HEADER, corsHeader);
 			}

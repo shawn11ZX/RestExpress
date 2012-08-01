@@ -61,6 +61,7 @@ extends SimpleChannelUpstreamHandler
 	private HttpResponseWriter responseWriter;
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
+	private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
 
@@ -131,7 +132,7 @@ extends SimpleChannelUpstreamHandler
 			notifyReceived(context);
 			resolveRoute(context);
 			boolean isResponseProcessorResolved = resolveResponseProcessor(context);
-			invokePreprocessors(context.getRequest());
+			invokePreprocessors(preprocessors, context.getRequest());
 			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
 
 			if (result != null)
@@ -139,7 +140,7 @@ extends SimpleChannelUpstreamHandler
 				context.getResponse().setBody(result);
 			}
 	
-			invokePostprocessors(context.getRequest(), context.getResponse());
+			invokePostprocessors(postprocessors, context.getRequest(), context.getResponse());
 
 			if (!isResponseProcessorResolved && !context.supportsRequestedFormat())
 			{
@@ -159,6 +160,7 @@ extends SimpleChannelUpstreamHandler
 		}
 		finally
 		{
+			invokeFinallyProcessors(finallyProcessors, context.getRequest(), context.getResponse());
 			notifyComplete(context);
 		}
 	}
@@ -374,9 +376,17 @@ extends SimpleChannelUpstreamHandler
 		}
 	}
 
-    private void invokePreprocessors(Request request)
+	public void addFinallyProcessor(Postprocessor handler)
+	{
+		if (!finallyProcessors.contains(handler))
+		{
+			finallyProcessors.add(handler);
+		}
+	}
+
+    private void invokePreprocessors(List<Preprocessor> processors, Request request)
     {
-		for (Preprocessor handler : preprocessors)
+		for (Preprocessor handler : processors)
 		{
 			handler.process(request);
 		}
@@ -384,11 +394,26 @@ extends SimpleChannelUpstreamHandler
 		request.getBody().resetReaderIndex();
     }
 
-    private void invokePostprocessors(Request request, Response response)
+    private void invokePostprocessors(List<Postprocessor> processors, Request request, Response response)
     {
-		for (Postprocessor handler : postprocessors)
+		for (Postprocessor handler : processors)
 		{
 			handler.process(request, response);
+		}
+    }
+
+    private void invokeFinallyProcessors(List<Postprocessor> processors, Request request, Response response)
+    {
+		for (Postprocessor handler : processors)
+		{
+			try
+			{
+				handler.process(request, response);
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace(System.err);
+			}
 		}
     }
 

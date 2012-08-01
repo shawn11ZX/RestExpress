@@ -324,6 +324,51 @@ public class DefaultRequestHandlerTest
 		assertTrue(responseBody.toString().endsWith("</response>"));
 	}
 
+	@Test
+	public void shouldCallAllFinallyProcessors()
+	{
+		NoopPostprocessor p1 = new NoopPostprocessor();
+		NoopPostprocessor p2 = new NoopPostprocessor();
+		NoopPostprocessor p3 = new NoopPostprocessor();
+		messageHandler.addFinallyProcessor(p1);
+		messageHandler.addFinallyProcessor(p2);
+		messageHandler.addFinallyProcessor(p3);
+		sendGetEvent("/foo");
+		assertEquals(1, p1.getCallCount());
+		assertEquals(1, p2.getCallCount());
+		assertEquals(1, p3.getCallCount());
+	}
+
+	@Test
+	public void shouldCallAllFinallyProcessorsOnRouteException()
+	{
+		NoopPostprocessor p1 = new NoopPostprocessor();
+		NoopPostprocessor p2 = new NoopPostprocessor();
+		NoopPostprocessor p3 = new NoopPostprocessor();
+		messageHandler.addFinallyProcessor(p1);
+		messageHandler.addFinallyProcessor(p2);
+		messageHandler.addFinallyProcessor(p3);
+		sendGetEvent("/xyzt.html");
+		assertEquals(1, p1.getCallCount());
+		assertEquals(1, p2.getCallCount());
+		assertEquals(1, p3.getCallCount());
+	}
+
+	@Test
+	public void shouldCallAllFinallyProcessorsOnProcessorException()
+	{
+		NoopPostprocessor p1 = new ExceptionPostprocessor();
+		NoopPostprocessor p2 = new ExceptionPostprocessor();
+		NoopPostprocessor p3 = new ExceptionPostprocessor();
+		messageHandler.addFinallyProcessor(p1);
+		messageHandler.addFinallyProcessor(p2);
+		messageHandler.addFinallyProcessor(p3);
+		sendGetEvent("/foo");
+		assertEquals(1, p1.getCallCount());
+		assertEquals(1, p2.getCallCount());
+		assertEquals(1, p3.getCallCount());
+	}
+
 	private void sendGetEvent(String path)
     {
 		try
@@ -475,6 +520,34 @@ public class DefaultRequestHandlerTest
 		public int getCompleteCount()
         {
         	return completeCount;
+        }
+	}
+
+	private class NoopPostprocessor
+	implements Postprocessor
+	{
+		private int callCount = 0;
+
+        @Override
+        public void process(Request request, Response response)
+        {
+        	++callCount;
+        }
+        
+        public int getCallCount()
+        {
+        	return callCount;
+        }
+	}
+
+	private class ExceptionPostprocessor
+	extends NoopPostprocessor
+	{
+        @Override
+        public void process(Request request, Response response)
+        {
+        	super.process(request, response);
+        	throw new RuntimeException("RuntimeException thrown...");
         }
 	}
 }

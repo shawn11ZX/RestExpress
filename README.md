@@ -64,6 +64,10 @@ Content-Length: 115
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.8.0 - in development (branch 'master')
+* Introduced concept of "finally" processors, which are executed in the finally block of
+  DefaultRequestHandler and all of them are executed even if an exception is thrown within one
+  of them.  This enable the CorsHeaderPlugin to set the appropriate header even on not found
+  errors, etc.
 * Changed to support multiple response types with wrapping or not, etc. Now can support wrapped
   JSON (.wjson) and XML (.wxml) as well as un-wrapped JSON (.json) and XML (.xml) depending on the
   format specifier.
