@@ -114,7 +114,7 @@ public class QueryRangeTest
 	public void shouldAssembleStringRangeUsingEnd()
 	{
 		QueryRange r = new QueryRange(1, 25l);
-		assertEquals("items 0-25", r.toString());
+		assertEquals("items 1-25", r.toString());
 	}
 
 	@Test
