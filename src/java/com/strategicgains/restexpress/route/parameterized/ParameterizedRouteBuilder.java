@@ -12,7 +12,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/
+ */
 package com.strategicgains.restexpress.route.parameterized;
 
 import java.lang.reflect.Method;
@@ -44,12 +44,26 @@ extends RouteBuilder
 		super(uri, controller, defaults);
 	}
 
-    @Override
-    protected Route newRoute(String pattern, Object controller, Method action,
-        HttpMethod method, boolean shouldSerializeResponse,
-        String name, List<String> supportedFormats, String defaultFormat, Set<String> flags,
-        Map<String, Object> parameters)
+	@Override
+	protected Route newRoute(String pattern, Object controller, Method action, HttpMethod method,
+		boolean shouldSerializeResponse, String name, List<String> supportedFormats,
+		String defaultFormat, Set<String> flags, Map<String, Object> parameters)
+	{
+		return new ParameterizedRoute(pattern, controller, action, method,
+		    shouldSerializeResponse, name, supportedFormats, defaultFormat,
+		    flags, parameters);
+	}
+
+	protected String toRegexPattern(String uri)
     {
-    	return new ParameterizedRoute(pattern, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters);
+	    String pattern = uri;
+
+		if (pattern != null && !pattern.startsWith("/"))
+		{
+			pattern = "/" + pattern;
+		}
+
+		return pattern;
     }
+
 }

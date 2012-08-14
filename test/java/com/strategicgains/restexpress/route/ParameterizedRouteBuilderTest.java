@@ -45,6 +45,16 @@ public class ParameterizedRouteBuilderTest
 		assertEquals(4, routes.size());
 		assertEquals(Format.JSON, routes.get(0).getDefaultFormat());
 	}
+	
+	@Test
+	public void shouldPrefixUriWithSlash()
+	{
+		ParameterizedRouteBuilder rb = new ParameterizedRouteBuilder("foo", new NoopController(), null);
+		List<Route> routes = rb.build();
+		assertNotNull(routes);
+		assertEquals(4, routes.size());
+		assertEquals("/foo", routes.get(0).getPattern());
+	}
 
 	@SuppressWarnings("unused")
     private class NoopController

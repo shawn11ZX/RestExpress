@@ -239,12 +239,7 @@ public abstract class RouteBuilder
 		}
 
 		List<Route> routes = new ArrayList<Route>();
-		String pattern = uri;
-
-		if (pattern != null && !pattern.startsWith("/"))
-		{
-			pattern = "/" + pattern;
-		}
+		String pattern = toRegexPattern(uri);
 		
 		for (HttpMethod method : methods)
 		{
@@ -261,6 +256,8 @@ public abstract class RouteBuilder
 		
 		return routes;
 	}
+
+	protected abstract String toRegexPattern(String uri);
 	
 	
 	// SECTION: CONSOLE
