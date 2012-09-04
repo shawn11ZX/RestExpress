@@ -32,7 +32,7 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 
 * On successful creation, call response.setResponseCreated() to set the returning HTTP status code to 201.
 
-* For more real-world examples, see the examples/ directory which contains additional projects that setup RestExpress services.  Simply do 'ant run' to run them.  Then to see what's available do: 'curl localhost:<port>/routes/metadata' to get a list of all the routes (or endpoints) available.
+* For more real-world examples, see the examples/ directory which contains additional projects that setup RestExpress services.  Simply do '**ant run**' to run them.  Then to see what's available perform a GET on the route: '/routes/metadata' to get a list of all the routes (or endpoints) available (e.g. localhost:8000/routes/metadata in the browser).
 
 ===================================================================================================
 BTW, if you're on a Mac or Linux box, you can do the following to get Ruby on Rails "scaffolding"
