@@ -16,29 +16,23 @@ value directly into JSON or XML.  For more information on JSEND-style responses,
 http://labs.omniti.com/labs/jsend
 
 ===================================================================================================
-A quick tutorial:
+## A quick tutorial:
 
 Please see the Kickstart application in examples/kickstart for a complete, running example.
 
 * HTTP Methods, if not changed in the fluent (DSL) interface, map to the following:
-1) GET --> read(Request, Response)
-2) PUT --> update(Request, Response)
-3) POST --> create(Request, Response)
-4) DELETE --> delete(Request, Response)
+	* GET --> read(Request, Response)
+	* PUT --> update(Request, Response)
+	* POST --> create(Request, Response)
+	* DELETE --> delete(Request, Response)
 
-You can choose to return objects from the methods, if desired, which will be returned to the client
-as body of the response.  The object will be marshaled into JSON or XML, depending on the default or
-based on the format in the request (e.g. '.xml' or '?format=xml').
+* You can choose to return objects from the methods, if desired, which will be returned to the client in the body of the response.  The object will be marshaled into JSON or XML, depending on the default or based on the format in the request (e.g. '.xml' or '?format=xml').
 
-If you choose to not return a value from the method (void methods) and using raw responses, then
-call response.setResponseNoContent() before returning to set the response HTTP status code to 204
-(no content).  Wrapped responses (JSEND style) are the default.  So if you're using wrapped
-responses, there will always be a response returned to the client--therefore, you don't need to set
-the response.setResponseNoContent().  Just return your objects--or not.  RestExpress will handle
-things on your behalf!
+* If you choose to not return a value from the method (void methods) and using raw responses, then call response.setResponseNoContent() before returning to set the response HTTP status code to 204 (no content).  Wrapped responses (JSEND style) are the default.  So if you're using wrapped responses, there will always be a response returned to the client--therefore, you don't need to set the response.setResponseNoContent().  Just return your objects--or not.  RestExpress will handle things on your behalf!
 
-On successful creation, call response.setResponseCreated() to set the returning HTTP status code to
-201.
+* On successful creation, call response.setResponseCreated() to set the returning HTTP status code to 201.
+
+* For more real-world examples, see the examples/ directory which contains additional projects that setup RestExpress services.  Simply do 'ant run' to run them.  Then to see what's available do: 'curl localhost:<port>/routes/metadata' to get a list of all the routes (or endpoints) available.
 
 ===================================================================================================
 BTW, if you're on a Mac or Linux box, you can do the following to get Ruby on Rails "scaffolding"
