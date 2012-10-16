@@ -54,9 +54,11 @@ extends RouteBuilder
 	    List<String> supportedFormats, String defaultFormat, Set<String> flags,
 	    Map<String, Object> parameters)
 	{
-		return new ParameterizedRoute(pattern, controller, action, method,
+		ParameterizedRoute r = new ParameterizedRoute(pattern, controller, action, method,
 		    shouldSerializeResponse, name, supportedFormats, defaultFormat,
 		    flags, parameters);
+		r.addAliases(aliases);
+		return r;
 	}
 
 	/**
