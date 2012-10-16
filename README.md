@@ -58,6 +58,7 @@ Content-Length: 115
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.8.0 - in development (branch 'master')
+* Introduced route 'aliases' where there are multiple URLs for a given service.
 * Introduced concept of "finally" processors, which are executed in the finally block of
   DefaultRequestHandler and all of them are executed even if an exception is thrown within one
   of them.  This enable the CorsHeaderPlugin to set the appropriate header even on not found
