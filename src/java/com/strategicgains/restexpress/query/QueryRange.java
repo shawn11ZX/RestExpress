@@ -281,7 +281,7 @@ public class QueryRange
 	 * @param maxItems the maximum number of items available.
 	 * @return a String of the form "items <first>-<last>/<max>"
 	 */
-	public String asContentRange(int maxItems)
+	public String asContentRange(long maxItems)
 	{
 		return assembleString(maxItems)
 			.append("/")
@@ -294,7 +294,7 @@ public class QueryRange
 		return assembleString(null);
 	}
 
-	private StringBuffer assembleString(Integer max)
+	private StringBuffer assembleString(Long max)
 	{
 		return new StringBuffer("items ")
 			.append(getStart())
