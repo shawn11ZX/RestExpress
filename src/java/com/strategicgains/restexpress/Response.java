@@ -142,7 +142,7 @@ public class Response
 	 */
 	public void addRangeHeader(QueryRange range, long count)
 	{
-    	addHeader(CONTENT_RANGE_HEADER_NAME, range.toString() + "/" + count);
+    	addHeader(CONTENT_RANGE_HEADER_NAME, range.asContentRange(count));
 	}
 	
 	public void addLocationHeader(String url)
