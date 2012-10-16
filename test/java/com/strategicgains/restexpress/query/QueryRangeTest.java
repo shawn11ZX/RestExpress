@@ -15,8 +15,8 @@
 */
 package com.strategicgains.restexpress.query;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
@@ -51,7 +51,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("Range", "items=A-24");
 		Request request = new Request(httpRequest, null);
-		QueryRange r = QueryRange.parseFrom(request);
+		QueryRange.parseFrom(request);
 		fail("Did not throw exception as expected.");
 	}
 
@@ -61,7 +61,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("Range", "items=24-0");
 		Request request = new Request(httpRequest, null);
-		QueryRange r = QueryRange.parseFrom(request);
+		QueryRange.parseFrom(request);
 		fail("Did not throw exception as expected.");
 	}
 
@@ -122,5 +122,16 @@ public class QueryRangeTest
 	{
 		QueryRange r = new QueryRange(0, 25);
 		assertEquals("items 0-24", r.toString());
+	}
+
+	@Test
+	public void shouldCreateAsContentRange()
+	{
+		QueryRange r = new QueryRange(0, 25);
+		assertEquals("items 0-24/25", r.asContentRange(25));
+		assertEquals("items 0-19/20", r.asContentRange(20));
+		assertEquals("items 0-0/0", r.asContentRange(0));
+		assertEquals("items 0-0/1", r.asContentRange(1));
+		assertEquals("items 0-1/2", r.asContentRange(2));
 	}
 }

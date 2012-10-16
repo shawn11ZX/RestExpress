@@ -55,9 +55,9 @@ public class QueryFilterTest
 		private Map<String, String> filters = new HashMap<String, String>();
 
         @Override
-        public void filterOn(String name, String value)
+        public void filterOn(FilterComponent c)
         {
-        	filters.put(name, value);
+        	filters.put(c.getField(), c.getValue());
         }
         
         public int getFilterCount()

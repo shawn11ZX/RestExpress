@@ -283,17 +283,22 @@ public class QueryRange
 	 */
 	public String asContentRange(int maxItems)
 	{
-		return assembleString()
+		return assembleString(maxItems)
 			.append("/")
 			.append(maxItems)
 			.toString();
 	}
-	
+
 	private StringBuffer assembleString()
+	{
+		return assembleString(null);
+	}
+
+	private StringBuffer assembleString(Integer max)
 	{
 		return new StringBuffer("items ")
 			.append(getStart())
 			.append("-")
-			.append(getEnd());
+			.append((max == null ? getEnd() : (getEnd() > max ? (max > 0 ? max - 1 : max) : getEnd())));
 	}
 }

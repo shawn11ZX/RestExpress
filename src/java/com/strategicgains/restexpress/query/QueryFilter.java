@@ -75,7 +75,7 @@ public class QueryFilter
 
 		for (Entry<String, String> entry : filters.entrySet())
 		{
-			callback.filterOn(entry.getKey(), entry.getValue());
+			callback.filterOn(new FilterComponent(entry.getKey(), entry.getValue()));
 		}
 	}
 	
