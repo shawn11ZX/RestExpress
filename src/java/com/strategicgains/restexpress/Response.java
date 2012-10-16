@@ -24,9 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.query.QueryRange;
+import com.strategicgains.restexpress.response.ResponseProcessor;
 
 /**
  * @author toddf
@@ -45,6 +47,7 @@ public class Response
 	private Map<String, List<String>> headers = new HashMap<String, List<String>>();
 	private boolean isSerialized = true;
 	private Throwable exception = null;
+	private ResponseProcessor responseProcessor;
 	
 	
 	// SECTION: CONSTRUCTORS
@@ -139,7 +142,12 @@ public class Response
 	 */
 	public void addRangeHeader(QueryRange range, long count)
 	{
-    	addHeader(CONTENT_RANGE_HEADER_NAME, range.toString() + "/" + count);
+    	addHeader(CONTENT_RANGE_HEADER_NAME, range.asContentRange(count));
+	}
+	
+	public void addLocationHeader(String url)
+	{
+		addHeader(HttpHeaders.Names.LOCATION, url);
 	}
 
 	/**
@@ -172,10 +180,15 @@ public class Response
 	
 	/**
 	 * Sets the HTTP response status code to 204 - no content.
+	 * Note, however, if a wrapped response is requested, then
+	 * this method has no effect (as the body will contain content).
 	 */
 	public void setResponseNoContent()
 	{
-		setResponseStatus(HttpResponseStatus.NO_CONTENT);
+		if (!responseProcessor.getWrapper().addsBodyContent())
+		{
+			setResponseStatus(HttpResponseStatus.NO_CONTENT);
+		}
 	}
 	
 	/**
@@ -232,4 +245,27 @@ public class Response
     {
     	this.exception = exception;
     }
+	
+	public ResponseProcessor getResponseProcessor()
+	{
+		return responseProcessor;
+	}
+	
+	public boolean hasResponseProcessor()
+	{
+		return (getResponseProcessor() != null);
+	}
+
+	public void setResponseProcessor(ResponseProcessor responseProcessor)
+	{
+		this.responseProcessor = responseProcessor;
+	}
+	
+	public void serialize()
+	{
+		if (hasResponseProcessor())
+		{
+			setBody(getResponseProcessor().process(this));
+		}
+	}
 }

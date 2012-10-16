@@ -8,7 +8,7 @@ import com.strategicgains.syntaxe.annotation.StringValidation;
 
 @Entity("comments")
 public class Comment
-extends BaseDomainObject
+extends AbstractEntity
 {
 	@Indexed
 	@StringValidation(name="Blog Entry ID", required=true)

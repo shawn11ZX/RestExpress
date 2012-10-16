@@ -23,6 +23,7 @@ import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.domain.metadata.RouteMetadata;
 import com.strategicgains.restexpress.domain.metadata.UriMetadata;
 import com.strategicgains.restexpress.exception.ConfigurationException;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**
  * Builds a route for a single URI.  If a URI is given with no methods or actions, the builder
@@ -67,7 +68,6 @@ public abstract class RouteBuilder
 	private String name;
 	private Set<String> flags = new HashSet<String>();
 	private Map<String, Object> parameters = new HashMap<String, Object>();
-	private boolean shouldUseWrappedResponse = true;
 	
 	/**
 	 * Create a RouteBuilder instance for the given URI pattern. URIs that match the pattern
@@ -76,13 +76,14 @@ public abstract class RouteBuilder
 	 * @param uri a URI pattern
 	 * @param controller the POJO service controller.
 	 */
-	public RouteBuilder(String uri, Object controller)
+	public RouteBuilder(String uri, Object controller, RouteDefaults defaults)
 	{
 		super();
 		this.uri = uri;
 		this.controller = controller;
+		applyDefaults(defaults);
 	}
-	
+
 	/**
 	 * Map a service method name (action) to a particular HTTP method (e.g. GET, POST, PUT, DELETE, HEAD, OPTIONS)
 	 * 
@@ -148,18 +149,6 @@ public abstract class RouteBuilder
 		return this;
 	}
 
-	public RouteBuilder useRawResponse()
-	{
-		this.shouldUseWrappedResponse = false;
-		return this;
-	}
-
-	public RouteBuilder useWrappedResponse()
-	{
-		this.shouldUseWrappedResponse = false;
-		return this;
-	}
-
 	/**
 	 * Give the route a known name to facilitate retrieving the route by name.  This facilitates
 	 * using the route URI pattern to create Link instances via LinkUtils.asLinks().
@@ -221,6 +210,18 @@ public abstract class RouteBuilder
 		parameters.put(name, value);
 		return this;
 	}
+
+	public RouteBuilder useStreamingMultipartUpload()
+	{
+		// TODO: complete supportMultipart()
+		return this;
+	}
+	
+	public RouteBuilder useStreamingDownload()
+	{
+		// TODO: complete useStreamingdownload()
+		return this;
+	}
 	
 	
 	// SECTION - BUILDER
@@ -238,12 +239,7 @@ public abstract class RouteBuilder
 		}
 
 		List<Route> routes = new ArrayList<Route>();
-		String pattern = uri;
-
-		if (pattern != null && !pattern.startsWith("/"))
-		{
-			pattern = "/" + pattern;
-		}
+		String pattern = toRegexPattern(uri);
 		
 		for (HttpMethod method : methods)
 		{
@@ -255,11 +251,13 @@ public abstract class RouteBuilder
 			}
 			
 			Method action = determineActionMethod(controller, actionName);
-			routes.add(newRoute(pattern, controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse, name, supportedFormats, defaultFormat, flags, parameters));
+			routes.add(newRoute(pattern, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters));
 		}
 		
 		return routes;
 	}
+
+	protected abstract String toRegexPattern(String uri);
 	
 	
 	// SECTION: CONSOLE
@@ -306,7 +304,7 @@ public abstract class RouteBuilder
      * @return
      */
     protected abstract Route newRoute(String pattern, Object controller, Method action,
-    	HttpMethod method, boolean shouldSerializeResponse, boolean shouldUseWrappedResponse,
+    	HttpMethod method, boolean shouldSerializeResponse,
     	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags,
     	Map<String, Object> parameters);
 
@@ -333,4 +331,14 @@ public abstract class RouteBuilder
 			throw new ConfigurationException(e);
 		}
 	}
+
+	/**
+     * @param defaults
+     */
+    protected void applyDefaults(RouteDefaults defaults)
+    {
+    	if (defaults == null) return;
+
+    	defaultFormat(defaults.getDefaultFormat());
+    }
 }

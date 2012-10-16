@@ -23,16 +23,25 @@ import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.exception.BadRequestException;
 
 /**
- * Supports the concept of 'pagination' via request 'Range' parameters.
+ * Supports the concept of 'pagination' via request 'Range' header or 'limit' and 'offset' parameters.
  * <p/>
- * Paging is accomplished using the Range and Content-Range HTTP headers.  The client can request a range of
- * results by including the "Range" header with the request.  For example, to get the first 25 results:
+ * Paging is accomplished using the Range and Content-Range HTTP headers or 'limit' and 'offset' query-string
+ * parameters.
+ * <p/>
+ * The client can request a range of results by including the "Range" header with the request.
+ * For example, to get the first 25 results:
  * <p/>
  * GET /many_things.json<br/>
  * HTTP/1.1<br/>
  * Host: example.com<br/>
  * Range: items=0-24<br/>
- * 
+ * <p/>
+ * To request the same using the 'limit' and 'offset' parameters, limit would be set to 25 with offset being
+ * set to 0 (or empty).  For example, via the query-string: &limit=25 which is equivalent to &limit=25&offset=0.
+ * <p/> 
+ * When both 'Range' and 'limit' + 'offset are provided, the 'limit' and 'offset' parameters override the 'Range'
+ * header.  In other words, the query-string parameters override the headers.
+ * <p/>
  * The server will respond with a "Content-Range" header that includes the start and end of the range, as well
  * as a total count of all results.  For example, the response for the first 25 of 67 total results:
  * <p/>
@@ -47,6 +56,8 @@ public class QueryRange
 {
 	// SECTION: CONSTANTS
 
+	private static final String LIMIT_HEADER_NAME = "limit";
+	private static final String OFFSET_HEADER_NAME = "offset";
 	private static final String RANGE_HEADER_NAME = "Range";
 	private static final String ITEMS_HEADER_REGEX = "items=(\\d+)-(\\d+)";
 	private static final Pattern ITEMS_HEADER_PATTERN = Pattern.compile(ITEMS_HEADER_REGEX);
@@ -55,7 +66,7 @@ public class QueryRange
 	// SECTION: INSTANCE VARIABLES
 
 	private Long start = null;
-	private Long stop = null;
+	private Long end = null;
 
 	
 	// SECTION: CONSTRUCTORS
@@ -65,35 +76,35 @@ public class QueryRange
 		super();
 	}
 
-	public QueryRange(long start, long stop)
+	public QueryRange(long start, long end)
 	{
 		super();
 		setStart(start);
-		setStop(stop);
+		setEnd(end);
 	}
 
-	public QueryRange(long start, int offset)
+	public QueryRange(long start, int limit)
 	{
 		super();
 
-		if (offset == 0)
+		if (limit == 0)
 		{
 			setStart(0);
-			setStop(0);
+			setEnd(0);
 		}
 		else
 		{
 			setStart(start);
-			setOffset(offset);
+			setLimit(limit);
 		}
 	}
 
 	
 	// SECTION: ACCESSORS / MUTATORS
 
-	public int getOffset()
+	public int getLimit()
 	{
-		return (int) (getStop() - getStart());
+		return (int) (getEnd() - getStart() + 1);
 	}
 
 	public boolean hasStart()
@@ -111,34 +122,34 @@ public class QueryRange
 		this.start = Long.valueOf(value);
 	}
 
-	public long getStop()
+	public long getEnd()
 	{
-		return (stop == null ? 0 : stop.intValue());
+		return (end == null ? 0 : end.longValue());
 	}
 
-	public boolean hasStop()
+	public boolean hasEnd()
 	{
-		return (stop != null);
+		return (end != null);
 	}
 
-	public void setStop(long value)
+	public void setEnd(long value)
 	{
-		this.stop = Long.valueOf(value);
+		this.end = Long.valueOf(value);
 	}
 	
-	public void setOffset(int value)
+	public void setLimit(int value)
 	{
-		setStop(getStart() + value - 1);
+		setEnd(getStart() + value - 1);
 	}
 	
 	/**
-	 * Return true if the range has start and stop values.
+	 * Return true if the range has start and end values.
 	 * 
-	 * @return true if the range is initialized (has start and stop values)
+	 * @return true if the range is initialized (has start and end values)
 	 */
 	public boolean isInitialized()
 	{
-		return hasStart() && hasStop();
+		return hasStart() && hasEnd();
 	}
 
 	/**
@@ -148,7 +159,7 @@ public class QueryRange
 	 */
 	public boolean isValid()
 	{
-		return (getStart() <= getStop());
+		return (getStart() <= getEnd());
 	}
 	
 	
@@ -160,12 +171,12 @@ public class QueryRange
 	 * default maximum offset if the request contains no range criteria.
 	 * 
 	 * @param request the current request
-	 * @param maxResults the default maximum offset, used if the request contains no range criteria
-	 * @return a QueryRange instance
+	 * @param limit the default limit, used if the request contains no range criteria
+	 * @return a QueryRange instance, defaulting to 0 to (limit - 1). Never null.
 	 */
-	public static QueryRange parseFrom(Request request, int maxResults)
+	public static QueryRange parseFrom(Request request, int limit)
 	{
-		QueryRange range = new QueryRange(0, maxResults);
+		QueryRange range = new QueryRange(0, limit);
 		parseInto(request, range);
 		return range;
 	}
@@ -174,7 +185,7 @@ public class QueryRange
 	 * Create a QueryRange instance from the current RestExpress request.
 	 * 
 	 * @param request the current request
-	 * @return a QueryRange instance
+	 * @return a QueryRange instance. Never null.
 	 */
 	public static QueryRange parseFrom(Request request)
 	{
@@ -185,7 +196,54 @@ public class QueryRange
 	
 	private static void parseInto(Request request, QueryRange range)
 	{
-		String rangeHeader = request.getUrlDecodedHeader(RANGE_HEADER_NAME);
+		String limit = request.getUrlDecodedHeader(LIMIT_HEADER_NAME);
+		String offset = request.getUrlDecodedHeader(OFFSET_HEADER_NAME);
+
+		if (!parseLimitAndOffset(limit, offset, range))
+		{
+			parseRangeHeader(request, range);
+		}
+	}
+	
+	/**
+     * @param limit
+     * @param offset
+     * @param range
+     * @return
+     */
+    private static boolean parseLimitAndOffset(String limit, String offset, QueryRange range)
+    {
+    	boolean hasLimit = false;
+    	boolean hasOffset = false;
+
+    	if (limit != null && !limit.trim().isEmpty())
+    	{
+    		hasLimit = true;
+    		range.setStart(Long.parseLong(offset));
+    	}
+    	
+    	if (offset != null && !offset.trim().isEmpty())
+    	{
+    		hasOffset = true;
+    		range.setLimit(Integer.parseInt(limit));
+    	}
+    	
+    	if (hasLimit || hasOffset)
+    	{
+    		if (!range.isValid())
+    		{
+    			throw new BadRequestException("Invalid 'limit' and 'offset' parameters: limit=" + limit + " offset=" + offset);
+    		}
+    		
+    		return true;
+    	}
+    	
+    	return false;
+    }
+
+	private static void parseRangeHeader(Request request, QueryRange range)
+    {
+	    String rangeHeader = request.getUrlDecodedHeader(RANGE_HEADER_NAME);
 
 		if (rangeHeader != null && !rangeHeader.trim().isEmpty())
 		{
@@ -197,19 +255,18 @@ public class QueryRange
 			}
 
 			range.setStart(Long.parseLong(matcher.group(1)));
-			range.setStop(Long.parseLong(matcher.group(2)));
+			range.setEnd(Long.parseLong(matcher.group(2)));
 			
 			if (!range.isValid())
 			{
 				throw new BadRequestException("Invalid 'Range' header.  Expecting items=[start]-[end]  was: " + rangeHeader);
 			}
 		}
-	}
-	
+    }
+
 	@Override
 	public String toString()
 	{
-//		return "items " + getStart() + "-" + getOffset();
 		return assembleString().toString();
 	}
 	
@@ -219,24 +276,29 @@ public class QueryRange
 	 * the Content-Range header on the response from Range requests.
 	 * <p/>
 	 * No range checking is performed.  It is therefore, the caller's responsibility to ensure
-	 * that maxItems is greater-than the offset.
+	 * that maxItems is greater-than the end value.
 	 * 
 	 * @param maxItems the maximum number of items available.
 	 * @return a String of the form "items <first>-<last>/<max>"
 	 */
-	public String asContentRange(int maxItems)
+	public String asContentRange(long maxItems)
 	{
-		return assembleString()
+		return assembleString(maxItems)
 			.append("/")
 			.append(maxItems)
 			.toString();
 	}
-	
+
 	private StringBuffer assembleString()
+	{
+		return assembleString(null);
+	}
+
+	private StringBuffer assembleString(Long max)
 	{
 		return new StringBuffer("items ")
 			.append(getStart())
 			.append("-")
-			.append(getOffset());
+			.append((max == null ? getEnd() : (getEnd() > max ? (max > 0 ? max - 1 : max) : getEnd())));
 	}
 }

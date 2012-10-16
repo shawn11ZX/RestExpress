@@ -71,7 +71,7 @@ implements GsonSerializer<Date>
     }
 
     @Override
-    public JsonElement serialize(Date date, Type typeOf, JsonSerializationContext contexst)
+    public JsonElement serialize(Date date, Type typeOf, JsonSerializationContext context)
     {
     	return new JsonPrimitive(adapter.format(date));
     }

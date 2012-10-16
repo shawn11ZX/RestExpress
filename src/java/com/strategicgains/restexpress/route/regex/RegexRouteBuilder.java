@@ -12,7 +12,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/
+ */
 package com.strategicgains.restexpress.route.regex;
 
 import java.lang.reflect.Method;
@@ -22,7 +22,9 @@ import java.util.Set;
 
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
+import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteBuilder;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**
  * @author toddf
@@ -36,20 +38,35 @@ extends RouteBuilder
 	 * @param controller
 	 * @param routeType
 	 */
-	public RegexRouteBuilder(String uri, Object controller)
+	public RegexRouteBuilder(String uri, Object controller,
+	    RouteDefaults defaults)
 	{
-		super(uri, controller);
+		super(uri, controller, defaults);
 	}
 
-	/* (non-Javadoc)
-     * @see com.strategicgains.restexpress.route.RouteBuilder#newRoute(java.lang.String, java.lang.Object, java.lang.reflect.Method, org.jboss.netty.handler.codec.http.HttpMethod, boolean, java.lang.String, java.util.List, java.lang.String)
-     */
-    @Override
-    protected RegexRoute newRoute(String pattern, Object controller, Method action,
-        HttpMethod method, boolean shouldSerializeResponse, boolean shouldUseWrappedResponse,
-        String name, List<String> supportedFormats, String defaultFormat, Set<String> flags,
-        Map<String, Object> parameters)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.strategicgains.restexpress.route.RouteBuilder#newRoute(java.lang.
+	 * String, java.lang.Object, java.lang.reflect.Method,
+	 * org.jboss.netty.handler.codec.http.HttpMethod, boolean, java.lang.String,
+	 * java.util.List, java.lang.String)
+	 */
+	@Override
+	protected Route newRoute(String pattern, Object controller, Method action,
+	    HttpMethod method, boolean shouldSerializeResponse, String name,
+	    List<String> supportedFormats, String defaultFormat, Set<String> flags,
+	    Map<String, Object> parameters)
+	{
+		return new RegexRoute(pattern, controller, action, method,
+		    shouldSerializeResponse, name, supportedFormats, defaultFormat,
+		    flags, parameters);
+	}
+
+	protected String toRegexPattern(String uri)
     {
-    	return new RegexRoute(pattern, controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse, name, flags, parameters);
+		// do not modify the uri, since the caller is building their own regex and is ON THEIR OWN... :-)
+		return uri;
     }
 }

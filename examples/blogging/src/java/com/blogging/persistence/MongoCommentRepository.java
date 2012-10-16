@@ -6,28 +6,15 @@ import org.bson.types.ObjectId;
 
 import com.blogging.domain.Comment;
 import com.google.code.morphia.query.Query;
-import com.mongodb.ServerAddress;
-import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
-import com.strategicgains.repoexpress.mongodb.MongodbRepository;
-import com.strategicgains.repoexpress.mongodb.ObjectIdAdapter;
+import com.mongodb.Mongo;
 
 public class MongoCommentRepository
-extends MongodbRepository<Comment>
+extends AbstractMongoDbRepository<Comment>
 implements CommentRepository
 {
-	private static final String DATABASE_NAME = "blogging";
-
-	@SuppressWarnings("unchecked")
-	public MongoCommentRepository(List<ServerAddress> bootstraps)
+	public MongoCommentRepository(Mongo mongo)
 	{
-		super(bootstraps, DATABASE_NAME, Comment.class);
-		initializeObservers();
-		setIdentifierAdapter(new ObjectIdAdapter());
-	}
-
-	private void initializeObservers()
-	{
-		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Comment>());
+		super(mongo, Comment.class);
 	}
 
 	@Override

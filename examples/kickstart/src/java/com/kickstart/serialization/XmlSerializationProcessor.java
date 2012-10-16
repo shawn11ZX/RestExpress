@@ -2,10 +2,6 @@ package com.kickstart.serialization;
 
 import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
 
-/**
- * @author toddf
- * @since Feb 16, 2011
- */
 public class XmlSerializationProcessor
 extends DefaultXmlProcessor
 {

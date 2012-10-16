@@ -18,6 +18,8 @@ package com.strategicgains.restexpress.route;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,7 +51,6 @@ public abstract class Route
 	private Method action;
 	private HttpMethod method;
 	private boolean shouldSerializeResponse = true;
-	private boolean shouldUseWrappedResponse = true;
 	private String name;
 	private List<String> supportedFormats = new ArrayList<String>();
 	private String defaultFormat;
@@ -63,16 +64,18 @@ public abstract class Route
 	 * @param controller
 	 */
 	public Route(UrlMatcher urlMatcher, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-		boolean shouldUseWrappedResponse, String name, Set<String> flags, Map<String, Object> parameters)
+		String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters)
 	{
 		super();
 		this.urlMatcher = urlMatcher;
 		this.controller = controller;
 		this.action = action;
+		this.action.setAccessible(true);
 		this.method = method;
 		this.shouldSerializeResponse = shouldSerializeResponse;
-		this.shouldUseWrappedResponse = shouldUseWrappedResponse;
 		this.name = name;
+		this.supportedFormats.addAll(supportedFormats);
+		this.defaultFormat = defaultFormat;
 		this.flags.addAll(flags);
 		this.parameters.putAll(parameters);
 	}
@@ -126,11 +129,11 @@ public abstract class Route
 	{
 		return shouldSerializeResponse;
 	}
-	
-	public boolean shouldUseWrappedResponse()
-	{
-		return shouldUseWrappedResponse;
-	}
+
+    public Collection<String> getSupportedFormats()
+    {
+	    return Collections.unmodifiableList(supportedFormats);
+    }
 	
 	public boolean hasSupportedFormats()
 	{

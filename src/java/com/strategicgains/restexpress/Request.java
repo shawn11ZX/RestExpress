@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -29,14 +30,14 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
-import com.strategicgains.restexpress.util.StringUtils;
-import com.strategicgains.restexpress.util.StringUtils.QueryStringCallback;
+import com.strategicgains.restexpress.url.QueryStringParser;
 
 /**
  * @author toddf
@@ -73,11 +74,16 @@ public class Request
 		this.httpVersion = request.getProtocolVersion();
 		this.effectiveHttpMethod = request.getMethod();
 		this.urlRouter = routes;
-		parseRequestedFormatToHeader(request);
-		parseQueryString(request);
-		determineEffectiveHttpMethod(request);
-		createCorrelationId();
+		initialize();
 	}
+
+	private void initialize()
+    {
+	    createCorrelationId();
+//		parseRequestedFormatToHeader(httpRequest);
+		parseQueryString(httpRequest);
+		determineEffectiveHttpMethod(httpRequest);
+    }
 
 
 	// SECTION: ACCESSORS/MUTATORS
@@ -180,14 +186,14 @@ public class Request
 	}
 
 	/**
-	 * Returns the body as a Map of name/value pairs from a url-form-encoded form submission.  Note that
-	 * duplicate names (value arrays using the same parameter name) are not currently supported.
+	 * Returns the body as a Map of name/value pairs from a url-form-encoded form submission.
 	 * 
 	 * @return
 	 */
-	public Map<String, String> getBodyAsUrlFormEncoded()
+	public Map<String, List<String>> getBodyFromUrlFormEncoded()
 	{
-        return StringUtils.parseQueryString(urlDecode(getBody().toString(ContentType.CHARSET)));
+		QueryStringDecoder qsd = new QueryStringDecoder(getBody().toString(ContentType.CHARSET), ContentType.CHARSET, false);
+		return qsd.getParameters();
 	}
 
 	public SerializationProcessor getSerializationProcessor()
@@ -213,9 +219,13 @@ public class Request
 	/**
 	 * Gets the named header as it came in on the request (without URL decoding it).
 	 * Returns null if the header is not present.
+	 * <p/>
+	 * NOTE: because HTTP headers are handled by Netty, which processes them with
+	 *       QueryStringDecoder, HTTP headers are URL decoded. Only query-string
+	 *       parameters that get processed by RestExpress are NOT URL decoded.
 	 * 
 	 * @param name
-	 * @return
+	 * @return the requested header, or null if 'name' doesn't exist as a header.
 	 */
 	public String getRawHeader(String name)
 	{
@@ -226,8 +236,13 @@ public class Request
 	 * Gets the named header as it came in on the request (without URL decoding it).
 	 * Throws BadRequestException(message) if the header is not present.
 	 * 
+	 * NOTE: because HTTP headers are handled by Netty, which processes them with
+	 *       QueryStringDecoder, HTTP headers are URL decoded. Only query-string
+	 *       parameters that get processed by RestExpress are NOT URL decoded.
+	 * 
 	 * @param name
-	 * @return
+	 * @return the requested header
+	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
 	 */
 	public String getRawHeader(String name, String message)
 	{
@@ -240,13 +255,13 @@ public class Request
 
 		return value;
 	}
-	
+
 	/**
 	 * Gets the named header, URL decoding it before returning it.
 	 * Returns null if the header is not present.
 	 * 
 	 * @param name
-	 * @return
+	 * @return the requested header, or null if 'name' doesn't exist as a header.
 	 */
 	public String getUrlDecodedHeader(String name)
 	{
@@ -258,8 +273,8 @@ public class Request
 	 * Gets the named header, URL decoding it before returning it.
 	 * Throws BadRequestException(message) if the header is not present.
 	 * 
-	 * @param name
-	 * @return
+	 * @return the requested header
+	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
 	 */
 	public String getUrlDecodedHeader(String name, String message)
 	{
@@ -390,16 +405,6 @@ public class Request
 	public String getHost()
 	{
 		return HttpHeaders.getHost(httpRequest);
-	}
-	
-	public String getJsonpHeader()
-	{
-		return getRawHeader(Parameters.Query.JSONP_CALLBACK);
-	}
-	
-	public boolean hasJsonpHeader()
-	{
-		return (getJsonpHeader() != null);
 	}
 
 	/**
@@ -537,50 +542,30 @@ public class Request
 	// SECTION: UTILITY - PRIVATE
 
 	/**
-	 * Puts the requested format in the FORMAT_HEADER_NAME header (forcing it to lower case).
-	 * 
-     * @param request
-     */
-    private void parseRequestedFormatToHeader(HttpRequest request)
-    {
-    	String uri = request.getUri();
-		int queryDelimiterIndex = uri.indexOf('?');
-		String path = (queryDelimiterIndex > 0 ? uri.substring(0, queryDelimiterIndex) : uri);
-    	int formatDelimiterIndex = path.indexOf('.');
-    	String format = (formatDelimiterIndex > 0 ? path.substring(formatDelimiterIndex + 1) : null);
-    	
-    	if (format != null)
-    	{
-    		request.addHeader(Parameters.Query.FORMAT, format.toLowerCase());
-    	}
-    }
-	
-	/**
 	 * Add the query string parameters to the request as headers.
-	 * Also parses the query string into the queryStringMap, if applicable.
+	 * Also parses the query string into the queryStringMap, if applicable. Note, if the query string
+	 * contains multiple of the same parameter name, the headers will contain them all, but the
+	 * queryStringMap will only contain the first one.  This will be fixed in a future release.
 	 */
 	private void parseQueryString(final HttpRequest request)
 	{
-		String uri = request.getUri();
-		int x = uri.indexOf('?');
-		String queryString = (x >= 0 ? uri.substring(x + 1) : null);
+		if (!request.getUri().contains("?")) return;
 
-		StringUtils.iterateQueryString(queryString,
-			new QueryStringCallback()
+		Map<String, List<String>> parameters = new QueryStringParser(request.getUri(), true).getParameters();
+
+		if (parameters == null || parameters.isEmpty()) return;
+
+		queryStringMap = new HashMap<String, String>(parameters.size());
+		
+		for (Entry<String, List<String>> entry : parameters.entrySet())
+		{
+			queryStringMap.put(entry.getKey(), entry.getValue().get(0));
+
+			for (String value : entry.getValue())
 			{
-				@Override
-	            public void assign(String key, String value)
-	            {
-					if (queryStringMap == null)
-					{
-						queryStringMap = new HashMap<String, String>();
-					}
-
-					request.addHeader(key, value);
-					queryStringMap.put(key, value);
-	            }
+				request.addHeader(entry.getKey(), value);
 			}
-		);
+		}
 	}
 
 	/**

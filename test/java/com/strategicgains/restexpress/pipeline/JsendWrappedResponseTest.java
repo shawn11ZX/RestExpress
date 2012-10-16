@@ -36,12 +36,12 @@ import org.junit.Test;
 
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
+import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.DefaultSerializationResolver;
-import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
-import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 
 /**
@@ -60,15 +60,16 @@ public class JsendWrappedResponseTest
 	public void initialize()
 	throws Exception
 	{
-		DefaultSerializationResolver resolver = new DefaultSerializationResolver();
-		resolver.put(Format.JSON, new DefaultJsonProcessor());
-		resolver.put(Format.XML, new DefaultXmlProcessor());
+		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
+		resolver.put(Format.JSON, ResponseProcessor.newJsonProcessor(new DefaultResponseWrapper()));
+		resolver.put(Format.XML, ResponseProcessor.newXmlProcessor(new DefaultResponseWrapper()));
 		resolver.setDefaultFormat(Format.JSON);
 		
-		messageHandler = new DefaultRequestHandler(new RouteResolver(new DummyRoutes().createRouteMapping()), resolver);
+		DummyRoutes routes = new DummyRoutes();
+		routes.defineRoutes();
+		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), resolver);
 		observer = new WrappedResponseObserver();
 		messageHandler.addMessageObserver(observer);
-		messageHandler.setResponseWrapperFactory(new DefaultResponseWrapper());
 		httpResponse = new StringBuffer();
 		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(httpResponse));
 		PipelineBuilder pf = new PipelineBuilder()
@@ -492,26 +493,26 @@ public class JsendWrappedResponseTest
 	extends RouteDeclaration
 	{
 		private Object controller = new WrappedResponseController();
+		private RouteDefaults defaults = new RouteDefaults();
 
-        @Override
-        protected void defineRoutes()
+        public void defineRoutes()
         {
-        	uri("/normal_get.{format}", controller)
+        	uri("/normal_get.{format}", controller, defaults)
         		.action("normalGetAction", HttpMethod.GET);
 
-        	uri("/normal_put.{format}", controller)
+        	uri("/normal_put.{format}", controller, defaults)
     		.action("normalPutAction", HttpMethod.PUT);
 
-        	uri("/normal_post.{format}", controller)
+        	uri("/normal_post.{format}", controller, defaults)
     		.action("normalPostAction", HttpMethod.POST);
 
-        	uri("/normal_delete.{format}", controller)
+        	uri("/normal_delete.{format}", controller, defaults)
     		.action("normalDeleteAction", HttpMethod.DELETE);
 
-        	uri("/not_found.{format}", controller)
+        	uri("/not_found.{format}", controller, defaults)
         		.action("notFoundAction", HttpMethod.GET);
 
-        	uri("/null_pointer.{format}", controller)
+        	uri("/null_pointer.{format}", controller, defaults)
         		.action("nullPointerAction", HttpMethod.GET);
         }
 	}

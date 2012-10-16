@@ -19,6 +19,8 @@ package com.strategicgains.restexpress.exception;
 
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
+import com.strategicgains.restexpress.Response;
+
 /**
  * @author toddf
  * @since Nov 20, 2009
@@ -26,16 +28,19 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 public class ServiceException
 extends RuntimeException
 {
-    private static final long serialVersionUID = 1810995969641082808L;
-    private static final HttpResponseStatus STATUS = HttpResponseStatus.INTERNAL_SERVER_ERROR;
-    
-    private HttpResponseStatus httpStatus;
+	private static final long serialVersionUID = 1810995969641082808L;
+	private static final HttpResponseStatus STATUS = HttpResponseStatus.INTERNAL_SERVER_ERROR;
+
+	private HttpResponseStatus httpStatus;
+
+	
+	// SECTION: CONSTRUCTORS
 
 	public ServiceException()
 	{
 		this(STATUS);
 	}
-	
+
 	public ServiceException(HttpResponseStatus status)
 	{
 		setHttpStatus(status);
@@ -48,7 +53,7 @@ extends RuntimeException
 	{
 		this(STATUS, message);
 	}
-	
+
 	public ServiceException(HttpResponseStatus status, String message)
 	{
 		super(message);
@@ -62,7 +67,7 @@ extends RuntimeException
 	{
 		this(STATUS, cause);
 	}
-	
+
 	public ServiceException(HttpResponseStatus status, Throwable cause)
 	{
 		super(cause);
@@ -79,32 +84,47 @@ extends RuntimeException
 	}
 
 	/**
-     * @param internalServerError
-     * @param message
-     * @param cause
-     */
-    public ServiceException(HttpResponseStatus status, String message, Throwable cause)
-    {
-    	super(message, cause);
-    	setHttpStatus(status);
-    }
+	 * @param internalServerError
+	 * @param message
+	 * @param cause
+	 */
+	public ServiceException(HttpResponseStatus status, String message,
+	    Throwable cause)
+	{
+		super(message, cause);
+		setHttpStatus(status);
+	}
+
+	
+	// SECTION: ACCESSORS - PUBLIC
 
 	public HttpResponseStatus getHttpStatus()
-    {
-    	return httpStatus;
-    }
+	{
+		return httpStatus;
+	}
 	
+	/**
+	 * Adds headers, etc. to the reponse, if required for the exception.
+	 */
+	public void augmentResponse(Response response)
+	{
+		// default behavior is to do nothing.
+	}
+
+	
+	// SECTION: MUTATORS - PRIVATE
+
 	private void setHttpStatus(HttpResponseStatus status)
 	{
 		this.httpStatus = status;
 	}
+
 	
-	
-	// CONVENIENCE - STATIC
+	// SECTION: CONVENIENCE - STATIC
 
 	public static boolean isAssignableFrom(Throwable exception)
-    {
-	    return ServiceException.class.isAssignableFrom(exception.getClass());
-    }
+	{
+		return ServiceException.class.isAssignableFrom(exception.getClass());
+	}
 
 }

@@ -161,6 +161,7 @@
 			<jvmarg value="-XX:MaxNewSize=128m"/>
 			<jvmarg value="-Xms256m"/>
 			<jvmarg value="-Xmx256m"/>
+			<jvmarg value="-server"/>
             <classpath>
                     <path refid="runtime.classpath"/>
             </classpath>

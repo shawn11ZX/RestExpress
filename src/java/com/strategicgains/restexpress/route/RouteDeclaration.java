@@ -21,19 +21,18 @@ import java.util.List;
 import com.strategicgains.restexpress.domain.metadata.RouteMetadata;
 import com.strategicgains.restexpress.route.parameterized.ParameterizedRouteBuilder;
 import com.strategicgains.restexpress.route.regex.RegexRouteBuilder;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**
  * @author toddf
  * @since Jan 13, 2011
  */
-public abstract class RouteDeclaration
+public class RouteDeclaration
 {
 	// SECTION: INSTANCE VARIABLES
 
 	private List<RouteBuilder> routeBuilders;
 	List<RouteMetadata> routeMetadata = new ArrayList<RouteMetadata>();
-	private String defaultFormat;
-	private List<String> supportedFormats = new ArrayList<String>();
 
 	
 	public RouteDeclaration()
@@ -51,9 +50,9 @@ public abstract class RouteDeclaration
 	 * @param urlPattern a string specifying a URL pattern to match.
 	 * @param controller a pojo which contains implementations of the service methods (e.g. create(), read(), update(), delete()).
 	 */
-	public ParameterizedRouteBuilder uri(String uri, Object controller)
+	public ParameterizedRouteBuilder uri(String uri, Object controller, RouteDefaults defaults)
 	{
-		ParameterizedRouteBuilder builder = new ParameterizedRouteBuilder(uri, controller);
+		ParameterizedRouteBuilder builder = new ParameterizedRouteBuilder(uri, controller, defaults);
 		routeBuilders.add(builder);
 		return builder;
 	}
@@ -64,24 +63,11 @@ public abstract class RouteDeclaration
 	 * @param regex a string specifying a regex pattern to match.
 	 * @param controller a pojo which contains implementations of service methods (e.g. create(), read(), update(), delete()).
 	 */
-	public RegexRouteBuilder regex(String regex, Object controller)
+	public RegexRouteBuilder regex(String regex, Object controller, RouteDefaults defaults)
 	{
-		RegexRouteBuilder builder = new RegexRouteBuilder(regex, controller);
+		RegexRouteBuilder builder = new RegexRouteBuilder(regex, controller, defaults);
 		routeBuilders.add(builder);
 		return builder;
-	}
-	
-	
-	// SECTION: MUTATORS
-	
-	public void setDefaultFormat(String format)
-	{
-		this.defaultFormat = format;
-	}
-	
-	public void setSupportedFormats(List<String> supportedFormats)
-	{
-		this.supportedFormats.addAll(supportedFormats);
 	}
 	
 	
@@ -90,9 +76,8 @@ public abstract class RouteDeclaration
 	/**
 	 * Generate a RouteMapping (utilized by RouteResolver) from the declared routes.
 	 */
-	public RouteMapping createRouteMapping()
+	public RouteMapping createRouteMapping(RouteDefaults defaults)
 	{
-		defineRoutes();
 		RouteMapping results = new RouteMapping();
 
 		for (RouteBuilder builder : routeBuilders)
@@ -101,32 +86,12 @@ public abstract class RouteDeclaration
 
     		for (Route route : builder.build())
 			{
-    			setRouteDefaults(route);
 				results.addRoute(route);
 			}
 		}
 
-		unDefineRoutes();
 		return results;
 	}
-	
-	private void setRouteDefaults(Route route)
-	{
-		if (!route.hasDefaultFormat())
-		{
-			route.setDefaultFormat(defaultFormat);
-		}
-		
-		if (!route.hasSupportedFormats())
-		{
-			route.addAllSupportedFormats(supportedFormats);
-		}
-	}
-
-	
-	// SECTION: ROUTES -SUBCLASSES
-
-	protected abstract void defineRoutes();
 
 	
 	// SECTION: CONSOLE
@@ -137,10 +102,5 @@ public abstract class RouteDeclaration
     public List<RouteMetadata> getMetadata()
     {
     	return routeMetadata;
-    }
-
-	private void unDefineRoutes()
-    {
-	    routeBuilders.clear();
     }
 }

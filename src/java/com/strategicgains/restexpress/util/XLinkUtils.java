@@ -33,6 +33,7 @@ import com.strategicgains.restexpress.domain.XLinkFactory;
 public abstract class XLinkUtils
 {
 	private static final XLinkFactory DEFAULT_XLINK_FACTORY = new DefaultXLinkFactory();
+	private static final MapStringFormat formatter = new MapStringFormat();
 
 	private XLinkUtils()
 	{
@@ -70,7 +71,6 @@ public abstract class XLinkUtils
 	 */
 	public static List<XLink> asXLinks(Collection<String> ids, String rel, String paramName, String urlPath, XLinkFactory xlinkFactory, String... nameValuePairs)
 	{
-		MapStringFormat formatter = new MapStringFormat();
 		Map<String, String> parameters = MapStringFormat.toMap(nameValuePairs);
 		List<XLink> results = new ArrayList<XLink>(ids.size());
 
@@ -81,5 +81,12 @@ public abstract class XLinkUtils
 		}
 
 		return results;
+	}
+	
+	public static String asLocationUrl(String id, String urlIdParam, String urlPath, String... nameValuePairs)
+	{
+		Map<String, String> parameters = MapStringFormat.toMap(nameValuePairs);
+		parameters.put(urlIdParam, id);
+		return formatter.format(urlPath, parameters);
 	}
 }

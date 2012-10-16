@@ -12,7 +12,7 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/
+ */
 package com.strategicgains.restexpress.route.parameterized;
 
 import java.lang.reflect.Method;
@@ -24,7 +24,9 @@ import java.util.Set;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.strategicgains.restexpress.domain.metadata.RouteMetadata;
+import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteBuilder;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**
  * @author toddf
@@ -40,16 +42,29 @@ extends RouteBuilder
 	 * @param controller
 	 * @param routeType
 	 */
-	public ParameterizedRouteBuilder(String uri, Object controller)
+	public ParameterizedRouteBuilder(String uri, Object controller,
+	    RouteDefaults defaults)
 	{
-		super(uri, controller);
+		super(uri, controller, defaults);
+	}
+
+	@Override
+	protected Route newRoute(String pattern, Object controller, Method action,
+	    HttpMethod method, boolean shouldSerializeResponse, String name,
+	    List<String> supportedFormats, String defaultFormat, Set<String> flags,
+	    Map<String, Object> parameters)
+	{
+		return new ParameterizedRoute(pattern, controller, action, method,
+		    shouldSerializeResponse, name, supportedFormats, defaultFormat,
+		    flags, parameters);
 	}
 
 	/**
-	 * Associate another URI pattern to this route, essentially making an alias for the route.
-	 * There may be multiple alias URIs for a given route.  Note that new parameter nodes (e.g. {id})
-	 * in the URI will be available within the method.  Parameter nodes that are missing from
-	 * the alias will not be available in the action method.
+	 * Associate another URI pattern to this route, essentially making an alias
+	 * for the route. There may be multiple alias URIs for a given route. Note
+	 * that new parameter nodes (e.g. {id}) in the URI will be available within
+	 * the method. Parameter nodes that are missing from the alias will not be
+	 * available in the action method.
 	 * 
 	 * @param uri the alias URI.
 	 * @return the ParameterizedRouteBuilder instance (this).
@@ -63,7 +78,7 @@ extends RouteBuilder
 
 		return this;
 	}
-	
+
 	@Override
 	public RouteMetadata asMetadata()
 	{
@@ -77,14 +92,16 @@ extends RouteBuilder
 		return metadata;
 	}
 
-    @Override
-    protected ParameterizedRoute newRoute(String pattern, Object controller, Method action,
-        HttpMethod method, boolean shouldSerializeResponse, boolean shouldUseWrappedResponse,
-        String name, List<String> supportedFormats, String defaultFormat, Set<String> flags,
-        Map<String, Object> parameters)
-    {
-    	ParameterizedRoute r = new ParameterizedRoute(pattern, controller, action, method, shouldSerializeResponse, shouldUseWrappedResponse, name, flags, parameters);
-    	r.addAliases(aliases);
-    	return r;
-    }
+	protected String toRegexPattern(String uri)
+	{
+		String pattern = uri;
+
+		if (pattern != null && !pattern.startsWith("/"))
+		{
+			pattern = "/" + pattern;
+		}
+
+		return pattern;
+	}
+
 }
