@@ -82,11 +82,23 @@ public abstract class XLinkUtils
 
 		return results;
 	}
-	
-	public static String asLocationUrl(String id, String urlIdParam, String urlPath, String... nameValuePairs)
+
+	/**
+	 * Create a Location header-style URL from an URL pattern, replacing parameters (of the form '{name}')
+	 * with actual values.
+	 * <p/>
+	 * Example usage:<br/>
+	 * String urlPattern = request.getNamedUrl(HttpMethod.GET, "order.crud.route");<br/>
+	 * String locationUrl = XLinkUtils.asLocationUrl(locationUrl, "orderId", "1234");<br/>
+	 * response.addLocationHeader(locationUrl);
+	 * 
+	 * @param urlPattern
+	 * @param nameValuePairs string name/value pairs where name matches parameters in the URL.
+	 * @return a String with parameters replaced with values.
+	 */
+	public static String asLocationUrl(String urlPattern, String... nameValuePairs)
 	{
 		Map<String, String> parameters = MapStringFormat.toMap(nameValuePairs);
-		parameters.put(urlIdParam, id);
-		return formatter.format(urlPath, parameters);
+		return formatter.format(urlPattern, parameters);
 	}
 }
