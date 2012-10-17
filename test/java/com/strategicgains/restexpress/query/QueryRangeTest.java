@@ -41,8 +41,42 @@ public class QueryRangeTest
 		Request request = new Request(httpRequest, null);
 		QueryRange r = QueryRange.parseFrom(request);
 		assertEquals(25, r.getLimit());
-		assertEquals(0, r.getStart());
+		assertEquals(0, r.getOffset());
 		assertEquals(24, r.getEnd());
+	}
+
+	@Test
+	public void shouldHandleNullOffset()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("limit", "5");
+		Request request = new Request(httpRequest, null);
+		QueryRange r = QueryRange.parseFrom(request);
+		assertEquals(5, r.getLimit());
+		assertEquals(0, r.getOffset());
+		assertEquals(4, r.getEnd());
+	}
+
+	@Test(expected=BadRequestException.class)
+	public void shouldThrowOnNullLimitWithOffset()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("offset", "25");
+		Request request = new Request(httpRequest, null);
+		QueryRange.parseFrom(request);
+		fail("Should have thrown");
+	}
+
+	@Test
+	public void shouldHandleNullLimitWithDefault()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("offset", "25");
+		Request request = new Request(httpRequest, null);
+		QueryRange r = QueryRange.parseFrom(request, 5);
+		assertEquals(5, r.getLimit());
+		assertEquals(25, r.getOffset());
+		assertEquals(29, r.getEnd());
 	}
 
 	@Test(expected=BadRequestException.class)
@@ -80,7 +114,9 @@ public class QueryRangeTest
 	@Test
 	public void shouldCreateZeroBasedRange()
 	{
-		QueryRange r = new QueryRange(0, 25);
+		QueryRange r = new QueryRange();
+		r.setStart(0);
+		r.setLimit(25);
 		assertEquals(25, r.getLimit());
 		assertEquals(0, r.getStart());
 		assertEquals(24, r.getEnd());
@@ -89,7 +125,9 @@ public class QueryRangeTest
 	@Test
 	public void shouldCreateNextPageRange()
 	{
-		QueryRange r = new QueryRange(25, 25);
+		QueryRange r = new QueryRange();
+		r.setStart(25);
+		r.setLimit(25);
 		assertEquals(25, r.getLimit());
 		assertEquals(25, r.getStart());
 		assertEquals(49, r.getEnd());
@@ -111,23 +149,24 @@ public class QueryRangeTest
 	}
 
 	@Test
-	public void shouldAssembleStringRangeUsingEnd()
+	public void shouldAssembleStringRange()
 	{
-		QueryRange r = new QueryRange(1, 25l);
-		assertEquals("items 1-25", r.toString());
-	}
-
-	@Test
-	public void shouldAssembleStringRangeUsingLimit()
-	{
-		QueryRange r = new QueryRange(0, 25);
+		QueryRange r = new QueryRange();
+		r.setStart(0);
+		r.setLimit(25);
 		assertEquals("items 0-24", r.toString());
+
+		r.setStart(1);
+		r.setLimitViaEnd(25l);
+		assertEquals("items 1-25", r.toString());
 	}
 
 	@Test
 	public void shouldCreateAsContentRange()
 	{
-		QueryRange r = new QueryRange(0, 25);
+		QueryRange r = new QueryRange();
+		r.setStart(0);
+		r.setLimit(25);
 		assertEquals("items 0-24/25", r.asContentRange(25));
 		assertEquals("items 0-19/20", r.asContentRange(20));
 		assertEquals("items 0-0/0", r.asContentRange(0));
