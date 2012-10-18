@@ -38,9 +38,9 @@ public class XLink
 	 */
 	private String href;
 
-	public XLink(String id, String href)
+	public XLink(String rel, String href)
 	{
-		this(id, null, href);
+		this(null, rel, href);
 	}
 
 	public XLink(String id, String rel, String href)
