@@ -128,7 +128,7 @@ public class QueryRange
 	 */
 	public void setLimit(int value)
 	{
-		if (value < 0) throw new IllegalArgumentException("limit must be >= 0");
+		if (value <= 0) throw new IllegalArgumentException("limit must be > 0");
 
 		this.limit = Integer.valueOf(value);
 	}
@@ -312,7 +312,7 @@ public class QueryRange
 			}
 			catch(IllegalArgumentException e)
 			{
-				// swallow it if setOffset() or setLimitViaEnd() causes exception since we're going to call isValid().
+				throw new BadRequestException("Invalid 'Range' header.  Expecting 'items=[start]-[end]'  was: " + rangeHeader);
 			}
 
 			if (!range.isValid())
@@ -342,20 +342,39 @@ public class QueryRange
 	 */
 	public String asContentRange(long maxItems)
 	{
-		return assembleString(maxItems).append("/").append(maxItems).toString();
+		return assembleString()
+			.append("/")
+			.append(maxItems)
+			.toString();
 	}
 
 	private StringBuffer assembleString()
 	{
-		return assembleString(null);
-	}
-
-	private StringBuffer assembleString(Long max)
-	{
-		long end = (max == null ? getEnd() : (getEnd() > max ? (max > 0 ? max - 1 : max) : getEnd()));
 		return new StringBuffer("items ")
 			.append(getOffset())
 			.append("-")
-		    .append(end);
+		    .append(getEnd());
 	}
+
+	// SECTION: COLLECTION SIZE RANGE CHECKING
+
+	public boolean isOutside(int size, long count)
+	{
+		return (size == 0 && count > 0);
+	}
+
+    public boolean extendsBeyond(int size, long count)
+    {
+	    return (count == 0 && getEnd() > 0) || (size > 0 && getEnd() > (count - 1));
+    }
+
+    public boolean spans(int size, long count)
+    {
+	    return (size == count && count > 0);
+    }
+
+    public boolean isInside(int size, long count)
+    {
+	    return (size > 0 && getEnd() < count && !spans(size, count));
+    }
 }

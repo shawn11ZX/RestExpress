@@ -151,6 +151,41 @@ public class Response
 	}
 
 	/**
+	 * Sets HTTP response code and Content-Range header appropriately for
+	 * the requested QueryRange, returned collection size and maximum data set size.
+	 * 
+	 * @param queryRange
+	 * @param results
+	 * @param count
+	 */
+	public void setCollectionResponse(QueryRange queryRange, int size, long count)
+	{
+		QueryRange range = new QueryRange(queryRange.getOffset(), queryRange.getLimit());
+		
+		if (range.isOutside(size, count))
+		{
+			setResponseCode(416);
+			range.setOffset(0);
+			range.setLimitViaEnd(Math.min(count - 1, range.getLimit()));
+		}
+		else if (range.extendsBeyond(size, count))
+		{
+			range.setLimitViaEnd((count > 1 ? count - 1 : 0));
+			
+			if (count > 0 && !range.spans(size, count))
+			{
+				setResponseCode(206);
+			}
+		}
+		else if (range.isInside(size, count))
+		{
+			setResponseCode(206);
+		}
+
+		addRangeHeader(range, count);
+	}
+
+	/**
 	 * Set the HTTP response status code.
 	 * 
 	 * @param value
