@@ -51,6 +51,14 @@ public class XLink
 	    this.rel = rel;
     }
 
+	/**
+	 * @param link
+	 */
+    public XLink(XLink link)
+    {
+    	this(link.id(), link.rel(), link.href());
+    }
+
 	public String id()
     {
     	return id;
