@@ -128,9 +128,10 @@ public class RestExpress
 		return routeDefaults.getBaseUrl();
 	}
 
-	public void setBaseUrl(String baseUrl)
+	public RestExpress setBaseUrl(String baseUrl)
 	{
 		routeDefaults.setBaseUrl(baseUrl);
+		return this;
 	}
 
 	/**
