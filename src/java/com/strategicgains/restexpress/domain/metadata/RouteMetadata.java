@@ -33,6 +33,7 @@ public class RouteMetadata
 	private String defaultFormat;
 	private List<String> methods = new ArrayList<String>();
 	private boolean isSerialized;
+	private String baseUrl;
 
 	public String getName()
 	{
@@ -145,5 +146,15 @@ public class RouteMetadata
 		{
 			addAlias(alias);
 		}
+	}
+	
+	public String getBaseUrl()
+	{
+		return baseUrl;
+	}
+	
+	public void setBaseUrl(String baseUrl)
+	{
+		this.baseUrl = baseUrl;
 	}
 }

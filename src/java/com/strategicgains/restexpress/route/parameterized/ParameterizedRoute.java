@@ -45,9 +45,9 @@ extends Route
      * @param name
      */
     public ParameterizedRoute(UrlPattern urlMatcher, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-    	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters)
+    	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters, String baseUrl)
     {
-	    super(urlMatcher, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters);
+	    super(urlMatcher, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters, baseUrl);
     }
 
     /**
@@ -59,9 +59,9 @@ extends Route
      * @param name
      */
     public ParameterizedRoute(String urlPattern, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-    	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters)
+    	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters, String baseUrl)
     {
-	    this(new UrlPattern(urlPattern), controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters);
+	    this(new UrlPattern(urlPattern), controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters, baseUrl);
     }
 
     public void addAliases(List<String> uris)

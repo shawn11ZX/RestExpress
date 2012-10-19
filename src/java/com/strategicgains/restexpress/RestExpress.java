@@ -123,6 +123,16 @@ public class RestExpress
 		useSystemOut();
 	}
 
+	public String getBaseUrl()
+	{
+		return routeDefaults.getBaseUrl();
+	}
+
+	public void setBaseUrl(String baseUrl)
+	{
+		routeDefaults.setBaseUrl(baseUrl);
+	}
+
 	/**
 	 * Get the name of this RestExpress service.
 	 * 

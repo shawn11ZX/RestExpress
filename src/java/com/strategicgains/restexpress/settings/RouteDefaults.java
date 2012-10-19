@@ -30,6 +30,17 @@ public class RouteDefaults
 {
 	private String defaultFormat = ContentType.JSON;
 	private Map<String, Class<?>> xmlAliases = new HashMap<String, Class<?>>();
+	private String baseUrl;
+
+	public String getBaseUrl()
+	{
+		return baseUrl;
+	}
+
+	public void setBaseUrl(String baseUrl)
+	{
+		this.baseUrl = baseUrl;
+	}
 
 	public String getDefaultFormat()
 	{
