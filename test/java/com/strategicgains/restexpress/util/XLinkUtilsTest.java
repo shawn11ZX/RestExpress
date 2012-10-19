@@ -15,7 +15,9 @@
 */
 package com.strategicgains.restexpress.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +25,6 @@ import java.util.List;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.domain.XLink;
-import com.strategicgains.restexpress.domain.XLinkFactory;
 
 
 /**
@@ -70,36 +71,5 @@ public class XLinkUtilsTest
 		assertEquals("three", xlinks.get(2).id());
 		assertEquals("/strings/simple/three", xlinks.get(2).href());
 		assertEquals("related", xlinks.get(2).rel());
-	}
-
-	@Test
-	public void shouldCreateXLinksUsingXLinkFactory()
-	{
-		XLinkFactory factory = new RelXLinkFactory();
-		List<String> ids = Arrays.asList("one", "two", "three");
-		List<XLink> xlinks = XLinkUtils.asXLinks(ids, "related", "id", "/{prefix}/{node}/{id}", factory, "prefix", "strings", "node", "simple");
-		assertNotNull(xlinks);
-		assertEquals(3, xlinks.size());
-		assertEquals("one", xlinks.get(0).id());
-		assertEquals("/strings/simple/one", xlinks.get(0).href());
-		assertEquals("relationValue", xlinks.get(0).rel());
-
-		assertEquals("two", xlinks.get(1).id());
-		assertEquals("/strings/simple/two", xlinks.get(1).href());
-		assertEquals("relationValue", xlinks.get(1).rel());
-
-		assertEquals("three", xlinks.get(2).id());
-		assertEquals("/strings/simple/three", xlinks.get(2).href());
-		assertEquals("relationValue", xlinks.get(2).rel());
-	}
-	
-	private class RelXLinkFactory
-	implements XLinkFactory
-	{
-        @Override
-        public XLink create(String id, String rel, String href)
-        {
-        	return new XLink(id, "relationValue", href);
-        }
 	}
 }
