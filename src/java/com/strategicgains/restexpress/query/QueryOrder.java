@@ -46,14 +46,34 @@ public class QueryOrder
 	{
 		super();
 	}
-	
-	public QueryOrder(String[] strings)
+
+	/**
+	 * Create a QueryOrder instance from an array of property names to order on,
+	 * prefixed with '-' to sort descending.
+	 * 
+	 * @param strings property name(s) to sort on (prefixed with '-' to sort descending).
+	 */
+	public QueryOrder(String... strings)
 	{
 		this();
 		
 		if (strings == null || strings.length == 0) return;
 
-		sorts = new ArrayList<OrderComponent>();
+		addSort(strings);
+	}
+
+	/**
+	 * Add sort order(s) to this QueryOrder instance.
+	 * 
+	 * @param strings property names to sort on (prefixed with '-' to sort descending).
+	 * @return this QueryOrder instance to facilitate method chaining.
+	 */
+	public QueryOrder addSort(String... strings)
+	{
+		if (sorts == null)
+		{
+			sorts = new ArrayList<OrderComponent>();
+		}
 
 		for (String sortString : strings)
 		{
@@ -61,6 +81,8 @@ public class QueryOrder
 			String fieldName = sortString.replaceAll("^[+-]{1}", "");
 			sorts.add(new OrderComponent(fieldName, isDescending));
 		}
+
+		return this;
 	}
 
 	/**

@@ -53,6 +53,41 @@ public class QueryOrderTest
 		assertTrue(callback.get("createdAt").isDescending());
 	}
 	
+	@Test
+	public void shouldAddSortCriteria()
+	{
+		QueryOrder o = new QueryOrder();
+		assertFalse(o.isSorted());
+		o.addSort("name", "-zip");
+		assertTrue(o.isSorted());
+		
+		o.iterate(new OrderCallback()
+		{
+			int i = 0;
+
+			@Override
+			public void orderBy(OrderComponent component)
+			{
+				if (i == 0)
+				{
+					assertEquals("name", component.getFieldName());
+					assertTrue(component.isAscending());
+				}
+				else if (i == 1)
+				{
+					assertEquals("zip", component.getFieldName());
+					assertTrue(component.isDescending());
+				}
+				else
+				{
+					fail("Called too many times");
+				}
+				
+				++i;
+			}
+		});
+	}
+	
 	private class OCallback
 	implements OrderCallback
 	{
