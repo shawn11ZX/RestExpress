@@ -49,6 +49,25 @@ public class QueryFilterTest
 		assertEquals("amazing", callback.get("description"));
 	}
 	
+	@Test
+	public void shouldAddFilterCriteria()
+	{
+		QueryFilter f = new QueryFilter();
+		assertFalse(f.hasFilters());
+		f.addCriteria("test", "something");
+		assertTrue(f.hasFilters());
+		
+		f.iterate(new FilterCallback()
+		{
+			@Override
+			public void filterOn(FilterComponent component)
+			{
+				assertEquals("test", component.getField());
+				assertEquals("something", component.getValue());
+			}
+		});
+	}
+	
 	private class FCallback
 	implements FilterCallback
 	{
