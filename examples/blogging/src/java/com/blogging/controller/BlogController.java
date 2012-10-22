@@ -2,7 +2,6 @@ package com.blogging.controller;
 
 import java.util.List;
 
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.blogging.Constants;
@@ -10,7 +9,6 @@ import com.blogging.domain.Blog;
 import com.blogging.persistence.BlogRepository;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.util.XLinkUtils;
 
 /**
  * @author toddf
@@ -32,7 +30,7 @@ public class BlogController
 		blog.validate();
 		Blog result = repo.create(blog);
 		String linkUrl = request.getNamedUrl(HttpMethod.GET, Constants.BLOG_URL_NAME);
-		response.addHeader(HttpHeaders.Names.LOCATION, XLinkUtils.asLocationUrl(result.getId(), "blogId", linkUrl));
+		response.addLocationHeader(LinkUtils.asLocationUrl(result.getId(), "blogId", linkUrl));
 		response.setResponseCreated();
 	}
 
