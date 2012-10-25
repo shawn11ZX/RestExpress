@@ -665,8 +665,7 @@ public class RestExpress
 		    createRouteResolver(), createResponseProcessorResolver());
 
 		// Add MessageObservers to the request handler here, if desired...
-		requestHandler.addMessageObserver(messageObservers
-		    .toArray(new MessageObserver[0]));
+		requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));
 
 		requestHandler.setExceptionMap(exceptionMap);
 
@@ -678,7 +677,7 @@ public class RestExpress
 		PipelineBuilder pf = new PipelineBuilder().addRequestHandler(
 		    new LoggingHandler(getLogLevel().getNettyLogLevel()))
 		    .addRequestHandler(requestHandler);
-		
+
 		if (getProcessingThreadCount() > 0)
 		{
 			ExecutionHandler executionHandler = new ExecutionHandler(
