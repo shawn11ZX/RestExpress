@@ -24,7 +24,7 @@ import com.strategicgains.syntaxe.annotation.StringValidation;
  */
 @Entity("blogs")
 public class Blog
-extends BaseDomainObject
+extends AbstractEntity
 {
 	@StringValidation(name = "Blog Title", required = true)
 	private String title;

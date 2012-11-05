@@ -16,17 +16,11 @@
 package com.strategicgains.restexpress.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
-
-import com.strategicgains.restexpress.util.StringUtils.QueryStringCallback;
 
 /**
  * @author toddf
@@ -34,90 +28,19 @@ import com.strategicgains.restexpress.util.StringUtils.QueryStringCallback;
  */
 public class StringUtilsTest
 {
-	private int size;
-
-	@Before
-	public void setup()
-	{
-		size = 0;
-	}
-
 	@Test
-	public void shouldParseQueryStringIntoMap()
+	public void shouldJoinListOfStrings()
 	{
-		Map<String, String> results = StringUtils.parseQueryString("a=1&b=two&c");
-		assertEquals(3, results.size());
-		assertEquals("1", results.get("a"));
-		assertEquals("two", results.get("b"));
-		assertEquals("", results.get("c"));
+		List<String> objects = new ArrayList<String>();
+		objects.add("Fredrich");
+		objects.add("Todd");
+		objects.add("Anthony");
+		assertEquals("Fredrich, Todd, Anthony", StringUtils.join(", ", objects));
 	}
-
+	
 	@Test
-	public void shouldParseNullQueryString()
+	public void shouldJoinFromSeparateItems()
 	{
-		Map<String, String> results = StringUtils.parseQueryString(null);
-		assertTrue(results.isEmpty());
-	}
-
-	@Test
-	public void shouldParseEmptyQueryString()
-	{
-		Map<String, String> results = StringUtils.parseQueryString("");
-		assertTrue(results.isEmpty());
-	}
-
-	@Test
-	public void shouldIterateQueryString()
-	{
-		StringUtils.iterateQueryString("a=1&b=two&c&bc", 
-			new QueryStringCallback()
-			{
-				private List<String> handled = new ArrayList<String>();
-
-				@Override
-				public void assign(String key, String value)
-				{
-					++size;
-					
-					if (handled.contains(key))
-					{
-						fail("already handled key: " + key);
-					}
-				}
-			});
-
-		assertEquals(4, size);
-	}
-
-	@Test
-	public void shouldIterateNullQueryString()
-	{
-		StringUtils.iterateQueryString(null, 
-			new QueryStringCallback()
-			{
-				@Override
-				public void assign(String key, String value)
-				{
-					++size;
-				}
-			});
-
-		assertEquals(0, size);
-	}
-
-	@Test
-	public void shouldIterateEmptyQueryString()
-	{
-		StringUtils.iterateQueryString(null, 
-			new QueryStringCallback()
-			{
-				@Override
-				public void assign(String key, String value)
-				{
-					++size;
-				}
-			});
-
-		assertEquals(0, size);
+		assertEquals("this... is... great", StringUtils.join("... ", "this", "is", "great"));
 	}
 }

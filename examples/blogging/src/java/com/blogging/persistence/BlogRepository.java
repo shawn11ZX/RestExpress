@@ -15,6 +15,8 @@
 */
 package com.blogging.persistence;
 
+import java.util.List;
+
 import com.blogging.domain.Blog;
 import com.strategicgains.repoexpress.Repository;
 
@@ -25,4 +27,5 @@ import com.strategicgains.repoexpress.Repository;
 public interface BlogRepository
 extends Repository<Blog>
 {
+	public List<Blog> readOwnedBlogs(String ownerId);
 }

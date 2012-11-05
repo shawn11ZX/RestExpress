@@ -18,10 +18,13 @@ package com.strategicgains.restexpress.route;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jboss.netty.handler.codec.http.HttpMethod;
+
+import com.strategicgains.restexpress.url.UrlMatch;
 
 /**
  * Contains the routes for a given service implementation. Sub-classes will
@@ -44,6 +47,7 @@ public class RouteMapping
 	private List<Route> headRoutes = new ArrayList<Route>();
 
 	private Map<String, Map<HttpMethod, Route>> routesByName = new HashMap<String, Map<HttpMethod, Route>>();
+	private Map<String, List<Route>> routesByPattern = new LinkedHashMap<String, List<Route>>();
 
 	// SECTION: CONSTRUCTOR
 
@@ -83,6 +87,72 @@ public class RouteMapping
 	}
 
 	/**
+	 * Attempts to match the path and method to an appropriate Route, returning an
+	 * Action instance if a match is found.  Returns null if no match is found.
+	 * 
+	 * @param method
+	 *            the HTTP method (GET, PUT, POST, DELETE) for which to retrieve
+	 *            the routes.
+	 * @param path the path portion of the url to match.
+	 * @return a new Action or null, if the path/method combination don't match.
+	 */
+	public Action getActionFor(HttpMethod method, String path)
+	{
+		for (Route route : routes.get(method))
+		{
+			UrlMatch match = route.match(path);
+
+			if (match != null)
+			{
+				return new Action(route, match);
+			}
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Returns a list of Route instances that the given path resolves to.
+	 * 
+	 * @param path the path portion of the URL (e.g. after the domain and port).
+	 * @return A list of Route instances matching the given path. Never null.
+	 */
+	public List<Route> getMatchingRoutes(String path)
+	{
+		for (List<Route> patternRoutes : routesByPattern.values())
+		{
+			if (patternRoutes.get(0).match(path) != null)
+			{
+				return Collections.unmodifiableList(patternRoutes);
+			}
+		}
+		
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Returns the supported HTTP methods for the given URL path.
+	 * 
+	 * @param path the path portion of the URL (e.g. after the domain and port).
+	 * @return A list of appropriate HTTP methods for the given path. Never null.
+	 */
+	public List<HttpMethod> getAllowedMethods(String path)
+	{
+		List<Route> matchingRoutes = getMatchingRoutes(path);
+		
+		if (matchingRoutes.isEmpty()) return Collections.emptyList();
+
+		List<HttpMethod> methods = new ArrayList<HttpMethod>();
+
+		for (Route route : matchingRoutes)
+		{
+			methods.add(route.getMethod());
+		}
+		
+		return methods;
+	}
+
+	/**
 	 * Return a Route by the name and HttpMethod provided in DSL. Returns null
 	 * if no route found.
 	 * 
@@ -111,13 +181,12 @@ public class RouteMapping
 	public void addRoute(Route route)
 	{
 		routes.get(route.getMethod()).add(route);
+		addByPattern(route);
 
 		if (route.hasName())
 		{
 			addNamedRoute(route);
 		}
-
-		// TODO: call log4j for added route, method
 	}
 
 
@@ -134,5 +203,18 @@ public class RouteMapping
 		}
 
 		routesByMethod.put(route.getMethod(), route);
+	}
+	
+	private void addByPattern(Route route)
+	{
+		List<Route> urlRoutes = routesByPattern.get(route.getPattern());
+		
+		if (urlRoutes == null)
+		{
+			urlRoutes = new ArrayList<Route>();
+			routesByPattern.put(route.getPattern(), urlRoutes);
+		}
+		
+		urlRoutes.add(route);
 	}
 }

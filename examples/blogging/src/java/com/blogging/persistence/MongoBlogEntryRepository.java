@@ -6,28 +6,15 @@ import org.bson.types.ObjectId;
 
 import com.blogging.domain.BlogEntry;
 import com.google.code.morphia.query.Query;
-import com.mongodb.ServerAddress;
-import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
-import com.strategicgains.repoexpress.mongodb.MongodbRepository;
-import com.strategicgains.repoexpress.mongodb.ObjectIdAdapter;
+import com.mongodb.Mongo;
 
 public class MongoBlogEntryRepository
-extends MongodbRepository<BlogEntry>
+extends AbstractMongoDbRepository<BlogEntry>
 implements BlogEntryRepository
 {
-	private static final String DATABASE_NAME = "blogging";
-
-	@SuppressWarnings("unchecked")
-	public MongoBlogEntryRepository(List<ServerAddress> bootstraps)
+	public MongoBlogEntryRepository(Mongo mongo)
 	{
-		super(bootstraps, DATABASE_NAME, BlogEntry.class);
-		initializeObservers();
-		setIdentifierAdapter(new ObjectIdAdapter());
-	}
-
-	private void initializeObservers()
-	{
-		addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<BlogEntry>());
+		super(mongo, BlogEntry.class);
 	}
 
 	@Override

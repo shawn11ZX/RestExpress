@@ -20,6 +20,7 @@ import static com.strategicgains.restexpress.ContentType.TEXT_PLAIN;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.netty.channel.ChannelHandler.Sharable;
@@ -38,12 +39,12 @@ import com.strategicgains.restexpress.exception.ExceptionUtils;
 import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.response.HttpResponseWriter;
-import com.strategicgains.restexpress.response.ResponseWrapperFactory;
+import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.SerializationProcessor;
-import com.strategicgains.restexpress.serialization.SerializationResolver;
 import com.strategicgains.restexpress.util.HttpSpecification;
+import com.strategicgains.restexpress.util.StringUtils;
 
 /**
  * @author toddf
@@ -56,28 +57,28 @@ extends SimpleChannelUpstreamHandler
 	// SECTION: INSTANCE VARIABLES
 
 	private RouteResolver routeResolver;
-	private SerializationResolver serializationResolver;
+	private ResponseProcessorResolver responseProcessorResolver;
 	private HttpResponseWriter responseWriter;
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
+	private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
-	private ResponseWrapperFactory responseWrapperFactory;
 
 
 	// SECTION: CONSTRUCTORS
 
-	public DefaultRequestHandler(RouteResolver routeResolver, SerializationResolver serializationResolver)
+	public DefaultRequestHandler(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver)
 	{
-		this(routeResolver, serializationResolver, new DefaultHttpResponseWriter());
+		this(routeResolver, responseProcessorResolver, new DefaultHttpResponseWriter());
 	}
 
-	public DefaultRequestHandler(RouteResolver routeResolver, SerializationResolver serializationResolver,
+	public DefaultRequestHandler(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver,
 		HttpResponseWriter responseWriter)
 	{
 		super();
 		this.routeResolver = routeResolver;
-		this.serializationResolver = serializationResolver;
+		this.responseProcessorResolver = responseProcessorResolver;
 		setResponseWriter(responseWriter);
 	}
 
@@ -116,11 +117,6 @@ extends SimpleChannelUpstreamHandler
 	{
 		this.responseWriter = writer;
 	}
-	
-	public void setResponseWrapperFactory(ResponseWrapperFactory factory)
-	{
-		this.responseWrapperFactory = factory;
-	}
 
 
 	// SECTION: SIMPLE-CHANNEL-UPSTREAM-HANDLER
@@ -134,17 +130,25 @@ extends SimpleChannelUpstreamHandler
 		try
 		{
 			notifyReceived(context);
-			resolveSerializationProcessor(context);
 			resolveRoute(context);
-			invokePreprocessors(context.getRequest());
+			boolean isResponseProcessorResolved = resolveResponseProcessor(context);
+			invokePreprocessors(preprocessors, context.getRequest());
 			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
-	
+
 			if (result != null)
 			{
 				context.getResponse().setBody(result);
 			}
 	
-			invokePostprocessors(context.getRequest(), context.getResponse());
+			invokePostprocessors(postprocessors, context.getRequest(), context.getResponse());
+
+			if (!isResponseProcessorResolved && !context.supportsRequestedFormat())
+			{
+				throw new BadRequestException("Requested representation format not supported: " 
+					+ context.getRequest().getFormat() 
+					+ ". Supported formats: " + StringUtils.join(", ", getSupportedFormats(context)));
+			}
+
 			serializeResponse(context);
 			enforceHttpSpecification(context);
 			writeResponse(ctx, context);
@@ -156,9 +160,26 @@ extends SimpleChannelUpstreamHandler
 		}
 		finally
 		{
+			invokeFinallyProcessors(finallyProcessors, context.getRequest(), context.getResponse());
 			notifyComplete(context);
 		}
 	}
+
+	/**
+     * @return
+     */
+    private Collection<String> getSupportedFormats(MessageContext context)
+    {
+	    Collection<String> routeFormats = context.getSupportedRouteFormats();
+	    
+	    if (routeFormats != null && !routeFormats.isEmpty())
+	    {
+	    	return routeFormats;
+	    }
+	    
+	    return responseProcessorResolver.getSupportedFormats();
+    }
+
 
 	/**
      * @param context
@@ -172,11 +193,18 @@ extends SimpleChannelUpstreamHandler
 	throws Exception
 	{
 		MessageContext context = (MessageContext) ctx.getAttachment();
+		resolveResponseProcessor(context);
+		resolveResponseProcessorViaUrlFormat(context);
 		Throwable rootCause = mapServiceException(cause);
 		
-		if (rootCause != null) // is a ServiceException
+		if (rootCause != null) // was/is a ServiceException
 		{
 			context.setHttpStatus(((ServiceException) rootCause).getHttpStatus());
+			
+			if (ServiceException.class.isAssignableFrom(rootCause.getClass()))
+			{
+				((ServiceException) rootCause).augmentResponse(context.getResponse());
+			}
 		}
 		else
 		{
@@ -220,22 +248,57 @@ extends SimpleChannelUpstreamHandler
 		Request request = createRequest((HttpRequest) event.getMessage(), ctx);
 		Response response = createResponse();
 		MessageContext context = new MessageContext(request, response);
-		context.setSerializationProcessor(serializationResolver.getDefault());
 		ctx.setAttachment(context);
 		return context;
 	}
 
-	private void resolveSerializationProcessor(MessageContext context)
+	/**
+	 * Resolve the ResponseProcessor based on the requested format (or the default, if none supplied).
+	 *  
+	 * @param context the message context.
+	 * @return true if the ResponseProcessor was resolved.  False if the ResponseProcessor was
+	 *         resolved to the 'default' because it was unresolvable.
+	 */
+	private boolean resolveResponseProcessor(MessageContext context)
 	{
-		try
+		boolean isResolved = true;
+		if (context.hasResponseProcessor()) return isResolved;
+
+		ResponseProcessor rp = responseProcessorResolver.resolve(context.getRequestedFormat());
+		
+		if (rp == null)
 		{
-			context.setSerializationProcessor(serializationResolver.resolve(context.getRequest()));
+			rp = responseProcessorResolver.getDefault();
+			isResolved = false;
 		}
-		catch(IllegalArgumentException e)
-		{
-			throw new BadRequestException(e);
-		}
+
+		context.setResponseProcessor(rp);
+		return isResolved;
 	}
+
+	private void resolveResponseProcessorViaUrlFormat(MessageContext context)
+    {
+	    String urlFormat = parseRequestedFormatFromUrl(context.getRequest());
+		
+		if (urlFormat != null && !urlFormat.isEmpty() && !urlFormat.equalsIgnoreCase(context.getRequestedFormat()))
+		{
+			ResponseProcessor rp = responseProcessorResolver.resolve(urlFormat);
+			
+			if (rp != null)
+			{
+				context.setResponseProcessor(rp);
+			}
+		}
+    }
+
+	private String parseRequestedFormatFromUrl(Request request)
+    {
+    	String uri = request.getUrl();
+		int queryDelimiterIndex = uri.indexOf('?');
+		String path = (queryDelimiterIndex > 0 ? uri.substring(0, queryDelimiterIndex) : uri);
+    	int formatDelimiterIndex = path.indexOf('.');
+    	return (formatDelimiterIndex > 0 ? path.substring(formatDelimiterIndex + 1) : null);
+    }
 
 	private void resolveRoute(MessageContext context)
     {
@@ -313,9 +376,17 @@ extends SimpleChannelUpstreamHandler
 		}
 	}
 
-    private void invokePreprocessors(Request request)
+	public void addFinallyProcessor(Postprocessor handler)
+	{
+		if (!finallyProcessors.contains(handler))
+		{
+			finallyProcessors.add(handler);
+		}
+	}
+
+    private void invokePreprocessors(List<Preprocessor> processors, Request request)
     {
-		for (Preprocessor handler : preprocessors)
+		for (Preprocessor handler : processors)
 		{
 			handler.process(request);
 		}
@@ -323,11 +394,26 @@ extends SimpleChannelUpstreamHandler
 		request.getBody().resetReaderIndex();
     }
 
-    private void invokePostprocessors(Request request, Response response)
+    private void invokePostprocessors(List<Postprocessor> processors, Request request, Response response)
     {
-		for (Postprocessor handler : postprocessors)
+		for (Postprocessor handler : processors)
 		{
 			handler.process(request, response);
+		}
+    }
+
+    private void invokeFinallyProcessors(List<Postprocessor> processors, Request request, Response response)
+    {
+		for (Postprocessor handler : processors)
+		{
+			try
+			{
+				handler.process(request, response);
+			}
+			catch(Throwable t)
+			{
+				t.printStackTrace(System.err);
+			}
 		}
     }
 
@@ -380,9 +466,7 @@ extends SimpleChannelUpstreamHandler
 
 		if (shouldSerialize(context))
 		{
-			SerializationProcessor sp = context.getSerializationProcessor();
-			Request request = context.getRequest();
-			response.setBody(serializeResult(responseWrapperFactory.wrap(response), sp, request));
+			response.serialize();
 		}
 
 		if (HttpSpecification.isContentTypeAllowed(response))
@@ -390,7 +474,7 @@ extends SimpleChannelUpstreamHandler
 			if (!response.hasHeader(CONTENT_TYPE))
 			{
 				String contentType = (context.getContentType() == null ? TEXT_PLAIN : context.getContentType());
-				context.getResponse().addHeader(CONTENT_TYPE, contentType);
+				response.addHeader(CONTENT_TYPE, contentType);
 			}
 		}
 	}
@@ -398,51 +482,6 @@ extends SimpleChannelUpstreamHandler
     private boolean shouldSerialize(MessageContext context)
     {
     	
-        return (context.shouldSerializeResponse() && (serializationResolver != null));
-    }
-
-    /**
-     * Depending on the result, the return value is serialized and, optionally, wrapped in a jsonp callback.
-     * 
-     * @param result object to serialize.
-     * @param processor the serialization processor that will do the serializing.
-     * @param request the current request.
-     * @return a serialized result, or null if the result is null and not wrapped in jsonp callback.
-     */
-	private String serializeResult(Object result, SerializationProcessor processor, Request request)
-	{
-		String content = processor.serialize(result);
-		String callback = getJsonpCallback(request, processor);
-
-		if (callback != null) // must wrap in jsonp callback--serialization necessary.
-		{
-        	StringBuilder sb = new StringBuilder();
-        	sb.append(callback).append("(").append(content).append(")");
-        	content = sb.toString();
-		}
-		else if (result == null) // not jsonp and null result requires no serialization.
-		{
-			content = null;
-		}
-		
-		return content;
-	}
-
-	/**
-	 * If JSONP header is set and the resulting type of the serialization processor includes JSON,
-	 * then returns the JSONP header string.  Otherwise, returns null.
-	 * 
-     * @param request
-     * @param processor
-     * @return  jsonp header string value, or null.
-     */
-    private String getJsonpCallback(Request request, SerializationProcessor processor)
-    {
-    	if (processor.getResultingContentType().toLowerCase().contains("json"))
-		{
-    		return request.getJsonpHeader();
-		}
-    	
-    	return null;
+        return (context.shouldSerializeResponse() && (responseProcessorResolver != null));
     }
 }

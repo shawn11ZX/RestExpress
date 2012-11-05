@@ -44,7 +44,7 @@ implements Postprocessor
 
 		Object body = response.getBody();
 
-		if (!response.hasHeader(LAST_MODIFIED) && body.getClass().isAssignableFrom(Timestamped.class))
+		if (!response.hasHeader(LAST_MODIFIED) && Timestamped.class.isAssignableFrom(body.getClass()))
 		{
 			response.addHeader(LAST_MODIFIED, fmt.format(((Timestamped) body).getUpdatedAt()));
 		}

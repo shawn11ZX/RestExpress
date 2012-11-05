@@ -3,27 +3,20 @@ package com.blogging.persistence;
 import java.util.List;
 
 import com.blogging.domain.Blog;
-import com.mongodb.ServerAddress;
-import com.strategicgains.repoexpress.event.DefaultTimestampedIdentifiableRepositoryObserver;
-import com.strategicgains.repoexpress.mongodb.MongodbRepository;
-import com.strategicgains.repoexpress.mongodb.ObjectIdAdapter;
+import com.mongodb.Mongo;
 
 public class MongoBlogRepository
-extends MongodbRepository<Blog>
+extends AbstractMongoDbRepository<Blog>
 implements BlogRepository
 {
-	private static final String DATABASE_NAME = "blogging";
-
-	@SuppressWarnings("unchecked")
-    public MongoBlogRepository(List<ServerAddress> bootstraps)
+    public MongoBlogRepository(Mongo mongo)
     {
-	    super(bootstraps, DATABASE_NAME, Blog.class);
-	    initializeObservers();
-	    setIdentifierAdapter(new ObjectIdAdapter());
+	    super(mongo, Blog.class);
     }
 
-    private void initializeObservers()
+    @Override
+    public List<Blog> readOwnedBlogs(String author)
     {
-    	addObserver(new DefaultTimestampedIdentifiableRepositoryObserver<Blog>());
+    	return getDataStore().find(Blog.class, "author", author).asList();
     }
 }

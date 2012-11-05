@@ -20,8 +20,6 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.ETAG;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
-import com.strategicgains.util.date.DateAdapter;
-import com.strategicgains.util.date.HttpHeaderTimestampAdapter;
 
 /**
  * If the response body is non-null, adds an ETag header.  ETag is
@@ -34,8 +32,6 @@ import com.strategicgains.util.date.HttpHeaderTimestampAdapter;
 public class EtagHeaderPostprocessor
 implements Postprocessor
 {
-	DateAdapter fmt = new HttpHeaderTimestampAdapter();
-
 	@Override
 	public void process(Request request, Response response)
 	{
@@ -47,13 +43,7 @@ implements Postprocessor
 		if (!response.hasHeader(ETAG))
 		{
 			String format = request.getFormat() == null ? request.getResolvedRoute().getDefaultFormat() : request.getFormat();
-			response.addHeader(ETAG, String.valueOf(body.hashCode() ^ format.hashCode()));
+			response.addHeader(ETAG, String.format("\"%d%d\"", body.hashCode(), format.hashCode()));
 		}
-
-		// TODO: this should be in a LastModifiedHeaderPostprocessor
-//		if (!response.hasHeader(LAST_MODIFIED) && body.getClass().isAssignableFrom(Timestamped.class))
-//		{
-//			response.addHeader(LAST_MODIFIED, fmt.format(((Timestamped) body).getUpdatedAt()));
-//		}
 	}
 }

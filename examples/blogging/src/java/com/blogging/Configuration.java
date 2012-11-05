@@ -16,19 +16,25 @@
 package com.blogging;
 
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.blogging.controller.BlogController;
+import com.blogging.controller.BlogEntryController;
+import com.blogging.controller.CommentController;
 import com.blogging.persistence.BlogEntryRepository;
 import com.blogging.persistence.BlogRepository;
 import com.blogging.persistence.CommentRepository;
 import com.blogging.persistence.MongoBlogEntryRepository;
 import com.blogging.persistence.MongoBlogRepository;
 import com.blogging.persistence.MongoCommentRepository;
+import com.mongodb.Mongo;
 import com.mongodb.ServerAddress;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.RestExpress;
+import com.strategicgains.restexpress.exception.ConfigurationException;
 import com.strategicgains.restexpress.util.Environment;
 
 /**
@@ -50,7 +56,14 @@ extends Environment
 	private String name;
 	private String persistence;
 	private String defaultFormat;
-	private List<ServerAddress> bootstraps;
+	
+	private BlogController blogController;
+	private BlogEntryController entryController;
+	private CommentController commentController;
+	
+	private BlogRepository blogRepository;
+	private BlogEntryRepository entryRepository;
+	private CommentRepository commentRepository;
 
 	@Override
 	protected void fillValues(Properties p)
@@ -60,12 +73,36 @@ extends Environment
 		this.persistence = p.getProperty(PERSISTENCE_PROPERTY, MONGODB_PERSISTENCE);
 		this.defaultFormat = p.getProperty(DEFAULT_FORMAT_PROPERTY, Format.JSON);
 		String bootstrapString = p.getProperty(BOOTSTRAPS_PROPERTY);
+		Mongo mongo = null;
 		
-		if (bootstrapString != null)
+		try
 		{
-			bootstraps = parseBootstraps(bootstrapString);
+			if (bootstrapString != null)
+			{
+		    	mongo = new Mongo(parseBootstraps(bootstrapString));
+			}
+			else
+			{
+				mongo = new Mongo();
+			}
 		}
+		catch(UnknownHostException e)
+		{
+			throw new ConfigurationException(e);
+		}
+		
+		initialize(mongo);
 	}
+
+    private void initialize(Mongo mongo)
+    {
+    	blogRepository = createBlogRespository(mongo);
+    	entryRepository = createEntryRespository(mongo);
+    	commentRepository = createCommentRespository(mongo);
+    	blogController = createBlogController();
+    	entryController = createEntryController();
+    	commentController = createCommentController();
+    }
 
 	public int getPort()
 	{
@@ -81,47 +118,62 @@ extends Environment
 	{
 		return defaultFormat;
 	}
+	
+	public BlogController getBlogController()
+	{
+		return blogController;
+	}
+	
+	public BlogEntryController getEntryController()
+	{
+		return entryController;
+	}
+	
+	public CommentController getCommentController()
+	{
+		return commentController;
+	}
+	
+	private BlogController createBlogController()
+	{
+		return new BlogController(blogRepository);
+	}
+	
+	private BlogEntryController createEntryController()
+	{
+		return new BlogEntryController(entryRepository);
+	}
+	
+	private CommentController createCommentController()
+	{
+		return new CommentController(commentRepository);
+	}
 
-	public BlogRepository getBlogRespository()
+	private BlogRepository createBlogRespository(Mongo mongo)
 	{
 		if (MONGODB_PERSISTENCE.equals(persistence))
 		{
-			if (bootstraps == null)
-			{
-				throw new RuntimeException("MongoDB bootstraps not set");
-			}
-
-			return new MongoBlogRepository(bootstraps);
+			return new MongoBlogRepository(mongo);
 		}
 
 		return null;
 	}
 
-	public BlogEntryRepository getEntriesRespository()
+	private BlogEntryRepository createEntryRespository(Mongo mongo)
 	{
 		if (MONGODB_PERSISTENCE.equals(persistence))
 		{
-			if (bootstraps == null)
-			{
-				throw new RuntimeException("MongoDB bootstraps not set");
-			}
-
-			return new MongoBlogEntryRepository(bootstraps);
+			return new MongoBlogEntryRepository(mongo);
 		}
 
 		return null;
 	}
 
-	public CommentRepository getCommentsRespository()
+	private CommentRepository createCommentRespository(Mongo mongo)
 	{
 		if (MONGODB_PERSISTENCE.equals(persistence))
 		{
-			if (bootstraps == null)
-			{
-				throw new RuntimeException("MongoDB bootstraps not set");
-			}
-
-			return new MongoCommentRepository(bootstraps);
+			return new MongoCommentRepository(mongo);
 		}
 
 		return null;

@@ -75,4 +75,9 @@ public class Action
     {
     	return match.parameterSet();
     }
+    
+    public String getParameter(String key)
+    {
+    	return match.get(key);
+    }
 }

@@ -24,8 +24,9 @@ import java.util.Map;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 
+import com.strategicgains.hyperexpress.domain.Link;
+import com.strategicgains.hyperexpress.domain.LinkableCollection;
 import com.strategicgains.restexpress.ContentType;
-import com.strategicgains.restexpress.domain.XLink;
 import com.strategicgains.restexpress.domain.ResultWrapper;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
 import com.thoughtworks.xstream.XStream;
@@ -49,7 +50,8 @@ implements AliasingSerializationProcessor
 	{
 		this(new XStream());
 		xstream.registerConverter(new XstreamTimestampConverter());
-		xstream.alias("link", XLink.class);
+		xstream.alias("link", Link.class);
+		xstream.alias("collection", LinkableCollection.class);
 		xstream.alias("list", Collections.EMPTY_LIST.getClass());
 		xstream.alias("response", ResultWrapper.class);
 	}

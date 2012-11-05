@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
+import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.domain.metadata.RouteMetadata;
 import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
@@ -48,21 +49,23 @@ extends AbstractPlugin
 		super.register(server);
 		RouteBuilder builder;
 
-		builder = server.getRouteDeclarations()
+		builder = server
 		    .uri("/routes/metadata.{format}", controller)
-		    .action("getAllRoutes", HttpMethod.GET).name("allRoutesMetadata");
+		    .action("getAllRoutes", HttpMethod.GET)
+		    .name("all.routes.metadata");
 		routeBuilders.add(builder);
 
-		builder = server.getRouteDeclarations()
-		    .uri("/route/{routeName}/metadata.{format}", controller)
+		builder = server
+		    .uri("/routes/{routeName}/metadata.{format}", controller)
 		    .action("getSingleRoute", HttpMethod.GET)
-		    .name("singleRouteMetadata");
+		    .name("single.route.metadata");
 		routeBuilders.add(builder);
 
-		server.getRouteDeclarations().uri("/routes/console.html", controller)
-		    .action("getConsole", HttpMethod.GET).useRawResponse()
-		    .noSerialization().name("routesConsole");
-		routeBuilders.add(builder);
+		server.uri("/routes/console.html", controller)
+		    .action("getConsole", HttpMethod.GET)
+		    .noSerialization()
+		    .name("routes.metadata.console")
+		    .format(Format.HTML);
 
 		server.alias("service", ServerMetadata.class);
 		server.alias("route", RouteMetadata.class);
