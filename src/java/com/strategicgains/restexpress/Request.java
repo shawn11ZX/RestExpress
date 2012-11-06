@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
@@ -255,6 +256,11 @@ public class Request
 
 		return value;
 	}
+
+        public Set<String> getHeaderNames()
+        {
+                return httpRequest.getHeaderNames();
+        }
 
 	/**
 	 * Gets the named header, URL decoding it before returning it.
