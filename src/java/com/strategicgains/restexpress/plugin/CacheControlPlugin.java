@@ -41,9 +41,4 @@ extends AbstractPlugin
 
 		return this;
 	}
-
-    @Override
-    public void bind(RestExpress server)
-    {
-    }
 }
