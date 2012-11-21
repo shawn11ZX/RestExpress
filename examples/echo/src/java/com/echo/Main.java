@@ -7,7 +7,7 @@ import com.echo.serialization.ResponseProcessors;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.RestExpress;
-import com.strategicgains.restexpress.plugin.RoutesMetadataPlugin;
+import com.strategicgains.restexpress.plugin.route.RoutesMetadataPlugin;
 import com.strategicgains.restexpress.util.Environment;
 
 /**

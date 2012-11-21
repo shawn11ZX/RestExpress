@@ -11,8 +11,8 @@ import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.pipeline.SimpleConsoleLogMessageObserver;
-import com.strategicgains.restexpress.plugin.CacheControlPlugin;
-import com.strategicgains.restexpress.plugin.RoutesMetadataPlugin;
+import com.strategicgains.restexpress.plugin.cache.CacheControlPlugin;
+import com.strategicgains.restexpress.plugin.route.RoutesMetadataPlugin;
 import com.strategicgains.restexpress.util.Environment;
 
 public class Main
