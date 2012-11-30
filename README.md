@@ -81,7 +81,7 @@ Release 0.8.0 - in development (branch 'master')
 * Changed example apps to reflect above elimination of RouteDefinition class.
 
 ===================================================================================================
-Release 0.7.4 - 30 Nov 2012
+Release 0.7.4 - 30 Nov 2012 (branch 'v0.7.4')
 ---------------------------------------------------------------------------------------------------
 * Patch release to allow period ('.') as a valid character within URL parameters. Note that this
   now allows a period to be the last character on the URL whether there is a format-specifier
