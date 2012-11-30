@@ -63,6 +63,18 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+Release 0.7.4 - 30 Nov 2012
+* Patch release to allow period ('.') as a valid character within URL parameters. Note that this
+  now allows a period to be the last character on the URL whether there is a format-specifier
+  parameter declared for that route, or not. Also, if the route supports the format specifier and
+  there is a period in the last parameter of the URL, anything after the last period will be used
+  as the format for the request--which may NOT be what you want.
+  -- /foo/todd.fredrich --> /foo/{p1}.{format} will use 'fredrich' as the format
+  -- /foo/todd.fredrich.json --> /foo/{p1}.{format} will use 'json' as the format
+  -- /foo/todd. --> /foo/{p1}.{format} will contain 'todd.' for the value of p1
+  -- /foo/todd. --> /foo/{p1} will contain 'todd.' for the value of p1
+
+===================================================================================================
 Release 0.7.3 - 12 July 2012
 * Patch release to fix an issue with i18n. Fixed issue with
   DefaultJsonProcessor.deserialize(ChannelBuffer, Class) where underlying InputStreamReader was
