@@ -57,7 +57,9 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+
 Release 0.8.0 - in development (branch 'master')
+---------------------------------------------------------------------------------------------------
 * Introduced route 'aliases' where there are multiple URLs for a given service.
 * Introduced concept of "finally" processors, which are executed in the finally block of
   DefaultRequestHandler and all of them are executed even if an exception is thrown within one
@@ -79,13 +81,28 @@ Release 0.8.0 - in development (branch 'master')
 * Changed example apps to reflect above elimination of RouteDefinition class.
 
 ===================================================================================================
+Release 0.7.4 - 30 Nov 2012
+---------------------------------------------------------------------------------------------------
+* Patch release to allow period ('.') as a valid character within URL parameters. Note that this
+  now allows a period to be the last character on the URL whether there is a format-specifier
+  parameter declared for that route, or not. Also, if the route supports the format specifier and
+  there is a period in the last parameter of the URL, anything after the last period will be used
+  as the format for the request--which may NOT be what you want.
+  -- /foo/todd.fredrich --> /foo/{p1}.{format} will use 'fredrich' as the format
+  -- /foo/todd.fredrich.json --> /foo/{p1}.{format} will use 'json' as the format
+  -- /foo/todd. --> /foo/{p1}.{format} will contain 'todd.' for the value of p1
+  -- /foo/todd. --> /foo/{p1} will contain 'todd.' for the value of p1
+
+===================================================================================================
 Release 0.7.3 - 12 July 2012 (branch 'v0.7.3')
+---------------------------------------------------------------------------------------------------
 * Patch release to fix an issue with i18n. Fixed issue with
   DefaultJsonProcessor.deserialize(ChannelBuffer, Class) where underlying InputStreamReader was
   not UTF-8.
 
 ==================================================================================================
 Release 0.7.2 - 14 May 2012
+---------------------------------------------------------------------------------------------------
 * Introduced ExecutionHandler with configuration via RestExpress.setExecutorThreadCount(int)
   to off-load long-running requests from the NIO workers into a separate thread pool.
 * Introduced CacheControlPlugin which leverages CacheHeaderPostprocessor, DateHeaderPostprocessor
@@ -105,6 +122,7 @@ Release 0.7.2 - 14 May 2012
 
 ===================================================================================================
 Release 0.7.1 - 20 Sep 2011
+---------------------------------------------------------------------------------------------------
 * Added rootCause to ResultWrapper data area.
 * Exposed the XStream object from DefaultXmlProcessor.
 * Renamed Link to XLink.
@@ -123,6 +141,7 @@ Release 0.7.1 - 20 Sep 2011
 
 ===================================================================================================
 Release 0.7.0
+---------------------------------------------------------------------------------------------------
 * Added gzip request/response handling. On by default. Disable it via call to
   RestExpress.noCompression() and supportCompression().
 * Added chunked message handling. On by default. Chunking settings are managed via
@@ -130,11 +149,13 @@ Release 0.7.0
 
 ===================================================================================================
 Release 0.6.1.1 - 31 Mar 2011
+---------------------------------------------------------------------------------------------------
 * Bug fix to patch erroneously writing to already closed channel in
   DefaultRequestHandler.exceptionCaught().
 
 ===================================================================================================
 Release 0.6.1 - 30 Mar 2011
+---------------------------------------------------------------------------------------------------
 * Stability release.
 * Fixed issue when unable to URL Decode query string parameters or URL.
 * Introduced SerializationResolver that defines a getDefault() method. Implemented
@@ -149,6 +170,7 @@ Release 0.6.1 - 30 Mar 2011
 
 ===================================================================================================
 Release 0.6.0.2 - 21 Mar 2011
+---------------------------------------------------------------------------------------------------
 * Fixed issue with 'connection reset by peer' causing unresponsive behavior.
 * Utilized Netty logging behavior to add logging capabilities to RestExpress.
 * Made socket-level settings externally configurable:  tcpNoDelay, KeepAlive, reuseAddress,
@@ -168,6 +190,7 @@ Release 0.6.0.2 - 21 Mar 2011
 
 ===================================================================================================
 Release 0.6.0.1
+---------------------------------------------------------------------------------------------------
 * Issue #7 - Fixed issue with invalid URL requested where serialization always occurred to the
              default (JSON).  Now serializes to the requested format, if applicable.
 * Issue #11 - Feature enhancement for Kickstart.  Now utilizes Rails-inspired configuration
@@ -177,6 +200,7 @@ Release 0.6.0.1
 
 ===================================================================================================
 Release 0.6.0
+---------------------------------------------------------------------------------------------------
 * Routes now defined in descendant of RouteDeclaration.
 * Refactored everything into RestExpress object, using builder pattern for configuration.
 * Implemented RestExpress DSL to declare REST server in main().
@@ -196,6 +220,7 @@ Release 0.6.0
 
 ===================================================================================================
 Release 0.5.6.1 - 11 Mar 2011
+---------------------------------------------------------------------------------------------------
 * Patch release to fix issue with HTTP response status of 204 (No Content) and 304 (Not Modified)
   where they would return a body of an empty string and content length of 2 ('\r\n').  No longer
   serializes for 204 or 304.  Also no longer serializes for null body response unless a JSONP header
@@ -203,6 +228,7 @@ Release 0.5.6.1 - 11 Mar 2011
 
 ===================================================================================================
 Release 0.5.6 - 18 Jan 2011
+---------------------------------------------------------------------------------------------------
 * Upgraded to Netty 3.2.3 final.
 * Added getProtocol(), getHost(), getPath() to Request
 * Functionality of getUrl() is now getPath() and getUrl() now returns the entire URL string,
@@ -210,6 +236,7 @@ Release 0.5.6 - 18 Jan 2011
 
 ===================================================================================================
 Release 0.5.5
+---------------------------------------------------------------------------------------------------
 * Added regex URL matching with RouteMapping.regex(String) method.
 * Refactored Route into an abstract class, moving previous functionality into ParameterizedRoute.
 * Added KickStart release artifact to get projects going quickly--simply unzip the kickstart file.
@@ -217,12 +244,14 @@ Release 0.5.5
 
 ===================================================================================================
 Release 0.5.4
+---------------------------------------------------------------------------------------------------
 * Added alias() capability to DefaultTxtProcessor to facilitate custom text serialization.
 * Updated kickstart application to illustrate latest features.
 * Minor refactoring of constants and their locations (moved to RestExpress.java).
 
 ===================================================================================================
 Release 0.5.3
+---------------------------------------------------------------------------------------------------
 * Fixed issue with JSON date/timestamp parsing.
 * Fixed issues with XML date/timestamp parsing.
 * Upgraded to GSON 1.6 release.
@@ -232,6 +261,7 @@ Release 0.5.3
 
 ===================================================================================================
 Release 0.5.2
+---------------------------------------------------------------------------------------------------
 * Introduced DateJsonProcessor (sibling to DefaultJsonProcessor) which parses dates vs. time points.
 * Refactored ExceptionMapping.getExceptionFor() signature from Exception to Throwable.
 * Introduced MessageObserver, which accepts notifications of onReceived(), onSuccess(), onException(), onComplete() to facilitate logging, auditing, timing, etc.
@@ -239,12 +269,14 @@ Release 0.5.2
 
 ===================================================================================================
 Release 0.5.1
+---------------------------------------------------------------------------------------------------
 * Enhanced support for mark, unreserved and some reserved characters in URL. Specifically, added
   $-+*()~:!' and %.  Still doesn't parse URLs with '.' within the string itself--because of the
   support for .{format} URL section.
 
 ===================================================================================================
 Release 0.5
+---------------------------------------------------------------------------------------------------
 * Renamed repository from RestX to RestExpress.
 * Repackaged everything from com.strategicgains.restx... to com.strategicgains.restexpress...
 * Changed DefaultHttpResponseWriter to output resonse headers correctly.
@@ -252,6 +284,7 @@ Release 0.5
 
 ===================================================================================================
 Release 0.4
+---------------------------------------------------------------------------------------------------
 * Fixed error in "Connection: keep-alive" processing during normal and error response writing.
 * Can now create route mappings for OPTIONS and HEAD http methods.
 * Added decoding to URL when Request is constructed.
@@ -262,6 +295,7 @@ Release 0.4
 
 ===================================================================================================
 Release 0.3
+---------------------------------------------------------------------------------------------------
 * Added support for "method tunneling" in POST via query string parameter (e.g. _method=PUT or _method=DELETE)
 * Added JSONP support. Use jsonp=<method_name> in query string.
 * Utilized Builder pattern in DefaultPipelineFactory, which is now PipelineBuilder.
