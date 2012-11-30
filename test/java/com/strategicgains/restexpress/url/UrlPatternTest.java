@@ -33,6 +33,7 @@ public class UrlPatternTest
 	public void shouldMatchUrlWithFormat()
 	{
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/joez.json"));
+		assertTrue(pFormat.matches("/xxx/todd.fredrich/yyy/joez.json"));
 		assertTrue(pFormat.matches("/xxx/[toddf]:1/yyy/joez.json"));
 		assertTrue(pFormat.matches("/xxx/12345/yyy/67890.json"));
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/joez.xml"));
@@ -52,6 +53,7 @@ public class UrlPatternTest
 	{
 		assertTrue(p.matches("/xxx/toddf/yyy/joez"));
 		assertTrue(p.matches("/xxx/[toddf]:1/yyy/joez"));
+		assertTrue(p.matches("/xxx/todd.fredrich/yyy/joez"));
 		assertTrue(p.matches("/xxx/12345/yyy/67890"));
 		assertTrue(p.matches("/xxx/toddf/yyy/joez"));
 		assertTrue(p.matches("/xxx/toddf/yyy/joez?x=y&a=b"));
@@ -61,7 +63,9 @@ public class UrlPatternTest
 	public void shouldNotMatchUrlWithFormat()
 	{
 		assertFalse(pFormat.matches("/xxx/toddf/yyy/joez/"));
+		assertFalse(pFormat.matches("/xxx/todd.fredrich/yyy/joez/"));
 		assertFalse(pFormat.matches("/xxx/toddf/yyy/joez."));
+		assertFalse(pFormat.matches("/xxx/todd.fredrich/yyy/joez."));
 		assertFalse(pFormat.matches("/aaa/toddf/yyy/joez.json"));
 		assertFalse(pFormat.matches("/xxx/toddf/bbb/joez.json"));
 		assertFalse(pFormat.matches("/xxx/toddf/yyy/"));
