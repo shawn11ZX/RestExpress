@@ -25,6 +25,8 @@ public interface Plugin
 {
 	/**
 	 * Called to register this plugin with the RestExpress server.
+	 * Within this method, pre/post-processors can be created, as
+	 * well as routes injected.
 	 * 
 	 * @param server
 	 * @return a Plugin reference so plugin commands can be chained.
@@ -38,4 +40,9 @@ public interface Plugin
 	 * @param server the fully-bound RestExpress server.
 	 */
 	public void bind(RestExpress server);
+	
+	/**
+	 * Called during RestExpress.shutdown() to release resources held by this plugin.
+	 */
+	public void shutdown(RestExpress server);
 }

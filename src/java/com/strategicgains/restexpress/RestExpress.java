@@ -761,6 +761,7 @@ public class RestExpress
 	{
 		ChannelGroupFuture future = allChannels.close();
 		future.awaitUninterruptibly();
+		shutdownPlugins();
 		bootstrap.getFactory().releaseExternalResources();
 	}
 
@@ -802,6 +803,14 @@ public class RestExpress
 		for (Plugin plugin : plugins)
 		{
 			plugin.bind(this);
+		}
+	}
+
+	private void shutdownPlugins()
+	{
+		for (Plugin plugin : plugins)
+		{
+			plugin.shutdown(this);
 		}
 	}
 
