@@ -50,10 +50,10 @@ public class ResponseProcessor
 	public String process(Response response)
 	{
 		Object wrapped = wrapper.wrap(response);
+		response.setContentType(serializer.getResultingContentType());
 		
 		if (wrapped != null)
 		{
-			response.setContentType(serializer.getResultingContentType());
 			return serializer.serialize(wrapped);
 		}
 		
