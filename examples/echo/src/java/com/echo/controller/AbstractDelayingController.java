@@ -16,6 +16,7 @@
 package com.echo.controller;
 
 import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.exception.BadRequestException;
 
 /**
  * @author toddf
@@ -27,7 +28,16 @@ public abstract class AbstractDelayingController
 
 	protected long delay(Request request)
 	{
-		long millis = Long.valueOf(request.getRawHeader(TIMEOUT_MILLIS_HEADER));
+		long millis = 0l;
+		
+		try
+		{
+			millis = Long.valueOf(request.getRawHeader(TIMEOUT_MILLIS_HEADER));
+		}
+		catch (NumberFormatException e)
+		{
+			throw new BadRequestException(e.getMessage());
+		}
 
 		if (millis == 0l) return 0l;
 

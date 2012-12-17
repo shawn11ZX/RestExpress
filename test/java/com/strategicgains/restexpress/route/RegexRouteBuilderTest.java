@@ -45,6 +45,17 @@ public class RegexRouteBuilderTest
 		assertEquals(4, routes.size());
 		assertEquals(Format.JSON, routes.get(0).getDefaultFormat());
 	}
+	
+	@Test
+	public void shouldNotModifyUri()
+	{
+		String pattern = "^/foo(.*)";
+		RegexRouteBuilder rb = new RegexRouteBuilder(pattern, new NoopController(), null);
+		List<Route> routes = rb.build();
+		assertNotNull(routes);
+		assertEquals(4, routes.size());
+		assertEquals(pattern, routes.get(0).getPattern());
+	}
 
 	@SuppressWarnings("unused")
     private class NoopController

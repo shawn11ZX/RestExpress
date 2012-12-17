@@ -12,15 +12,15 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/
+ */
 package com.strategicgains.restexpress.response;
 
 import com.strategicgains.restexpress.Response;
 
 /**
  * Leaves the response alone, returning it without wrapping it at all, unless
- * there is an exception.  If there is an exception, the exception is wrapped
- * in a serializable Error instance.
+ * there is an exception. If there is an exception, the exception is wrapped in
+ * a serializable Error instance.
  * 
  * @author toddf
  * @since Feb 10, 2011
@@ -35,7 +35,13 @@ implements ResponseWrapper
 		{
 			return response.getBody();
 		}
-		
+
 		return response.getException().getMessage();
+	}
+
+	@Override
+	public boolean addsBodyContent()
+	{
+		return false;
 	}
 }

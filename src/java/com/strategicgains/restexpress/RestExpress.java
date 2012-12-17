@@ -82,6 +82,7 @@ public class RestExpress
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
+	private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
 	private Resolver<ResponseProcessor> responseResolver;
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<Plugin> plugins = new ArrayList<Plugin>();
@@ -120,6 +121,17 @@ public class RestExpress
 		supportJson(true);
 		supportXml();
 		useSystemOut();
+	}
+
+	public String getBaseUrl()
+	{
+		return routeDefaults.getBaseUrl();
+	}
+
+	public RestExpress setBaseUrl(String baseUrl)
+	{
+		routeDefaults.setBaseUrl(baseUrl);
+		return this;
 	}
 
 	/**
@@ -319,8 +331,7 @@ public class RestExpress
 	 * Tell RestExpress to support TXT format specifiers in routes, outgoing
 	 * only at present.
 	 * 
-	 * @param isDefault
-	 *            true to make TXT the default format.
+	 * @param isDefault true to make TXT the default format.
 	 * @return the RestExpress instance.
 	 */
 	public RestExpress supportTxt(boolean isDefault)
@@ -388,10 +399,11 @@ public class RestExpress
 	}
 
 	/**
-	 * Add a PostProcessor instance that gets call after an incoming message is
+	 * Add a Postprocessor instance that gets called after an incoming message is
 	 * processed. A Postprocessor is useful for augmenting or transforming the
-	 * results. Postprocessors get called in the order in which they get added.
-	 * However, they do NOT get called in the case of an exception or error
+	 * results of a controller or adding headers, etc. Postprocessors get called
+	 * in the order in which they are added.
+	 * Note however, they do NOT get called in the case of an exception or error
 	 * within the route.
 	 * 
 	 * @param processor
@@ -410,6 +422,35 @@ public class RestExpress
 	public List<Postprocessor> getPostprocessors()
 	{
 		return Collections.unmodifiableList(postprocessors);
+	}
+
+	/**
+	 * Add a Postprocessor instance that gets called in a finally block after
+	 * the message is processed.  Finally processors are Postprocessor instances
+	 * that are guaranteed to run even if an error is thrown from the controller
+	 * or somewhere else in the route.  A Finally Processor is useful for adding
+	 * headers or transforming results even during error conditions. Finally
+	 * processors get called in the order in which they are added.
+	 * 
+	 * If an exception is thrown during finally processor execution, the finally processors
+	 * following it are executed after printing a stack trace to the System.err stream.
+	 * 
+	 * @param processor
+	 * @return RestExpress for method chaining.
+	 */
+	public RestExpress addFinallyProcessor(Postprocessor processor)
+	{
+		if (!postprocessors.contains(processor))
+		{
+			postprocessors.add(processor);
+		}
+
+		return this;
+	}
+
+	public List<Postprocessor> getFinallyProcessors()
+	{
+		return Collections.unmodifiableList(finallyProcessors);
 	}
 
 	public boolean shouldUseSystemOut()
@@ -624,19 +665,19 @@ public class RestExpress
 		    createRouteResolver(), createResponseProcessorResolver());
 
 		// Add MessageObservers to the request handler here, if desired...
-		requestHandler.addMessageObserver(messageObservers
-		    .toArray(new MessageObserver[0]));
+		requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));
 
 		requestHandler.setExceptionMap(exceptionMap);
 
 		// Add pre/post processors to the request handler here...
 		addPreprocessors(requestHandler);
 		addPostprocessors(requestHandler);
+		addFinallyProcessors(requestHandler);
 
 		PipelineBuilder pf = new PipelineBuilder().addRequestHandler(
 		    new LoggingHandler(getLogLevel().getNettyLogLevel()))
 		    .addRequestHandler(requestHandler);
-		
+
 		if (getProcessingThreadCount() > 0)
 		{
 			ExecutionHandler executionHandler = new ExecutionHandler(
@@ -720,6 +761,7 @@ public class RestExpress
 	{
 		ChannelGroupFuture future = allChannels.close();
 		future.awaitUninterruptibly();
+		shutdownPlugins();
 		bootstrap.getFactory().releaseExternalResources();
 	}
 
@@ -730,21 +772,6 @@ public class RestExpress
 	{
 		return new RouteResolver(routeDeclarations.createRouteMapping(routeDefaults));
 	}
-
-	/**
-	 * @return
-	 */
-//	private List<String> getSupportedFormats()
-//	{
-//		List<String> supportedFormats = new ArrayList<String>();
-//
-//		for (String format : responseProcessors.keySet())
-//		{
-//			supportedFormats.add(format);
-//		}
-//
-//		return Collections.unmodifiableList(supportedFormats);
-//	}
 
 	/**
 	 * @return
@@ -776,6 +803,14 @@ public class RestExpress
 		for (Plugin plugin : plugins)
 		{
 			plugin.bind(this);
+		}
+	}
+
+	private void shutdownPlugins()
+	{
+		for (Plugin plugin : plugins)
+		{
+			plugin.shutdown(this);
 		}
 	}
 
@@ -827,6 +862,17 @@ public class RestExpress
 		for (Postprocessor processor : getPostprocessors())
 		{
 			requestHandler.addPostprocessor(processor);
+		}
+	}
+
+	/**
+	 * @param requestHandler
+	 */
+	private void addFinallyProcessors(DefaultRequestHandler requestHandler)
+	{
+		for (Postprocessor processor : getFinallyProcessors())
+		{
+			requestHandler.addFinallyProcessor(processor);
 		}
 	}
 

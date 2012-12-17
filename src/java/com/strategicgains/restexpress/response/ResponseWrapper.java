@@ -24,4 +24,5 @@ import com.strategicgains.restexpress.Response;
 public interface ResponseWrapper
 {
 	public Object wrap(Response response);
+	public boolean addsBodyContent();
 }

@@ -28,22 +28,45 @@ import java.util.regex.Pattern;
  * denoted by curly braces '{}' with the parameter name contained within (e.g. '{userid}').
  *
  * <p/>Parameter names must be formed of word characters (e.g. A-Z, a-z, 0-9, '_').
+<<<<<<< HEAD
  * <p/>An optional format parameter following a dot ('.') may be added to the end.
  *
+=======
+ * <p/>An optional format parameter following a dot ('.') may be added to the end.  While it could be named any valid parameter name,
+ * RestExpress offers special handling (e.g. within the Request, etc.) if it's named 'format'.
+ * <p/>
+ * Note that the format specifier allows only word characters and percent-encoded characters.
+ * 
+>>>>>>> 07f36374553aa4f98835b2128afb27650c3824f4
  * <p/>URL Pattern examples:
  * <ul>
  *   <li>/api/search.{format}</li>
  *   <li>/api/search/users/{userid}.{format}</li>
  *   <li>/api/{version}/search/users/{userid}</li>
  * </ul>
+<<<<<<< HEAD
  *
  * <p/>Limitations:
  * <ol>
  * 	<li>While parameter names within URL patterns may, parameter values within the URL may not contain dots ('.').</li>
  * </ol>
  *
+=======
+ * 
+ * RestExpress accepts URIs with the following BNF values taken from the URI Generic Syntax IETF RFC 3986 as follows:
+ * <p/>
+ * pct-encoded   = "%" HEXDIG HEXDIG
+ * <p/>
+ * unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"<br/>
+ * reserved      = gen-delims / sub-delims<br/>
+ * gen-delims    = ":" / "/" / "?" / "#" / "[" / "]" / "@"</br>
+ * sub-delims    = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "=" *
+ * <p/>
+ * 
+>>>>>>> 07f36374553aa4f98835b2128afb27650c3824f4
  * @author toddf
  * @since Apr 28, 2010
+ * @see http://www.ietf.org/rfc/rfc3986.txt
  */
 public class UrlPattern
 implements UrlMatcher
@@ -52,6 +75,7 @@ implements UrlMatcher
 
 	// Finds parameters in the URL pattern string.
 	private static final String URL_PARAM_REGEX = "\\{(\\w*?)\\}";
+<<<<<<< HEAD
 
 	// Replaces parameter names in the URL pattern string before compilation to match URLs.
 	// Notice: In RestExpress, valid URL characters are alphanumerics (word characters) plus :$~-_+!*'(),%[]
@@ -59,16 +83,32 @@ implements UrlMatcher
 	// In particular, doesn't include '.' but includes colon (':'), '[' and ']'
 	private static final String URL_MATCH_REGEX = "\\([\\\\w-:%!',@\"&\\\\.\\\\(\\\\)\\\\[\\\\]\\\\~\\\\+\\\\*\\$]+?\\)";
 
+=======
+	
+	// Replaces parameter names in the URL pattern string to match parameters in URLs.
+	private static final String URL_PARAM_MATCH_REGEX = "\\([%\\\\w-.\\\\~!\\$&'\\\\(\\\\)\\\\*\\\\+,;=:\\\\?#\\\\[\\\\]@]+?\\)";
+	
+>>>>>>> 07f36374553aa4f98835b2128afb27650c3824f4
 	// Pattern to match URL pattern parameter names.
 	private static final Pattern URL_PARAM_PATTERN = Pattern.compile(URL_PARAM_REGEX);
 
 	// Finds the format portion of the URL pattern string.
+<<<<<<< HEAD
 	private static final String URL_FORMAT_REGEX = "(?:\\.\\{(\\S+)\\})$";
 
 	// Replaces the format parameter name in the URL pattern string before compilation to match URLs.
 	private static final String URL_FORMAT_MATCH_REGEX = "(?:\\\\.\\(\\\\S+?\\))?";
 
 	// Finds the query string in a URL.
+=======
+	private static final String URL_FORMAT_REGEX = "(?:\\.\\{(\\w+)\\})$";
+
+	// Replaces the format parameter name in the URL pattern string to match the format specifier in URLs. Appended to the end of the regex string
+	// when a URL pattern contains a format parameter.
+	private static final String URL_FORMAT_MATCH_REGEX = "(?:\\\\.\\([\\\\w%]+?\\))?";
+
+	// Finds the query string portion within a URL. Appended to the end of the built-up regex string.
+>>>>>>> 07f36374553aa4f98835b2128afb27650c3824f4
 	private static final String URL_QUERY_STRING_REGEX = "(?:\\?.+?)?$";
 
 	/**
@@ -176,7 +216,9 @@ implements UrlMatcher
 	{
 		acquireParameterNames();
 		String parsedPattern = getUrlPattern().replaceFirst(URL_FORMAT_REGEX, URL_FORMAT_MATCH_REGEX);
-		parsedPattern = parsedPattern.replaceAll(URL_PARAM_REGEX, URL_MATCH_REGEX);
+		parsedPattern = parsedPattern.replaceAll(URL_PARAM_REGEX, URL_PARAM_MATCH_REGEX);
+		@SuppressWarnings("unused")
+        String completePattern = parsedPattern + URL_QUERY_STRING_REGEX;
 		compiledUrl = Pattern.compile(parsedPattern + URL_QUERY_STRING_REGEX);
 	}
 

@@ -3,8 +3,10 @@
 
 	<property environment="env"/>
 	<property file="build.properties"/>
-	<property name="dir.src.java" value="${basedir}/src/java"/>
-	<property name="dir.src.test" value="${basedir}/test/java"/>
+	<property name="dir.src" value="${basedir}/src"/>
+	<property name="dir.test" value="${basedir}/test"/>
+	<property name="dir.src.java" value="${dir.src}/java"/>
+	<property name="dir.src.test" value="${dir.test}/java"/>
 	<property name="dir.build" value="${basedir}/build"/>
 	<property name="dir.compile" value="${dir.build}/classes/main"/>
 	<property name="dir.compile.test" value="${dir.build}/classes/test"/>
@@ -119,32 +121,33 @@
           target: release
          ====================================================================== -->
     <target name="release" depends="_init, compile" description="Release a distro">
-		<manifestclasspath property="jar.classpath" jarfile="${dir.dist}/${ant.project.name}deps.jar">
+    	<buildnumber/>
+		<manifestclasspath property="jar.classpath" jarfile="${dir.dist}/${ant.project.name}-${build.number}-deps.jar">
 			<classpath refid="lib.classpath" />
 		</manifestclasspath>
-		<jar destfile="${dir.dist}/${project.name}.jar">
+		<jar destfile="${dir.dist}/${project.name}-${build.number}.jar">
 			<manifest>
-				<attribute name="Main-Class" value="com.blogging.Main"/>
+				<attribute name="Main-Class" value="com.kickstart.Main"/>
 				<attribute name="Class-Path" value="${jar.classpath}"/>
 			</manifest>
     		<fileset dir="${dir.compile}"/>
     	</jar>
-		<jar destfile="${dir.dist}/${project.name}-src.jar">
+		<jar destfile="${dir.dist}/${project.name}-${build.number}-src.jar">
     		<fileset dir="${dir.src.java}"/>
     	</jar>
-    	<zip destfile="${dir.dist}/${project.name}.zip">
+    	<zip destfile="${dir.dist}/${project.name}-${build.number}.zip">
     		<zipfileset dir="${dir.dist}" prefix="${project.name}/bin" includes="${project.name}.jar"/>
     		<zipfileset dir="${dir.config}" prefix="${project.name}/config" includes="**/*.properties"/>
 			<zipfileset dir="${dir.lib}" prefix="${project.name}/lib">
 				<exclude name="sources/**"/>
-				<include name="*.jar"/>
+				<include name="**/*.jar"/>
 			</zipfileset>
     	</zip>
-    	<tar destfile="${dir.dist}/${project.name}.tgz" compression="gzip">
+    	<tar destfile="${dir.dist}/${project.name}-${build.number}.tgz" compression="gzip">
     		<tarfileset dir="${dir.dist}" prefix="${project.name}/bin" includes="${project.name}.jar"/>
     		<tarfileset dir="${dir.config}" prefix="${project.name}/config" includes="**/*.properties"/>
 			<tarfileset dir="${dir.lib}" prefix="${project.name}/lib">
-				<include name="*.jar"/>
+				<include name="**/*.jar"/>
 			</tarfileset>
     	</tar>
     </target>
@@ -153,7 +156,14 @@
           target: run              
          ====================================================================== -->
     <target name="run" depends="_init, compile" description="Run the project from the command line">
-        <java fork="true" classname="com.blogging.Main">
+        <java fork="true" classname="com.kickstart.Main">
+			<jvmarg value="-XX:+UseConcMarkSweepGC"/>
+			<jvmarg value="-XX:+UseParNewGC"/>
+			<jvmarg value="-XX:CMSInitiatingOccupancyFraction=70"/>
+			<jvmarg value="-XX:NewSize=128m"/>
+			<jvmarg value="-XX:MaxNewSize=128m"/>
+			<jvmarg value="-Xms256m"/>
+			<jvmarg value="-Xmx256m"/>
             <classpath>
                     <path refid="runtime.classpath"/>
             </classpath>

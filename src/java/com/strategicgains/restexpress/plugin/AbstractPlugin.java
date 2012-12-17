@@ -37,6 +37,19 @@ implements Plugin
 
 		return this;
 	}
+	
+	@Override
+	public void bind(RestExpress server)
+	{
+		// default behavior is to do nothing.
+	}
+
+	@Override
+	public void shutdown(RestExpress server)
+	{
+		// default behavior is to do essentially nothing.
+		setRegistered(false);
+	}
 
 	/**
 	 * This AbstractPlugin is assumed to be equal to other when:

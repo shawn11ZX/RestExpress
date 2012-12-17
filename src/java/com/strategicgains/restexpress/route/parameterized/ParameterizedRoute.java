@@ -23,6 +23,7 @@ import java.util.Set;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.strategicgains.restexpress.route.Route;
+import com.strategicgains.restexpress.url.UrlMatch;
 import com.strategicgains.restexpress.url.UrlPattern;
 
 
@@ -33,6 +34,8 @@ import com.strategicgains.restexpress.url.UrlPattern;
 public class ParameterizedRoute
 extends Route
 {
+	private UrlPattern[] aliases;
+
 	/**
      * @param urlMatcher
      * @param controller
@@ -42,9 +45,9 @@ extends Route
      * @param name
      */
     public ParameterizedRoute(UrlPattern urlMatcher, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-    	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters)
+    	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters, String baseUrl)
     {
-	    super(urlMatcher, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters);
+	    super(urlMatcher, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters, baseUrl);
     }
 
     /**
@@ -56,8 +59,42 @@ extends Route
      * @param name
      */
     public ParameterizedRoute(String urlPattern, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-    	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters)
+    	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters, String baseUrl)
     {
-	    this(new UrlPattern(urlPattern), controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters);
+	    this(new UrlPattern(urlPattern), controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters, baseUrl);
+    }
+
+    public void addAliases(List<String> uris)
+    {
+    	if (uris == null) return;
+    	
+    	aliases = new UrlPattern[uris.size()];
+    	int i = 0;
+
+    	for (String uri : uris)
+    	{
+    		aliases[i++] = new UrlPattern(uri);
+    	}
+    }
+
+    @Override
+    public UrlMatch match(String url)
+    {
+    	UrlMatch match = super.match(url);
+    	
+    	if (match == null && aliases != null)
+    	{
+    		for (UrlPattern alias : aliases)
+    		{
+    			match = alias.match(url);
+    			
+    			if (match != null)
+    			{
+    				break;
+    			}
+    		}
+    	}
+
+    	return match;
     }
 }

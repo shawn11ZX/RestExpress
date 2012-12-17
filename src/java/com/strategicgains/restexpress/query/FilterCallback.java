@@ -29,5 +29,5 @@ public interface FilterCallback
 	 * @param name
 	 * @param value
 	 */
-	void filterOn(String name, String value);
+	void filterOn(FilterComponent component);
 }

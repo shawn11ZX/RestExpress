@@ -11,16 +11,10 @@ import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.pipeline.SimpleConsoleLogMessageObserver;
-import com.strategicgains.restexpress.plugin.CacheControlPlugin;
-import com.strategicgains.restexpress.plugin.RoutesMetadataPlugin;
+import com.strategicgains.restexpress.plugin.cache.CacheControlPlugin;
+import com.strategicgains.restexpress.plugin.route.RoutesMetadataPlugin;
 import com.strategicgains.restexpress.util.Environment;
 
-/**
- * The main entry-point into RestExpress for the example services.
- * 
- * @author toddf
- * @since Aug 31, 2009
- */
 public class Main
 {
 	public static void main(String[] args) throws Exception
@@ -55,6 +49,7 @@ public class Main
 		// Maps /kickstart uri with optional format ('json' or 'xml'), accepting
 		// POST HTTP method only.  Calls KickStartService.create(Request, Reply).
 		server.uri("/kickstart.{format}", config.getKickStartController())
+			.alias("/yada/{id}/yadas/yahs.{format}")
 			.method(HttpMethod.POST);
 
 		// Maps /kickstart uri with required orderId and optional format identifier
@@ -62,6 +57,7 @@ public class Main
 		// Names this route to allow returning links from read resources in
 		// KickStartService methods via call to LinkUtils.asLinks().
 		server.uri("/kickstart/{orderId}.{format}", config.getKickStartController())
+			.alias("/blah/da/dah/{orderId}.{format}")
 			.method(HttpMethod.GET, HttpMethod.PUT, HttpMethod.DELETE)
 			.name(Constants.KICKSTART_ORDER_URI)
 			.parameter(Parameters.Cache.MAX_AGE, 3600);		// Cache for 3600 seconds (1 hour).

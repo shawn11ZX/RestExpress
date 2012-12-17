@@ -372,7 +372,7 @@ public class Request
 		
 		if (route != null)
 		{
-			return route.getPattern();
+			return route.getFullPattern();
 		}
 		
 		return null;

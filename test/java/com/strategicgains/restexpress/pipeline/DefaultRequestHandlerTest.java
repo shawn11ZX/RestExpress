@@ -16,6 +16,7 @@
 package com.strategicgains.restexpress.pipeline;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.InetSocketAddress;
@@ -44,6 +45,7 @@ import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
+import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
@@ -71,12 +73,13 @@ public class DefaultRequestHandlerTest
 	throws Exception
 	{
 		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.put(Format.JSON, ResponseProcessor.newJsonProcessor(new DefaultResponseWrapper()));
+		resolver.put(Format.WRAPPED_JSON, ResponseProcessor.newJsonProcessor(new DefaultResponseWrapper()));
+		resolver.put(Format.JSON, ResponseProcessor.newJsonProcessor(new RawResponseWrapper()));
 		ResponseProcessor xmlProcessor = ResponseProcessor.newXmlProcessor(new DefaultResponseWrapper());
 		AliasingSerializationProcessor xmlSerializer = (AliasingSerializationProcessor) xmlProcessor.getSerializer();
 		xmlSerializer.alias("dated", Dated.class);
 		resolver.put(Format.XML, xmlProcessor);
-		resolver.setDefaultFormat(Format.JSON);
+		resolver.setDefaultFormat(Format.WRAPPED_JSON);
 		
 		DummyRoutes routes = new DummyRoutes();
 		routes.defineRoutes();
@@ -91,6 +94,23 @@ public class DefaultRequestHandlerTest
 	    pl = pf.getPipeline();
 	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();
 	    channel = channelFactory.newChannel(pl);
+	}
+
+	@Test
+	public void shouldReturnTextPlainContentTypeByDefault()
+	throws Exception
+	{
+		sendGetEvent("/unserializedDefault");
+		assertEquals(0, observer.getExceptionCount());
+		assertEquals(1, observer.getReceivedCount());
+		assertEquals(1, observer.getCompleteCount());
+		assertEquals(1, observer.getSuccessCount());
+//		System.out.println(responseBody.toString());
+		assertEquals("should be text plain, here", responseBody.toString());
+		assertTrue(responseHeaders.containsKey("Content-Type"));
+		List<String> contentTypes = responseHeaders.get(HttpHeaders.Names.CONTENT_TYPE);
+		assertEquals(1, contentTypes.size());
+		assertEquals("text/plain; charset=UTF-8", contentTypes.get(0));
 	}
 
 	@Test
@@ -192,7 +212,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
 //		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"foobar'd\",\"data\":\"BadRequestException\"}", responseBody.toString());
-		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"Requested representation format not supported: %target. Supported formats: json, xml\",\"data\":\"BadRequestException\"}", responseBody.toString());
+		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"Requested representation format not supported: %target. Supported formats: json, wjson, xml\",\"data\":\"BadRequestException\"}", responseBody.toString());
 	}
 
 	@Test
@@ -205,7 +225,7 @@ public class DefaultRequestHandlerTest
 		assertEquals(1, observer.getExceptionCount());
 		assertEquals(0, observer.getSuccessCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"Requested representation format not supported: unsupported. Supported formats: json, xml\",\"data\":\"BadRequestException\"}", responseBody.toString());
+		assertEquals("{\"code\":400,\"status\":\"error\",\"message\":\"Requested representation format not supported: unsupported. Supported formats: json, wjson, xml\",\"data\":\"BadRequestException\"}", responseBody.toString());
 	}
 
 	@Test
@@ -237,7 +257,7 @@ public class DefaultRequestHandlerTest
 	@Test
 	public void shouldParseTimepointJson()
 	{
-		sendGetEvent("/date.json", "{\"at\":\"2010-12-17T120000Z\"}");
+		sendGetEvent("/date.wjson", "{\"at\":\"2010-12-17T120000Z\"}");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -249,7 +269,7 @@ public class DefaultRequestHandlerTest
 	@Test
 	public void shouldParseTimepointJsonUsingQueryString()
 	{
-		sendGetEvent("/date?format=json", "{\"at\":\"2010-12-17T120000Z\"}");
+		sendGetEvent("/date?format=wjson", "{\"at\":\"2010-12-17T120000Z\"}");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -324,6 +344,83 @@ public class DefaultRequestHandlerTest
 		assertTrue(responseBody.toString().endsWith("</response>"));
 	}
 
+	@Test
+	public void shouldCallAllFinallyProcessors()
+	{
+		NoopPostprocessor p1 = new NoopPostprocessor();
+		NoopPostprocessor p2 = new NoopPostprocessor();
+		NoopPostprocessor p3 = new NoopPostprocessor();
+		messageHandler.addFinallyProcessor(p1);
+		messageHandler.addFinallyProcessor(p2);
+		messageHandler.addFinallyProcessor(p3);
+		sendGetEvent("/foo");
+		assertEquals(1, p1.getCallCount());
+		assertEquals(1, p2.getCallCount());
+		assertEquals(1, p3.getCallCount());
+	}
+
+	@Test
+	public void shouldCallAllFinallyProcessorsOnRouteException()
+	{
+		NoopPostprocessor p1 = new NoopPostprocessor();
+		NoopPostprocessor p2 = new NoopPostprocessor();
+		NoopPostprocessor p3 = new NoopPostprocessor();
+		messageHandler.addFinallyProcessor(p1);
+		messageHandler.addFinallyProcessor(p2);
+		messageHandler.addFinallyProcessor(p3);
+		sendGetEvent("/xyzt.html");
+		assertEquals(1, p1.getCallCount());
+		assertEquals(1, p2.getCallCount());
+		assertEquals(1, p3.getCallCount());
+	}
+
+	@Test
+	public void shouldCallAllFinallyProcessorsOnProcessorException()
+	{
+		NoopPostprocessor p1 = new ExceptionPostprocessor();
+		NoopPostprocessor p2 = new ExceptionPostprocessor();
+		NoopPostprocessor p3 = new ExceptionPostprocessor();
+		messageHandler.addFinallyProcessor(p1);
+		messageHandler.addFinallyProcessor(p2);
+		messageHandler.addFinallyProcessor(p3);
+		sendGetEvent("/foo");
+		assertEquals(1, p1.getCallCount());
+		assertEquals(1, p2.getCallCount());
+		assertEquals(1, p3.getCallCount());
+	}
+
+	@Test
+	public void shouldSetJSONContentType()
+	throws Exception
+	{
+		sendGetEvent("/serializedString.json?returnValue=raw string");
+		assertEquals(0, observer.getExceptionCount());
+		assertEquals(1, observer.getReceivedCount());
+		assertEquals(1, observer.getCompleteCount());
+		assertEquals(1, observer.getSuccessCount());
+		assertEquals("\"raw string\"", responseBody.toString());
+		assertTrue(responseHeaders.containsKey("Content-Type"));
+		List<String> contentTypes = responseHeaders.get(HttpHeaders.Names.CONTENT_TYPE);
+		assertEquals(1, contentTypes.size());
+		assertEquals("application/json; charset=UTF-8", contentTypes.get(0));
+	}
+
+	@Test
+	public void shouldSetJSONContentTypeOnNullReturn()
+	throws Exception
+	{
+		sendGetEvent("/serializedString.json");
+		assertEquals(0, observer.getExceptionCount());
+		assertEquals(1, observer.getReceivedCount());
+		assertEquals(1, observer.getCompleteCount());
+		assertEquals(1, observer.getSuccessCount());
+		assertTrue(responseHeaders.containsKey("Content-Type"));
+		List<String> contentTypes = responseHeaders.get(HttpHeaders.Names.CONTENT_TYPE);
+		assertEquals(1, contentTypes.size());
+		assertEquals("application/json; charset=UTF-8", contentTypes.get(0));
+		assertEquals("null", responseBody.toString());
+	}
+
 	private void sendGetEvent(String path)
     {
 		try
@@ -374,11 +471,17 @@ public class DefaultRequestHandlerTest
         	uri("/date.{format}", controller, defaults)
     			.action("dateAction", HttpMethod.GET);
 
+        	uri("/unserializedDefault", controller, defaults)
+        		.action("unserializedDefault", HttpMethod.GET);
+
         	uri("/unserialized", controller, defaults)
         		.action("unserializedAction", HttpMethod.GET);
 
         	uri("/unserializedToo", controller, defaults)
         		.action("contentHeaderAction", HttpMethod.GET);
+
+        	uri("/serializedString.{format}", controller, defaults)
+    		.action("serializedStringAction", HttpMethod.GET);
 
         	uri("/setBodyAction.html", controller, defaults)
         		.action("setBodyAction", HttpMethod.GET)
@@ -403,11 +506,22 @@ public class DefaultRequestHandlerTest
 			return request.getBodyAs(Dated.class);
 		}
 
+		public String unserializedDefault(Request request, Response response)
+		{
+			response.noSerialization();
+			return "should be text plain, here";
+		}
+
 		public String unserializedAction(Request request, Response response)
 		{
 			response.setContentType("text/html");
 			response.noSerialization();
 			return "<html><body>Some kinda wonderful!</body></html>";
+		}
+
+		public String serializedStringAction(Request request, Response response)
+		{
+			return request.getRawHeader("returnValue");
 		}
 
 		public String contentHeaderAction(Request request, Response response)
@@ -475,6 +589,34 @@ public class DefaultRequestHandlerTest
 		public int getCompleteCount()
         {
         	return completeCount;
+        }
+	}
+
+	private class NoopPostprocessor
+	implements Postprocessor
+	{
+		private int callCount = 0;
+
+        @Override
+        public void process(Request request, Response response)
+        {
+        	++callCount;
+        }
+        
+        public int getCallCount()
+        {
+        	return callCount;
+        }
+	}
+
+	private class ExceptionPostprocessor
+	extends NoopPostprocessor
+	{
+        @Override
+        public void process(Request request, Response response)
+        {
+        	super.process(request, response);
+        	throw new RuntimeException("RuntimeException thrown...");
         }
 	}
 }

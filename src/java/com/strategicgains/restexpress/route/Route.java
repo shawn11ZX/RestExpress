@@ -52,6 +52,7 @@ public abstract class Route
 	private HttpMethod method;
 	private boolean shouldSerializeResponse = true;
 	private String name;
+	private String baseUrl;
 	private List<String> supportedFormats = new ArrayList<String>();
 	private String defaultFormat;
 	private Set<String> flags = new HashSet<String>();
@@ -64,12 +65,14 @@ public abstract class Route
 	 * @param controller
 	 */
 	public Route(UrlMatcher urlMatcher, Object controller, Method action, HttpMethod method, boolean shouldSerializeResponse,
-		String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters)
+		String name, List<String> supportedFormats, String defaultFormat, Set<String> flags, Map<String, Object> parameters,
+		String baseUrl)
 	{
 		super();
 		this.urlMatcher = urlMatcher;
 		this.controller = controller;
 		this.action = action;
+		this.action.setAccessible(true);
 		this.method = method;
 		this.shouldSerializeResponse = shouldSerializeResponse;
 		this.name = name;
@@ -77,6 +80,7 @@ public abstract class Route
 		this.defaultFormat = defaultFormat;
 		this.flags.addAll(flags);
 		this.parameters.putAll(parameters);
+		this.baseUrl = baseUrl;
 	}
 	
 	public boolean isFlagged(String flag)
@@ -118,7 +122,17 @@ public abstract class Route
 	{
 		return (getName() != null && !getName().trim().isEmpty());
 	}
-	
+
+	public String getBaseUrl()
+	{
+		return baseUrl;
+	}
+
+	public String getFullPattern()
+	{
+		return getBaseUrl() + getPattern();
+	}
+
 	public String getPattern()
 	{
 		return urlMatcher.getPattern();
@@ -165,11 +179,6 @@ public abstract class Route
 	public boolean hasDefaultFormat()
 	{
 		return defaultFormat != null;
-	}
-
-	public void setDefaultFormat(String format)
-	{
-		this.defaultFormat = format;
 	}
 
 	public UrlMatch match(String url)

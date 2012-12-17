@@ -6,14 +6,10 @@ import java.util.Map;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.kickstart.Constants;
+import com.strategicgains.hyperexpress.util.LinkUtils;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.util.XLinkUtils;
 
-/**
- * @author toddf
- * @since Aug 31, 2010
- */
 public class KickStartController
 {
 	/**
@@ -29,7 +25,7 @@ public class KickStartController
 		response.setResponseCreated();
 		// Include the Location header...
 		String locationUrl = request.getNamedUrl(HttpMethod.GET, Constants.KICKSTART_ORDER_URI);
-		response.addLocationHeader(XLinkUtils.asLocationUrl(newId, Constants.ORDER_ID_PARAMETER, locationUrl));
+		response.addLocationHeader(LinkUtils.formatUrl(locationUrl, Constants.ORDER_ID_PARAMETER, newId));
 		// Return the newly-created ID...
 		return newId;
 	}

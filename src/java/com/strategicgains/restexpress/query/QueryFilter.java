@@ -47,10 +47,33 @@ public class QueryFilter
 		super();
 	}
 	
+	/**
+	 * Create a QueryFilter instance from a Map of name/value pairs.
+	 * 
+	 * @param filters name/value pairs to match on.
+	 */
 	public QueryFilter(Map<String, String> filters)
 	{
 		this();
 		this.filters = new HashMap<String, String>(filters);
+	}
+
+	/**
+	 * Add a filter criteria to this QueryFilter instance.
+	 * 
+	 * @param name the property name to filter on.  Cannot be null.
+	 * @param value the value to match.  Cannot be null.
+	 * @return a reference to this QueryFilter to facilitate method chaining.
+	 */
+	public QueryFilter addCriteria(String name, String value)
+	{
+		if (filters == null)
+		{
+			filters = new HashMap<String, String>();
+		}
+
+		filters.put(name, value);
+		return this;
 	}
 
 	/**
@@ -75,7 +98,7 @@ public class QueryFilter
 
 		for (Entry<String, String> entry : filters.entrySet())
 		{
-			callback.filterOn(entry.getKey(), entry.getValue());
+			callback.filterOn(new FilterComponent(entry.getKey(), entry.getValue()));
 		}
 	}
 	

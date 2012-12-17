@@ -66,6 +66,7 @@ public abstract class RouteBuilder
 	private Object controller;
 	private boolean shouldSerializeResponse = true;
 	private String name;
+	private String baseUrl;
 	private Set<String> flags = new HashSet<String>();
 	private Map<String, Object> parameters = new HashMap<String, Object>();
 	
@@ -103,6 +104,21 @@ public abstract class RouteBuilder
 			methods.add(method);
 		}
 
+		return this;
+	}
+	
+	/**
+	 * Set the base URL that is associated with this route.  By default
+	 * the route will inherit the base URL from the RestExpress server and
+	 * is used when retrieving the URL pattern for a route in order to create
+	 * a Location or other hypermedia link.
+	 *  
+	 * @param baseUrl protocol://host:port to use as a base URL in links.
+	 * @return the RouteBuilder instance.
+	 */
+	public RouteBuilder baseUrl(String baseUrl)
+	{
+		this.baseUrl = baseUrl;
 		return this;
 	}
 	
@@ -239,12 +255,7 @@ public abstract class RouteBuilder
 		}
 
 		List<Route> routes = new ArrayList<Route>();
-		String pattern = uri;
-
-		if (pattern != null && !pattern.startsWith("/"))
-		{
-			pattern = "/" + pattern;
-		}
+		String pattern = toRegexPattern(uri);
 		
 		for (HttpMethod method : methods)
 		{
@@ -256,11 +267,13 @@ public abstract class RouteBuilder
 			}
 			
 			Method action = determineActionMethod(controller, actionName);
-			routes.add(newRoute(pattern, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters));
+			routes.add(newRoute(pattern, controller, action, method, shouldSerializeResponse, name, supportedFormats, defaultFormat, flags, parameters, baseUrl));
 		}
 		
 		return routes;
 	}
+
+	protected abstract String toRegexPattern(String uri);
 	
 	
 	// SECTION: CONSOLE
@@ -272,6 +285,7 @@ public abstract class RouteBuilder
 		metadata.setSerialized(shouldSerializeResponse);
 		metadata.setDefaultFormat(defaultFormat);
 		metadata.addAllSupportedFormats(supportedFormats);
+		metadata.setBaseUrl(baseUrl);
 		
 		for (HttpMethod method : methods)
 		{
@@ -304,12 +318,13 @@ public abstract class RouteBuilder
 	 * @param defaultFormat
 	 * @param flags
 	 * @param parameters
+	 * @param baseUrl
      * @return
      */
     protected abstract Route newRoute(String pattern, Object controller, Method action,
     	HttpMethod method, boolean shouldSerializeResponse,
     	String name, List<String> supportedFormats, String defaultFormat, Set<String> flags,
-    	Map<String, Object> parameters);
+    	Map<String, Object> parameters, String baseUrl);
 
 
 	// SECTION: UTILITY - PRIVATE
@@ -343,5 +358,6 @@ public abstract class RouteBuilder
     	if (defaults == null) return;
 
     	defaultFormat(defaults.getDefaultFormat());
+    	baseUrl(defaults.getBaseUrl());
     }
 }

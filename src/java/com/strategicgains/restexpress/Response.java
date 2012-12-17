@@ -142,12 +142,47 @@ public class Response
 	 */
 	public void addRangeHeader(QueryRange range, long count)
 	{
-    	addHeader(CONTENT_RANGE_HEADER_NAME, range.toString() + "/" + count);
+    	addHeader(CONTENT_RANGE_HEADER_NAME, range.asContentRange(count));
 	}
 	
 	public void addLocationHeader(String url)
 	{
 		addHeader(HttpHeaders.Names.LOCATION, url);
+	}
+
+	/**
+	 * Sets HTTP response code and Content-Range header appropriately for
+	 * the requested QueryRange, returned collection size and maximum data set size.
+	 * 
+	 * @param queryRange
+	 * @param results
+	 * @param count
+	 */
+	public void setCollectionResponse(QueryRange queryRange, int size, long count)
+	{
+		QueryRange range = new QueryRange(queryRange.getOffset(), queryRange.getLimit());
+		
+		if (range.isOutside(size, count))
+		{
+			setResponseCode(416);
+			range.setOffset(0);
+			range.setLimitViaEnd(Math.min(count - 1, range.getLimit()));
+		}
+		else if (range.extendsBeyond(size, count))
+		{
+			range.setLimitViaEnd((count > 1 ? count - 1 : 0));
+			
+			if (count > 0 && !range.spans(size, count))
+			{
+				setResponseCode(206);
+			}
+		}
+		else if (range.isInside(size, count))
+		{
+			setResponseCode(206);
+		}
+
+		addRangeHeader(range, count);
 	}
 
 	/**
@@ -180,10 +215,15 @@ public class Response
 	
 	/**
 	 * Sets the HTTP response status code to 204 - no content.
+	 * Note, however, if a wrapped response is requested, then
+	 * this method has no effect (as the body will contain content).
 	 */
 	public void setResponseNoContent()
 	{
-		setResponseStatus(HttpResponseStatus.NO_CONTENT);
+		if (!responseProcessor.getWrapper().addsBodyContent())
+		{
+			setResponseStatus(HttpResponseStatus.NO_CONTENT);
+		}
 	}
 	
 	/**

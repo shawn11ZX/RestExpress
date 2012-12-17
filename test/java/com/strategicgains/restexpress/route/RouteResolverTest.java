@@ -66,9 +66,33 @@ public class RouteResolverTest
 	}
 
 	@Test
+	public void shouldResolveAliasBarGetRoute()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/bar/bar432.json?value=ignored");
+		httpRequest.addHeader("Host", "testing-host");
+		Request request = new Request(httpRequest, null);
+		Action action = resolver.resolve(request);
+		assertNotNull(action);
+		assertEquals(HttpMethod.GET, action.getRoute().getMethod());
+		assertEquals("/foo/bar/{barId}", action.getRoute().getPattern());
+	}
+
+	@Test
 	public void shouldResolvePostRoute()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo.json?value=ignored");
+		httpRequest.addHeader("Host", "testing-host");
+		Request request = new Request(httpRequest, null);
+		Action action = resolver.resolve(request);
+		assertNotNull(action);
+		assertEquals(HttpMethod.POST, action.getRoute().getMethod());
+		assertEquals("/foo", action.getRoute().getPattern());
+	}
+
+	@Test
+	public void shouldResolveAliasFooPostRoute()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/yada/yada.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
 		Request request = new Request(httpRequest, null);
 		Action action = resolver.resolve(request);
@@ -90,9 +114,33 @@ public class RouteResolverTest
 	}
 
 	@Test
+	public void shouldResolveAliasCrudRouteForGet()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/blah/foo/foo23.json?value=ignored");
+		httpRequest.addHeader("Host", "testing-host");
+		Request request = new Request(httpRequest, null);
+		Action action = resolver.resolve(request);
+		assertNotNull(action);
+		assertEquals(HttpMethod.GET, action.getRoute().getMethod());
+		assertEquals("/foo/{fooId}", action.getRoute().getPattern());
+	}
+
+	@Test
 	public void shouldResolveCrudRouteForPut()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, "/foo/foo23.json?value=ignored");
+		httpRequest.addHeader("Host", "testing-host");
+		Request request = new Request(httpRequest, null);
+		Action action = resolver.resolve(request);
+		assertNotNull(action);
+		assertEquals(HttpMethod.PUT, action.getRoute().getMethod());
+		assertEquals("/foo/{fooId}", action.getRoute().getPattern());
+	}
+
+	@Test
+	public void shouldResolveAliasCrudRouteForPut()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, "/blah/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
 		Request request = new Request(httpRequest, null);
 		Action action = resolver.resolve(request);
@@ -114,9 +162,33 @@ public class RouteResolverTest
 	}
 
 	@Test
+	public void shouldResolveAliasCrudRouteForPost()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/blah/foo/foo23.json?value=ignored");
+		httpRequest.addHeader("Host", "testing-host");
+		Request request = new Request(httpRequest, null);
+		Action action = resolver.resolve(request);
+		assertNotNull(action);
+		assertEquals(HttpMethod.POST, action.getRoute().getMethod());
+		assertEquals("/foo/{fooId}", action.getRoute().getPattern());
+	}
+
+	@Test
 	public void shouldResolveCrudRouteForDelete()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, "/foo/foo23.json?value=ignored");
+		httpRequest.addHeader("Host", "testing-host");
+		Request request = new Request(httpRequest, null);
+		Action action = resolver.resolve(request);
+		assertNotNull(action);
+		assertEquals(HttpMethod.DELETE, action.getRoute().getMethod());
+		assertEquals("/foo/{fooId}", action.getRoute().getPattern());
+	}
+
+	@Test
+	public void shouldResolveAliasCrudRouteForDelete()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, "/blah/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
 		Request request = new Request(httpRequest, null);
 		Action action = resolver.resolve(request);
@@ -206,12 +278,16 @@ public class RouteResolverTest
         public void defineRoutes()
         {
     		uri("/foo/bar/{barId}.{format}", service, defaults)
+    			.alias("/bar/{barId}.{format}")
+    			.name("BAR_CRUD_ROUTE")
     			.action("readBar", HttpMethod.GET);
 
     		uri("/foo.{format}", service, defaults)
+    			.alias("/yada/yada.{format}")
     			.method(HttpMethod.POST);
 
     		uri("/foo/{fooId}.{format}", service, defaults)
+    			.alias("/blah/foo/{fooId}.{format}")
     			.name("CRUD_ROUTE");
         }
 	}
