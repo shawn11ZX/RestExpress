@@ -243,7 +243,9 @@ public class RequestTest
 	{
 		request.addHeader("header-key", "header-value");
 		request.addHeader("header-key-1", "header-value-1");
+		request.addHeader("header-key-2", "");
 		assertTrue(request.getHeaderNames().contains("header-key"));
 		assertTrue(request.getHeaderNames().contains("header-key-1"));
+		assertTrue(request.getHeaderNames().contains("header-key-2"));
 	}
 }
