@@ -26,20 +26,20 @@ import java.util.regex.Pattern;
 /**
  * UrlPattern leverages Regex Pattern to represent a parameterized URL. Parameters within the URL are
  * denoted by curly braces '{}' with the parameter name contained within (e.g. '{userid}').
- *
+ * 
  * <p/>Parameter names must be formed of word characters (e.g. A-Z, a-z, 0-9, '_').
  * <p/>An optional format parameter following a dot ('.') may be added to the end.  While it could be named any valid parameter name,
  * RestExpress offers special handling (e.g. within the Request, etc.) if it's named 'format'.
  * <p/>
  * Note that the format specifier allows only word characters and percent-encoded characters.
- *
+ * 
  * <p/>URL Pattern examples:
  * <ul>
  *   <li>/api/search.{format}</li>
  *   <li>/api/search/users/{userid}.{format}</li>
  *   <li>/api/{version}/search/users/{userid}</li>
  * </ul>
- *
+ * 
  * RestExpress accepts URIs with the following BNF values taken from the URI Generic Syntax IETF RFC 3986 as follows:
  * <p/>
  * pct-encoded   = "%" HEXDIG HEXDIG
@@ -49,7 +49,7 @@ import java.util.regex.Pattern;
  * gen-delims    = ":" / "/" / "?" / "#" / "[" / "]" / "@"</br>
  * sub-delims    = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "=" *
  * <p/>
- *
+ * 
  * @author toddf
  * @since Apr 28, 2010
  * @see http://www.ietf.org/rfc/rfc3986.txt
@@ -61,10 +61,10 @@ implements UrlMatcher
 
 	// Finds parameters in the URL pattern string.
 	private static final String URL_PARAM_REGEX = "\\{(\\w*?)\\}";
-
+	
 	// Replaces parameter names in the URL pattern string to match parameters in URLs.
 	private static final String URL_PARAM_MATCH_REGEX = "\\([%\\\\w-.\\\\~!\\$&'\\\\(\\\\)\\\\*\\\\+,;=:\\\\?#\\\\[\\\\]@]+?\\)";
-
+	
 	// Pattern to match URL pattern parameter names.
 	private static final Pattern URL_PARAM_PATTERN = Pattern.compile(URL_PARAM_REGEX);
 
@@ -82,18 +82,18 @@ implements UrlMatcher
 	 * The URL pattern describing the URL layout and any parameters.
 	 */
 	private String urlPattern;
-
+	
 	/**
 	 * A compiled regex created from the urlPattern, above.
 	 */
 	private Pattern compiledUrl;
-
+	
 	/**
 	 * An ordered list of parameter names found in the urlPattern, above.
 	 */
 	private List<String> parameterNames = new ArrayList<String>();
 
-
+	
 	// SECTION: CONSTRUCTOR
 
 	/**
@@ -106,7 +106,7 @@ implements UrlMatcher
 		compile();
 	}
 
-
+	
 	// SECTION: ACCESSORS/MUTATORS - PRIVATE
 
 	/**
@@ -116,7 +116,7 @@ implements UrlMatcher
     {
     	return urlPattern;
     }
-
+    
     public String getPattern()
     {
     	return getUrlPattern().replaceFirst(URL_FORMAT_REGEX, "");
@@ -129,20 +129,20 @@ implements UrlMatcher
     {
     	this.urlPattern = pattern;
     }
-
+    
     public List<String> getParameterNames()
     {
     	return Collections.unmodifiableList(parameterNames);
     }
-
-
+    
+    
     // SECTION: URL MATCHING
 
     /**
      * Test the given URL against the underlying pattern to determine if it matches, returning the
      * results in a UrlMatch instance.  If the URL matches, parse any applicable parameters from it,
      * placing those also in the UrlMatch instance accessible by their parameter names.
-     *
+     * 
      * @param url an URL string with or without query string.
      * @return a UrlMatch instance reflecting the outcome of the comparison, if matched. Otherwise, null.
      */
@@ -158,11 +158,11 @@ implements UrlMatcher
 
 		return null;
 	}
-
+	
 	/**
 	 * Test the given URL against the underlying pattern to determine if it matches, returning a boolean
 	 * to reflect the outcome.
-	 *
+	 * 
 	 * @param url an URL string with or without query string.
 	 * @return true if the given URL matches the underlying pattern.  Otherwise false.
 	 */
@@ -171,10 +171,10 @@ implements UrlMatcher
 	{
 		return (match(url) != null);
 	}
-
-
+	
+	
 	// SECTION: UTILITY - PRIVATE
-
+	
 	/**
 	 * Processes the incoming URL pattern string to create a java.util.regex Pattern out of it and
 	 * parse out the parameter names, if applicable.
@@ -205,18 +205,18 @@ implements UrlMatcher
 
 	/**
 	 * Extracts parameter values from a Matcher instance.
-	 *
+	 * 
 	 * @param matcher
 	 * @return a Map containing parameter values indexed by their corresponding parameter name.
 	 */
 	private Map<String, String> extractParameters(Matcher matcher)
     {
 	    Map<String, String> values = new HashMap<String, String>();
-
+	    
 	    for (int i = 0; i < matcher.groupCount(); i++)
 	    {
 	    	String value = matcher.group(i + 1);
-
+	    	
 	    	if (value != null)
 	    	{
 	    		values.put(parameterNames.get(i), value);

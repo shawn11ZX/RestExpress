@@ -63,7 +63,6 @@ public class UrlPatternTest
 		assertTrue(p.matches("/xxx/12345/yyy/67890"));
 		assertTrue(p.matches("/xxx/toddf/yyy/joez"));
 		assertTrue(p.matches("/xxx/toddf/yyy/joez?x=y&a=b"));
-		assertTrue(p.matches("/xxx/toddf/yyy/joez."));
 	}
 
 	@Test
@@ -157,7 +156,7 @@ public class UrlPatternTest
 		assertNull(match.get("format"));
 		assertEquals("12345", match.get("a_id"));
 		assertEquals("67890", match.get("b_id"));
-
+		
 		match = p.match("/xxx/12.345/yyy/678.90?x=y&a=b");
 		assertNotNull(match);
 		assertNull(match.get("format"));
@@ -174,7 +173,7 @@ public class UrlPatternTest
 		assertEquals("1.0", match.get("a_id"));
 		assertEquals("67890", match.get("b_id"));
 	}
-
+	
 	@Test
 	public void shouldParseTimestampParameters()
 	{
@@ -182,16 +181,16 @@ public class UrlPatternTest
 		UrlMatch match = huge.match("/name/asc/4/2A3B4C5E6D/12345/foo/560261e05f7c21533a3d7d09efff4b91eb7ca702f490e073e1d51614c2e33c1e?contenttype=jsonp%26jsonp=_jqjsp%26_1287161495587");
 		assertNotNull(match);
 		assertEquals("12345", match.get("REQUEST_TIME_STAMP"));
-
+		
 		match = huge.match("/name/asc/4/2A3B4C5E6D/2010-10-15T16:51:33Z/foo/560261e05f7c21533a3d7d09efff4b91eb7ca702f490e073e1d51614c2e33c1e?contenttype=jsonp&jsonp=_jqjsp&_1287161495587=");
 		assertNotNull(match);
 		assertEquals("2010-10-15T16:51:33Z", match.get("REQUEST_TIME_STAMP"));
-
+		
 		match = huge.match("/name/asc/4/2A3B4C5E6D/2010-10-15T16%253A51%253A33Z/foo/560261e05f7c21533a3d7d09efff4b91eb7ca702f490e073e1d51614c2e33c1e?contenttype=jsonp%26jsonp=_jqjsp%26_1287161495587");
 		assertNotNull(match);
 		assertEquals("2010-10-15T16%253A51%253A33Z", match.get("REQUEST_TIME_STAMP"));
 	}
-
+	
 	@Test
 	public void shouldParseUrlCharactersInParameters()
 	{
@@ -200,7 +199,7 @@ public class UrlPatternTest
 		assertEquals("$-_+*()~", match.get("a_id"));
 		assertEquals(":,!'%", match.get("b_id"));
 	}
-
+	
 	@Test
 	public void shouldReturnBaseUriAsNormalizedUrlPattern()
 	{
