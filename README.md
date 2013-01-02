@@ -60,6 +60,7 @@ Change History/Release Notes:
 
 Release 0.8.0 - in development (branch 'master')
 ---------------------------------------------------------------------------------------------------
+* Merged pull request #49 - Added method to get all headers from a HttpRequest.
 * Fixed issue #40 (https://github.com/RestExpress/RestExpress/issues/40).
 * Introduced route 'aliases' where there are multiple URLs for a given service.
 * Introduced concept of "finally" processors, which are executed in the finally block of
