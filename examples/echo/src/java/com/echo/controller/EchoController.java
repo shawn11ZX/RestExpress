@@ -30,19 +30,15 @@ extends AbstractDelayingController
 	
 	public String read(Request request, Response response)
 	{
-//		delay(request);
-//		return request.getUrlDecodedHeader(ECHO_HEADER, ECHO_PARAMETER_NOT_FOUND);
-		
-		// the following mimics the nodeJS echo.js program for benchmarking.
-		response.setContentType("text/xml");
+		delay(request);
 		String echo = request.getUrlDecodedHeader(ECHO_HEADER);
 		
 		if (echo == null)
 		{
-			return "<http_test><error>no value specified</error></http_test>";
+			return "Please set query-string parameter 'echo' (e.g. ?echo=value)";
 		}
 		
-		return String.format("<http_test><value>%s</value></http_test>", echo);
+		return echo;
 	}
 
 	public ChannelBuffer update(Request request, Response response)

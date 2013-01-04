@@ -7,6 +7,7 @@ import com.echo.serialization.ResponseProcessors;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.RestExpress;
+import com.strategicgains.restexpress.pipeline.SimpleConsoleLogMessageObserver;
 import com.strategicgains.restexpress.plugin.route.RoutesMetadataPlugin;
 import com.strategicgains.restexpress.util.Environment;
 
@@ -28,8 +29,8 @@ public class Main
 		    .putResponseProcessor(Format.JSON, ResponseProcessors.json())
 		    .putResponseProcessor(Format.XML, ResponseProcessors.xml())
 		    .putResponseProcessor(Format.WRAPPED_JSON, ResponseProcessors.wrappedJson())
-		    .putResponseProcessor(Format.WRAPPED_XML, ResponseProcessors.wrappedXml());
-//   		    .addMessageObserver(new SimpleConsoleLogMessageObserver());
+		    .putResponseProcessor(Format.WRAPPED_XML, ResponseProcessors.wrappedXml())
+   		    .addMessageObserver(new SimpleConsoleLogMessageObserver());
 
 
 		defineRoutes(server, config);
