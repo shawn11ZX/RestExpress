@@ -6,7 +6,7 @@
 	<url>https://github.com/RestExpress/RestExpress</url>
 	<groupId>com.strategicgains</groupId>
 	<artifactId>RestExpress</artifactId>
-	<version>0.8.0-SNAPSHOT</version>
+	<version>0.8.0</version>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -132,7 +132,7 @@
 		<url>git@github.com:RestExpress/RestExpress.git</url>
 		<connection>scm:git:git@github.com:RestExpress/RestExpress.git</connection>
 		<developerConnection>scm:git:git@github.com:RestExpress/RestExpress.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>v0.8.0-20130109-0742</tag>
 	</scm>
 
 	<developers>
