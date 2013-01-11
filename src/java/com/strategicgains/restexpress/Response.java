@@ -27,7 +27,7 @@ import java.util.Set;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
-import com.strategicgains.restexpress.query.QueryRange;
+import com.strategicgains.restexpress.common.query.QueryRange;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 
 /**

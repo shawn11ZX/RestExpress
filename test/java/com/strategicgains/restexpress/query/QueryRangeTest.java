@@ -27,6 +27,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.common.query.QueryRange;
 import com.strategicgains.restexpress.exception.BadRequestException;
 
 /**
@@ -41,7 +42,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("Range", "items=0-24");
 		Request request = new Request(httpRequest, null);
-		QueryRange r = QueryRange.parseFrom(request);
+		QueryRange r = QueryRanges.parseFrom(request);
 		assertEquals(25, r.getLimit());
 		assertEquals(0, r.getOffset());
 		assertEquals(24, r.getEnd());
@@ -53,7 +54,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("limit", "5");
 		Request request = new Request(httpRequest, null);
-		QueryRange r = QueryRange.parseFrom(request);
+		QueryRange r = QueryRanges.parseFrom(request);
 		assertEquals(5, r.getLimit());
 		assertEquals(0, r.getOffset());
 		assertEquals(4, r.getEnd());
@@ -65,7 +66,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("offset", "25");
 		Request request = new Request(httpRequest, null);
-		QueryRange.parseFrom(request);
+		QueryRanges.parseFrom(request);
 		fail("Should have thrown");
 	}
 
@@ -75,7 +76,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("offset", "25");
 		Request request = new Request(httpRequest, null);
-		QueryRange r = QueryRange.parseFrom(request, 5);
+		QueryRange r = QueryRanges.parseFrom(request, 5);
 		assertEquals(5, r.getLimit());
 		assertEquals(25, r.getOffset());
 		assertEquals(29, r.getEnd());
@@ -87,7 +88,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("Range", "items=A-24");
 		Request request = new Request(httpRequest, null);
-		QueryRange.parseFrom(request);
+		QueryRanges.parseFrom(request);
 		fail("Did not throw exception as expected.");
 	}
 
@@ -97,7 +98,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("Range", "items=24-23");
 		Request request = new Request(httpRequest, null);
-		QueryRange.parseFrom(request);
+		QueryRanges.parseFrom(request);
 		fail("Did not throw exception as expected.");
 	}
 
@@ -107,7 +108,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("Range", "items=1-0");
 		Request request = new Request(httpRequest, null);
-		QueryRange.parseFrom(request);
+		QueryRanges.parseFrom(request);
 		fail("Did not throw exception as expected.");
 	}
 
@@ -117,7 +118,7 @@ public class QueryRangeTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("Range", "items=200-299");
 		Request request = new Request(httpRequest, null);
-		QueryRange r = QueryRange.parseFrom(request);
+		QueryRange r = QueryRanges.parseFrom(request);
 		assertEquals(100, r.getLimit());
 		assertEquals(200, r.getStart());
 		assertEquals(299, r.getEnd());
@@ -174,7 +175,7 @@ public class QueryRangeTest
 		httpRequest.addHeader("limit", "100");
 		httpRequest.addHeader("offset", "200");
 		Request request = new Request(httpRequest, null);
-		QueryRange r = QueryRange.parseFrom(request);
+		QueryRange r = QueryRanges.parseFrom(request);
 		assertEquals(100, r.getLimit());
 		assertEquals(200, r.getStart());
 		assertEquals(299, r.getEnd());

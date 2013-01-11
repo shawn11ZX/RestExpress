@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.junit.Test;
 
-import com.strategicgains.restexpress.query.QueryRange;
+import com.strategicgains.restexpress.common.query.QueryRange;
 
 /**
  * @author toddf
