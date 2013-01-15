@@ -18,89 +18,22 @@ package com.strategicgains.restexpress.query;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.common.query.QueryFilter;
 
 /**
- * Supports the concept of filtering a result based on the 'filter' query parameter.
- * a list of field name/value pairs separated by a vertical bar ('|') and the field name
- * separated from the value with two colons ('::').
- * <p/>
- * To filter on name: ?filter=name::todd
- * <p/>
- * To filter on name and description: ?filter=name::todd|description::amazing
+ * A factory for RestExpress-Common QueryFilter instance, parsing from a Request.
  * 
  * @author toddf
  * @since Apr 12, 2011
+ * @see com.strategicgains.restexpress.common.query.QueryFilter
  */
-public class QueryFilter
+public abstract class QueryFilters
 {
 	private static final String FILTER_HEADER_NAME = "filter";
 	private static final String FILTER_SEPARATOR = "\\|";
 	private static final String NAME_VALUE_SEPARATOR = "::";
-
-	private Map<String, String> filters = null;
-	
-	public QueryFilter()
-	{
-		super();
-	}
-	
-	/**
-	 * Create a QueryFilter instance from a Map of name/value pairs.
-	 * 
-	 * @param filters name/value pairs to match on.
-	 */
-	public QueryFilter(Map<String, String> filters)
-	{
-		this();
-		this.filters = new HashMap<String, String>(filters);
-	}
-
-	/**
-	 * Add a filter criteria to this QueryFilter instance.
-	 * 
-	 * @param name the property name to filter on.  Cannot be null.
-	 * @param value the value to match.  Cannot be null.
-	 * @return a reference to this QueryFilter to facilitate method chaining.
-	 */
-	public QueryFilter addCriteria(String name, String value)
-	{
-		if (filters == null)
-		{
-			filters = new HashMap<String, String>();
-		}
-
-		filters.put(name, value);
-		return this;
-	}
-
-	/**
-	 * Returns true if this QueryFilter instance would affect the query (has effective filters).
-	 * 
-	 * @return true if filters exist within this QueryFilter instance
-	 */
-	public boolean hasFilters()
-	{
-		return (filters != null && !filters.isEmpty());
-	}
-	
-	/**
-	 * Iterate the filter criteria within this QueryFilter, invoking the FilterCallback
-	 * to presumably construct a query.
-	 * 
-	 * @param callback a FilterCallback instance
-	 */
-	public void iterate(FilterCallback callback)
-	{
-		if (callback == null || !hasFilters()) return;
-
-		for (Entry<String, String> entry : filters.entrySet())
-		{
-			callback.filterOn(new FilterComponent(entry.getKey(), entry.getValue()));
-		}
-	}
 	
 	
 	// SECTION: FACTORY

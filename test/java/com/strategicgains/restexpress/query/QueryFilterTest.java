@@ -15,7 +15,9 @@
 */
 package com.strategicgains.restexpress.query;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +29,9 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.common.query.FilterCallback;
+import com.strategicgains.restexpress.common.query.FilterComponent;
+import com.strategicgains.restexpress.common.query.QueryFilter;
 
 /**
  * @author toddf
@@ -40,7 +45,7 @@ public class QueryFilterTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("filter", "name::todd|description::amazing");
 		Request request = new Request(httpRequest, null);
-		QueryFilter f = QueryFilter.parseFrom(request);
+		QueryFilter f = QueryFilters.parseFrom(request);
 		assertTrue(f.hasFilters());
 		FCallback callback = new FCallback();
 		f.iterate(callback);

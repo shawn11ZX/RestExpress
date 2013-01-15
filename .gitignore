@@ -3,3 +3,7 @@
 build/
 bin/
 dist/
+target/
+.project
+.classpath
+.settings

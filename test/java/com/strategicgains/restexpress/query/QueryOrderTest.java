@@ -15,7 +15,10 @@
 */
 package com.strategicgains.restexpress.query;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +30,9 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.common.query.OrderCallback;
+import com.strategicgains.restexpress.common.query.OrderComponent;
+import com.strategicgains.restexpress.common.query.QueryOrder;
 
 /**
  * @author toddf
@@ -40,7 +46,7 @@ public class QueryOrderTest
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("sort", "-name|description|-createdAt");
 		Request request = new Request(httpRequest, null);
-		QueryOrder o = QueryOrder.parseFrom(request);
+		QueryOrder o = QueryOrders.parseFrom(request);
 		assertTrue(o.isSorted());
 		OCallback callback = new OCallback();
 		o.iterate(callback);
