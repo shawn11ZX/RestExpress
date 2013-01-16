@@ -6,7 +6,7 @@
 	<url>https://github.com/RestExpress/RestExpress</url>
 	<groupId>com.strategicgains</groupId>
 	<artifactId>RestExpress</artifactId>
-	<version>0.8.1-SNAPSHOT</version>
+	<version>0.8.1</version>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>DateAdapterJ</artifactId>
-			<version>1.1.0</version>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
@@ -68,7 +68,7 @@
 		<url>git@github.com:RestExpress/RestExpress.git</url>
 		<connection>scm:git:git@github.com:RestExpress/RestExpress.git</connection>
 		<developerConnection>scm:git:git@github.com:RestExpress/RestExpress.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>RestExpress-0.8.1</tag>
 	</scm>
 
 	<build>
