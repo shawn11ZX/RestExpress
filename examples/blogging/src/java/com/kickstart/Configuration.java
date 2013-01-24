@@ -12,6 +12,8 @@ import com.kickstart.persistence.BlogEntryRepository;
 import com.kickstart.persistence.BlogRepository;
 import com.kickstart.persistence.CommentRepository;
 import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.RestExpress;
@@ -71,7 +73,11 @@ extends Environment
 			throw new ConfigurationException(e);
 		}
 
-		Mongo mongo = new Mongo(bootstraps);
+		MongoClientOptions options = new MongoClientOptions.Builder()
+			.connectionsPerHost(100)
+			.socketKeepAlive(true)
+			.build();
+		MongoClient mongo = new MongoClient(bootstraps, options);
 		initialize(mongo, dbName, dbUser, dbPassword);
 	}
 
