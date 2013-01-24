@@ -33,7 +33,7 @@ public class Main
 	{
 		Configuration config = loadEnvironment(args);
 		RestExpress server = new RestExpress()
-		    .setName(config.getName())
+		    .setName("Sample Blogging")
 		    .setBaseUrl(config.getBaseUrl())
 		    .setDefaultFormat(config.getDefaultFormat())
 		    .setExecutorThreadCount(config.getExecutorThreadPoolProperty())

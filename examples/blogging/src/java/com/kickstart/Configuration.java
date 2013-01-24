@@ -23,7 +23,6 @@ import com.strategicgains.restexpress.util.Environment;
 public class Configuration
 extends Environment
 {
-	private static final String NAME_PROPERTY = "name";
 	private static final String PORT_PROPERTY = "port";
 	private static final String DEFAULT_FORMAT_PROPERTY = "default.Format";
 	private static final String MONGODB_BOOTSTRAPS_PROPERTY = "mongodb.bootstraps";
@@ -35,7 +34,6 @@ extends Environment
 	private static final String EXECUTOR_THREAD_POOL_PROPERTY = "thread.pool.size";
 
 	private int port;
-	private String name;
 	private String defaultFormat;
 	private String baseUrl;
 	private int executorThreadPoolSize;
@@ -51,11 +49,10 @@ extends Environment
 	@Override
 	protected void fillValues(Properties p)
 	{
-		this.name = p.getProperty(NAME_PROPERTY, RestExpress.DEFAULT_NAME);
 		this.port = Integer.parseInt(p.getProperty(PORT_PROPERTY, String.valueOf(RestExpress.DEFAULT_PORT)));
 		this.defaultFormat = p.getProperty(DEFAULT_FORMAT_PROPERTY, Format.JSON);
 		this.baseUrl = p.getProperty(BASE_URL_PROPERTY, "http://localhost:" + String.valueOf(port));
-		this.executorThreadPoolSize = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_POOL_PROPERTY, "10"));
+		this.executorThreadPoolSize = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_POOL_PROPERTY, "100"));
 		String dbName = p.getProperty(MONGODB_DATABASE_PROPERTY);
 
 		if (dbName == null)
@@ -158,11 +155,6 @@ extends Environment
 		return port;
 	}
 
-	public String getName()
-	{
-		return name;
-	}
-	
 	public BlogController getBlogController()
 	{
 		return blogController;
