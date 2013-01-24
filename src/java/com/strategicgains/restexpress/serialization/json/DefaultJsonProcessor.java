@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2012, Strategic Gains, Inc.
+ * Copyright 2010-2013, Strategic Gains, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,25 @@
 
 package com.strategicgains.restexpress.serialization.json;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.strategicgains.restexpress.ContentType;
+import com.strategicgains.restexpress.serialization.DeserializationException;
+import com.strategicgains.restexpress.serialization.SerializationException;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
-import com.strategicgains.restexpress.util.StringUtils;
 import com.strategicgains.util.date.DateAdapterConstants;
 
 /**
@@ -42,46 +49,85 @@ import com.strategicgains.util.date.DateAdapterConstants;
 public class DefaultJsonProcessor
 implements SerializationProcessor
 {
-	private Gson gson;
+	private ObjectMapper mapper;
 
 	public DefaultJsonProcessor()
 	{
 		super();
-		gson = new GsonBuilder()
-		    .disableHtmlEscaping()
-		    .registerTypeAdapter(Date.class, new GsonTimestampSerializer())
-		    .setDateFormat(DateAdapterConstants.TIMESTAMP_OUTPUT_FORMAT)
-		    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-		    .create();
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(Date.class, new JacksonTimepointDeserializer());
+		module.addSerializer(Date.class, new JacksonTimepointSerializer());
+		initialize(module);
 	}
 
-	public DefaultJsonProcessor(Gson gson)
+	public DefaultJsonProcessor(Module module)
+	{
+		initialize(module);
+	}
+
+	public DefaultJsonProcessor(ObjectMapper mapper)
 	{
 		super();
-		this.gson = gson;
+		this.mapper = mapper;
 	}
-
-
-	// SECTION: SERIALIZATION PROCESSOR
+	
+	private void initialize(Module module)
+	{
+		this.mapper = new ObjectMapper();
+		mapper.registerModule(module)
+			.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+			.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+			.setDateFormat(new SimpleDateFormat(DateAdapterConstants.TIME_POINT_OUTPUT_FORMAT));
+	}
 
 	@Override
 	public <T> T deserialize(String string, Class<T> type)
 	{
-		return gson.fromJson((String) string, type);
+		try
+		{
+			return (string == null || string.trim().isEmpty() ? null : mapper.readValue(string, type));
+		}
+		catch (JsonProcessingException e)
+		{
+			throw new DeserializationException(e);
+		}
+		catch (IOException e)
+		{
+			throw new DeserializationException(e);
+		}
 	}
 
 	@Override
 	public <T> T deserialize(ChannelBuffer buffer, Class<T> type)
 	{
-    	return gson.fromJson(new InputStreamReader(new ChannelBufferInputStream(buffer), ContentType.CHARSET), type);
+		try
+		{
+			
+			return (buffer == null || buffer.readableBytes() == 0 ? null : mapper.readValue(new InputStreamReader(new ChannelBufferInputStream(buffer), ContentType.CHARSET), type));
+		}
+		catch (JsonProcessingException e)
+		{
+			throw new DeserializationException(e);
+		}
+		catch (IOException e)
+		{
+			throw new DeserializationException(e);
+		}
 	}
 
 	@Override
 	public String serialize(Object object)
 	{
-		if (object == null) return StringUtils.EMPTY_STRING;
-
-		return gson.toJson(object);
+		try
+		{
+			return (object == null ? "" : mapper.writeValueAsString(object));
+		}
+		catch (JsonProcessingException e)
+		{
+			throw new SerializationException(e);
+		}
 	}
 
 	@Override

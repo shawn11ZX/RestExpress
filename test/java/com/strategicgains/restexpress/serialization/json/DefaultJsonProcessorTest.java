@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.serialization.KnownObject;
+import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
 
 /**
  * @author toddf

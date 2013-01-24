@@ -95,7 +95,8 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.8.2 - SNAPSHOT (in branch 'master')
+Release 0.9.0 - SNAPSHOT (in branch 'master')
+* BREAKING CHANGE: eliminated GSON. RestExpress now uses Jackson for JSON processing.
 
 Release 0.8.1 - 16 Jan 2013
 ---------------------------------------------------------------------------------------------------
