@@ -28,7 +28,6 @@ import org.jboss.netty.buffer.ChannelBufferInputStream;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -55,12 +54,10 @@ implements SerializationProcessor
 	{
 		super();
 		SimpleModule module = new SimpleModule();
-		module.addDeserializer(Date.class, new JacksonTimepointDeserializer());
-		module.addSerializer(Date.class, new JacksonTimepointSerializer());
-		initialize(module);
+		initializeModule(module);
 	}
 
-	public DefaultJsonProcessor(Module module)
+	public DefaultJsonProcessor(SimpleModule module)
 	{
 		initialize(module);
 	}
@@ -70,17 +67,44 @@ implements SerializationProcessor
 		super();
 		this.mapper = mapper;
 	}
-	
-	private void initialize(Module module)
+
+	private void initialize(SimpleModule module)
 	{
 		this.mapper = new ObjectMapper();
-		mapper.registerModule(module)
+		mapper.registerModule(module);
+		initializeMapper(mapper);
+	}
+
+	/**
+	 * Template method for sub-classes to augment the module with desired
+	 * serializers and/or deserializers.  Sub-classes should call super()
+	 * to get default settings.
+	 * 
+	 * @param module a SimpleModule
+	 */
+	protected void initializeModule(SimpleModule module)
+    {
+		module
+			.addSerializer(Date.class, new JacksonTimepointSerializer())
+			.addDeserializer(Date.class, new JacksonTimepointDeserializer());
+		initialize(module);
+    }
+
+	/**
+	 * Template method for sub-classes to augment the mapper with desired
+	 * settings.  Sub-classes should call super() to get default settings.
+	 * 
+	 * @param module a SimpleModule
+	 */
+	protected void initializeMapper(ObjectMapper mapper)
+    {
+		mapper
 			.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
 			.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
 			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 			.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 			.setDateFormat(new SimpleDateFormat(DateAdapterConstants.TIME_POINT_OUTPUT_FORMAT));
-	}
+    }
 
 	@Override
 	public <T> T deserialize(String string, Class<T> type)
