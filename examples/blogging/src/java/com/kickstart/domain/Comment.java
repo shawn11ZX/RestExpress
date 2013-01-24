@@ -1,7 +1,7 @@
 package com.kickstart.domain;
 
-import com.google.code.morphia.annotations.Entity;
-import com.google.code.morphia.annotations.Indexed;
+import com.github.jmkgreen.morphia.annotations.Entity;
+import com.github.jmkgreen.morphia.annotations.Indexed;
 import com.strategicgains.syntaxe.annotation.StringValidation;
 
 @Entity("comments")

@@ -1,10 +1,11 @@
 package com.kickstart.domain;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.code.morphia.annotations.NotSaved;
+import com.github.jmkgreen.morphia.annotations.NotSaved;
 import com.strategicgains.hyperexpress.domain.Link;
 import com.strategicgains.hyperexpress.domain.Linkable;
 import com.strategicgains.repoexpress.mongodb.AbstractMongodbEntity;
@@ -38,4 +39,15 @@ implements Linkable
 		
 		links.add(link);
 	}
+
+	@Override
+    public void addAllLinks(Collection<Link> links)
+    {
+		if (links == null) return;
+		
+		for (Link link : links)
+		{
+			addLink(link);
+		}
+    }
 }

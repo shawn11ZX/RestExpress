@@ -12,10 +12,13 @@ import com.strategicgains.hyperexpress.domain.Link;
 import com.strategicgains.hyperexpress.util.LinkUtils;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.common.query.QueryFilter;
+import com.strategicgains.restexpress.common.query.QueryOrder;
+import com.strategicgains.restexpress.common.query.QueryRange;
 import com.strategicgains.restexpress.exception.BadRequestException;
-import com.strategicgains.restexpress.query.QueryFilter;
-import com.strategicgains.restexpress.query.QueryOrder;
-import com.strategicgains.restexpress.query.QueryRange;
+import com.strategicgains.restexpress.query.QueryFilters;
+import com.strategicgains.restexpress.query.QueryOrders;
+import com.strategicgains.restexpress.query.QueryRanges;
 import com.strategicgains.syntaxe.ValidationEngine;
 
 public class BlogController
@@ -64,9 +67,9 @@ public class BlogController
 
 	public List<Blog> readAll(Request request, Response response)
 	{
-		QueryFilter filter = QueryFilter.parseFrom(request);
-		QueryOrder order = QueryOrder.parseFrom(request);
-		QueryRange range = QueryRange.parseFrom(request, 20);
+		QueryFilter filter = QueryFilters.parseFrom(request);
+		QueryOrder order = QueryOrders.parseFrom(request);
+		QueryRange range = QueryRanges.parseFrom(request, 20);
 		List<Blog> results = blogs.readAll(filter, range, order);
 		response.setCollectionResponse(range, results.size(), blogs.count(filter));
 		

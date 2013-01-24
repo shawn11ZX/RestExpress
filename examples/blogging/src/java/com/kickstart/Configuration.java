@@ -29,11 +29,13 @@ extends Environment
 	private static final String MONGODB_USERNAME_PROPERTY = "mongodb.user";
 	private static final String MONGODB_PASSWORD_PROPERTY = "mongodb.password";
 	private static final String BASE_URL_PROPERTY = "base.url";
+	private static final String EXECUTOR_THREAD_POOL_PROPERTY = "thread.pool.size";
 
 	private int port;
 	private String name;
 	private String defaultFormat;
 	private String baseUrl;
+	private int executorThreadPoolSize;
 
 	private BlogRepository blogRepository;
 	private BlogEntryRepository blogEntryRepository;
@@ -50,6 +52,7 @@ extends Environment
 		this.port = Integer.parseInt(p.getProperty(PORT_PROPERTY, String.valueOf(RestExpress.DEFAULT_PORT)));
 		this.defaultFormat = p.getProperty(DEFAULT_FORMAT_PROPERTY, Format.JSON);
 		this.baseUrl = p.getProperty(BASE_URL_PROPERTY, "http://localhost:" + String.valueOf(port));
+		this.executorThreadPoolSize = Integer.parseInt(p.getProperty(EXECUTOR_THREAD_POOL_PROPERTY, "10"));
 		String dbName = p.getProperty(MONGODB_DATABASE_PROPERTY);
 
 		if (dbName == null)
@@ -180,5 +183,10 @@ extends Environment
 	public CommentRepository getCommentRepository()
 	{
 		return commentRepository;
+	}
+	
+	public int getExecutorThreadPoolProperty()
+	{
+		return executorThreadPoolSize;
 	}
 }
