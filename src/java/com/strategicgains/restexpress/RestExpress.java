@@ -611,27 +611,27 @@ public class RestExpress
 	 * 
 	 * @return the number of executor threads.
 	 */
-	public int getProcessingThreadCount()
+	public int getExecutorThreadCount()
 	{
-		return serverSettings.getProcessingThreadCount();
+		return serverSettings.getExecutorThreadCount();
 	}
 	
 	/**
 	 * Set the number of background request-handling (executor) threads.
-	 * This value controls the number of simultaneous requests that the
-	 * application can handle.  For longer-running requests, a higher number
+	 * This value controls the number of simultaneous blocking requests that
+	 * the server can handle.  For longer-running requests, a higher number
 	 * may be indicated.
 	 * 
 	 * For VERY short-running requests, a value of zero will cause no
 	 * background threads to be created, causing all processing to occur in
-	 * the NIO worker.
+	 * the NIO (front-end) worker thread.
 	 * 
 	 * @param value the number of executor threads to create.
 	 * @return the RestExpress instance.
 	 */
 	public RestExpress setExecutorThreadCount(int value)
 	{
-		serverSettings.setProcessingThreadCount(value);
+		serverSettings.setExecutorThreadCount(value);
 		return this;
 	}
 
@@ -678,10 +678,10 @@ public class RestExpress
 		    new LoggingHandler(getLogLevel().getNettyLogLevel()))
 		    .addRequestHandler(requestHandler);
 
-		if (getProcessingThreadCount() > 0)
+		if (getExecutorThreadCount() > 0)
 		{
 			ExecutionHandler executionHandler = new ExecutionHandler(
-	             new OrderedMemoryAwareThreadPoolExecutor(getProcessingThreadCount(), 0, 0));
+	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
 			pf.setExecutionHandler(executionHandler);
 		}
 
