@@ -613,7 +613,7 @@ public class RestExpress
 	 */
 	public int getExecutorThreadCount()
 	{
-		return serverSettings.getExecutorThreadCount();
+		return serverSettings.getExecutorThreadPoolSize();
 	}
 	
 	/**
@@ -631,7 +631,7 @@ public class RestExpress
 	 */
 	public RestExpress setExecutorThreadCount(int value)
 	{
-		serverSettings.setExecutorThreadCount(value);
+		serverSettings.setExecutorThreadPoolSize(value);
 		return this;
 	}
 
