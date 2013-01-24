@@ -12,6 +12,8 @@ import com.kickstart.persistence.BlogEntryRepository;
 import com.kickstart.persistence.BlogRepository;
 import com.kickstart.persistence.CommentRepository;
 import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.RestExpress;
@@ -28,6 +30,7 @@ extends Environment
 	private static final String MONGODB_DATABASE_PROPERTY = "mongodb.database";
 	private static final String MONGODB_USERNAME_PROPERTY = "mongodb.user";
 	private static final String MONGODB_PASSWORD_PROPERTY = "mongodb.password";
+	private static final String MONGODB_CONNECTIONS_PER_HOST_PROPERTY = "mongodb.connectionsPerHost";
 	private static final String BASE_URL_PROPERTY = "base.url";
 	private static final String EXECUTOR_THREAD_POOL_PROPERTY = "thread.pool.size";
 
@@ -62,6 +65,7 @@ extends Environment
 
 		String dbUser = p.getProperty(MONGODB_USERNAME_PROPERTY);
 		String dbPassword = p.getProperty(MONGODB_PASSWORD_PROPERTY);
+		int connectionsPerHost = Integer.parseInt(p.getProperty(MONGODB_CONNECTIONS_PER_HOST_PROPERTY, "100"));
 		List<ServerAddress> bootstraps = null;
 
 		try
@@ -74,7 +78,11 @@ extends Environment
 			throw new ConfigurationException(e);
 		}
 
-		Mongo mongo = new Mongo(bootstraps);
+		MongoClientOptions options = new MongoClientOptions.Builder()
+			.connectionsPerHost(connectionsPerHost)
+			.socketKeepAlive(true)
+			.build();
+		MongoClient mongo = new MongoClient(bootstraps, options);
 		initialize(mongo, dbName, dbUser, dbPassword);
 	}
 
