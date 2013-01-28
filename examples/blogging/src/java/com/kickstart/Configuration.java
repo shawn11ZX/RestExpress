@@ -185,7 +185,7 @@ extends Environment
 		return commentRepository;
 	}
 	
-	public int getExecutorThreadPoolProperty()
+	public int getExecutorThreadPoolSize()
 	{
 		return executorThreadPoolSize;
 	}

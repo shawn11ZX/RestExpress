@@ -36,7 +36,7 @@ public class Main
 		    .setName("Sample Blogging")
 		    .setBaseUrl(config.getBaseUrl())
 		    .setDefaultFormat(config.getDefaultFormat())
-		    .setExecutorThreadCount(config.getExecutorThreadPoolProperty())
+		    .setExecutorThreadCount(config.getExecutorThreadPoolSize())
 		    .putResponseProcessor(Format.JSON, ResponseProcessors.json())
 		    .putResponseProcessor(Format.XML, ResponseProcessors.xml())
 		    .putResponseProcessor(Format.WRAPPED_JSON, ResponseProcessors.wrappedJson())
