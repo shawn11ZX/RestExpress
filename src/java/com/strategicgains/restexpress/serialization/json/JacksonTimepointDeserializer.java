@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.strategicgains.restexpress.serialization.DeserializationException;
 import com.strategicgains.util.date.DateAdapter;
-import com.strategicgains.util.date.TimestampAdapter;
+import com.strategicgains.util.date.Iso8601TimepointAdapter;
 
 /**
  * @author toddf
@@ -38,7 +38,7 @@ extends JsonDeserializer<Date>
 
 	public JacksonTimepointDeserializer()
 	{
-		this(new TimestampAdapter());
+		this(new Iso8601TimepointAdapter());
 	}
 
 	public JacksonTimepointDeserializer(DateAdapter adapter)
