@@ -25,10 +25,11 @@ import java.util.Date;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -100,11 +101,13 @@ implements SerializationProcessor
 	protected void initializeMapper(ObjectMapper mapper)
     {
 		mapper
-			.enable(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS)
 			.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
 			.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
 			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 			.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+			.setVisibility(PropertyAccessor.FIELD, Visibility.ANY)
+			.setVisibility(PropertyAccessor.GETTER, Visibility.NONE)
+			.setVisibility(PropertyAccessor.IS_GETTER, Visibility.NONE)
 			.setDateFormat(new SimpleDateFormat(DateAdapterConstants.TIME_POINT_OUTPUT_FORMAT));
     }
 
