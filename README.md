@@ -24,7 +24,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.8.1</version>
+			<version>0.8.2</version>
 		</dependency>
 ```
 Development:
@@ -32,7 +32,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.8.2-SNAPSHOT</version>
+			<version>0.9.0-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -99,6 +99,15 @@ Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.9.0 - SNAPSHOT (in branch 'master')
 * BREAKING CHANGE: eliminated GSON. RestExpress now uses Jackson for JSON processing.
+  The changes are localized to the 'serialization' package.  Simply copy the ObjectIdDeserializer,
+  ObjectIdSerializer and JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/mongodb/src/main/java/com/strategicgains/restexpress/scaffold/mongodb/serialization
+  for MongoDB-based projects.  Or just the JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/minimal/src/main/java/com/strategicgains/restexpress/scaffold/minimal/serialization
+  for a minimal project.
+
+Release 0.8.2 - 19 Feb 2013
+---------------------------------------------------------------------------------------------------
+* Fixed issue in Request.parseQueryString() to URL decode query-string parameters before putting
+  them in the Request header.
 
 Release 0.8.1 - 16 Jan 2013
 ---------------------------------------------------------------------------------------------------

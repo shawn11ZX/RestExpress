@@ -569,7 +569,14 @@ public class Request
 
 			for (String value : entry.getValue())
 			{
-				request.addHeader(entry.getKey(), value);
+				try
+                {
+	                request.addHeader(entry.getKey(), URLDecoder.decode(value, ContentType.ENCODING));
+                }
+                catch (Exception e)
+                {
+	                request.addHeader(entry.getKey(), value);
+                }
 			}
 		}
 	}
