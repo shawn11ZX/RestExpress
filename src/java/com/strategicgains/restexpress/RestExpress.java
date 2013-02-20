@@ -31,7 +31,6 @@ import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
-import org.jboss.netty.handler.logging.LoggingHandler;
 
 import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
@@ -644,8 +643,8 @@ public class RestExpress
 		addPostprocessors(requestHandler);
 		addFinallyProcessors(requestHandler);
 
-		PipelineBuilder pf = new PipelineBuilder().addRequestHandler(
-		    new LoggingHandler(getLogLevel().getNettyLogLevel()))
+		PipelineBuilder pf = new PipelineBuilder()
+//			.addRequestHandler(new LoggingHandler(getLogLevel().getNettyLogLevel()))
 		    .addRequestHandler(requestHandler);
 
 		if (getExecutorThreadCount() > 0)
