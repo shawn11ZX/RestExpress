@@ -15,22 +15,11 @@
 */
 package com.strategicgains.restexpress.pipeline;
 
-import com.strategicgains.restexpress.Response;
-
 /**
- * @author fredta2
+ * @author toddf
  * @since Feb 20, 2013
  */
-public class ResponseCallback
-implements SuccessCallback<Response>, ErrorCallback
+public interface ErrorCallback
 {
-	@Override
-	public void onError(Throwable t)
-	{
-	}
-
-	@Override
-    public void onSuccess(Response result)
-    {
-    }
+	public void onError(Throwable t);
 }
