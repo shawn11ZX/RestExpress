@@ -3,9 +3,6 @@
  */
 package com.strategicgains.restexpress.pipeline;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -28,15 +25,16 @@ implements ChannelPipelineFactory
 {
 	// SECTION: INSTANCE VARIABLES
 
-	private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
 	private ExecutionHandler executionHandler = null;
+	private ChannelHandler dispatcher = null;
 
 	
 	// SECTION: CONSTRUCTORS
 
-	public PipelineBuilder()
+	public PipelineBuilder(ChannelHandler handler)
 	{
 		super();
+		this.dispatcher = handler;
 	}
 
 	
@@ -45,16 +43,6 @@ implements ChannelPipelineFactory
 	public PipelineBuilder setExecutionHandler(ExecutionHandler handler)
 	{
 		this.executionHandler = handler;
-		return this;
-	}
-
-	public PipelineBuilder addRequestHandler(ChannelHandler handler)
-	{
-		if (!requestHandlers.contains(handler))
-		{
-			requestHandlers.add(handler);
-		}
-
 		return this;
 	}
 
@@ -78,11 +66,7 @@ implements ChannelPipelineFactory
 			pipeline.addLast("executionHandler", executionHandler);
 		}
 
-		for (ChannelHandler handler : requestHandlers)
-		{
-			pipeline.addLast(handler.getClass().getSimpleName(), handler);
-		}
-
+		pipeline.addLast(dispatcher.getClass().getSimpleName(), dispatcher);
 		return pipeline;
 	}
 }

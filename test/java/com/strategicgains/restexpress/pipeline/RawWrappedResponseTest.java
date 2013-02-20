@@ -48,7 +48,7 @@ import com.strategicgains.restexpress.settings.RouteDefaults;
  */
 public class RawWrappedResponseTest
 {
-	private DefaultRequestHandler messageHandler;
+	private RequestDispatcher messageHandler;
 	private WrappedResponseObserver observer;
 	private Channel channel;
     private ChannelPipeline pl;
@@ -65,13 +65,12 @@ public class RawWrappedResponseTest
 		
 		DummyRoutes routes = new DummyRoutes();
 		routes.defineRoutes();
-		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), resolver);
+		messageHandler = new RequestDispatcher(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), resolver);
 		observer = new WrappedResponseObserver();
 		messageHandler.addMessageObserver(observer);
 		httpResponse = new StringBuffer();
 		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(httpResponse));
-		PipelineBuilder pf = new PipelineBuilder()
-			.addRequestHandler(messageHandler);
+		PipelineBuilder pf = new PipelineBuilder(messageHandler);
 	    pl = pf.getPipeline();
 	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();
 	    channel = channelFactory.newChannel(pl);

@@ -51,7 +51,7 @@ import com.strategicgains.restexpress.util.StringUtils;
  * @since Nov 13, 2009
  */
 @Sharable
-public class DefaultRequestHandler
+public class RequestDispatcher
 extends SimpleChannelUpstreamHandler
 {
 	// SECTION: INSTANCE VARIABLES
@@ -68,12 +68,12 @@ extends SimpleChannelUpstreamHandler
 
 	// SECTION: CONSTRUCTORS
 
-	public DefaultRequestHandler(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver)
+	public RequestDispatcher(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver)
 	{
 		this(routeResolver, responseProcessorResolver, new DefaultHttpResponseWriter());
 	}
 
-	public DefaultRequestHandler(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver,
+	public RequestDispatcher(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver,
 		HttpResponseWriter responseWriter)
 	{
 		super();
@@ -96,13 +96,13 @@ extends SimpleChannelUpstreamHandler
 		}
 	}
 
-	public <T extends Throwable, U extends ServiceException> DefaultRequestHandler mapException(Class<T> from, Class<U> to)
+	public <T extends Throwable, U extends ServiceException> RequestDispatcher mapException(Class<T> from, Class<U> to)
 	{
 		exceptionMap.map(from, to);
 		return this;
 	}
 	
-	public DefaultRequestHandler setExceptionMap(ExceptionMapping map)
+	public RequestDispatcher setExceptionMap(ExceptionMapping map)
 	{
 		this.exceptionMap = map;
 		return this;

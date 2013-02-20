@@ -35,7 +35,7 @@ import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
 import com.strategicgains.restexpress.exception.ServiceException;
-import com.strategicgains.restexpress.pipeline.DefaultRequestHandler;
+import com.strategicgains.restexpress.pipeline.RequestDispatcher;
 import com.strategicgains.restexpress.pipeline.MessageObserver;
 import com.strategicgains.restexpress.pipeline.PipelineBuilder;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
@@ -630,7 +630,7 @@ public class RestExpress
 		}
 
 		// Set up the event pipeline factory.
-		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
+		RequestDispatcher requestHandler = new RequestDispatcher(
 		    createRouteResolver(), createResponseProcessorResolver());
 
 		// Add MessageObservers to the request handler here, if desired...
@@ -643,9 +643,7 @@ public class RestExpress
 		addPostprocessors(requestHandler);
 		addFinallyProcessors(requestHandler);
 
-		PipelineBuilder pf = new PipelineBuilder()
-//			.addRequestHandler(new LoggingHandler(getLogLevel().getNettyLogLevel()))
-		    .addRequestHandler(requestHandler);
+		PipelineBuilder pf = new PipelineBuilder(requestHandler);
 
 		if (getExecutorThreadCount() > 0)
 		{
@@ -800,7 +798,7 @@ public class RestExpress
 	/**
 	 * @param requestHandler
 	 */
-	private void addPreprocessors(DefaultRequestHandler requestHandler)
+	private void addPreprocessors(RequestDispatcher requestHandler)
 	{
 		for (Preprocessor processor : getPreprocessors())
 		{
@@ -811,7 +809,7 @@ public class RestExpress
 	/**
 	 * @param requestHandler
 	 */
-	private void addPostprocessors(DefaultRequestHandler requestHandler)
+	private void addPostprocessors(RequestDispatcher requestHandler)
 	{
 		for (Postprocessor processor : getPostprocessors())
 		{
@@ -822,7 +820,7 @@ public class RestExpress
 	/**
 	 * @param requestHandler
 	 */
-	private void addFinallyProcessors(DefaultRequestHandler requestHandler)
+	private void addFinallyProcessors(RequestDispatcher requestHandler)
 	{
 		for (Postprocessor processor : getFinallyProcessors())
 		{

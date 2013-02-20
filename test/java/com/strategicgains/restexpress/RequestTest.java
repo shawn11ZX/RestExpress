@@ -228,7 +228,7 @@ public class RequestTest
 			+ "&openid.identity=" + URLEncoder.encode(formValue2, ContentType.ENCODING)
 			+ "&openid.claimed_id=" + URLEncoder.encode(formValue3, ContentType.ENCODING)).getBytes()));
 		Request formPost = new Request(httpRequest, null);
-		Map<String, List<String>> form = formPost.getBodyFromUrlFormEncoded();
+		Map<String, List<String>> form = formPost.getBodyAsUrlFormEncoded();
 		assertEquals(3, form.size());
 		assertNotNull(form.get("openid.return_to"));
 		assertNotNull(form.get("openid.identity"));

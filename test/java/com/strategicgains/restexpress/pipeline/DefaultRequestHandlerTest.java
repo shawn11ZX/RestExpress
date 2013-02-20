@@ -60,7 +60,7 @@ import com.strategicgains.restexpress.settings.RouteDefaults;
  */
 public class DefaultRequestHandlerTest
 {
-	private DefaultRequestHandler messageHandler;
+	private RequestDispatcher messageHandler;
 	private DummyObserver observer;
 	private Channel channel;
     private ChannelPipeline pl;
@@ -82,14 +82,13 @@ public class DefaultRequestHandlerTest
 		
 		DummyRoutes routes = new DummyRoutes();
 		routes.defineRoutes();
-		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), resolver);
+		messageHandler = new RequestDispatcher(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), resolver);
 		observer = new DummyObserver();
 		messageHandler.addMessageObserver(observer);
 		responseBody = new StringBuffer();
 		responseHeaders = new HashMap<String, List<String>>();
 		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(responseHeaders, responseBody));
-		PipelineBuilder pf = new PipelineBuilder()
-			.addRequestHandler(messageHandler);
+		PipelineBuilder pf = new PipelineBuilder(messageHandler);
 	    pl = pf.getPipeline();
 	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();
 	    channel = channelFactory.newChannel(pl);

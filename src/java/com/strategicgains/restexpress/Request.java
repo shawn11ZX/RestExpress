@@ -47,18 +47,15 @@ import com.strategicgains.restexpress.url.QueryStringParser;
  */
 public class Request
 {
-	// SECTION: CONSTANTS
-
-	private static final String DEFAULT_PROTOCOL = "http";
-	
 	private static AtomicLong nextCorrelationId = new AtomicLong(0);
 
 
 	// SECTION: INSTANCE VARIABLES
 
 	private HttpRequest httpRequest;
-	private HttpVersion httpVersion;
+	private String protocol;
 	private SerializationProcessor serializationProcessor;
+//	PE-ewe!  This smells...
 	private RouteResolver urlRouter;
 	private HttpMethod effectiveHttpMethod;
 	private Route resolvedRoute;
@@ -73,10 +70,10 @@ public class Request
 	{
 		super();
 		this.httpRequest = request;
-		this.httpVersion = request.getProtocolVersion();
+		this.protocol = request.getProtocolVersion().getProtocolName().toLowerCase();
 		this.effectiveHttpMethod = request.getMethod();
 		this.urlRouter = routes;
-	    createCorrelationId();
+	    generateCorrelationId();
 		parseQueryString(request);
 		determineEffectiveHttpMethod(request);
 	}
@@ -186,31 +183,16 @@ public class Request
 	 * 
 	 * @return
 	 */
-	public Map<String, List<String>> getBodyFromUrlFormEncoded()
+	public Map<String, List<String>> getBodyAsUrlFormEncoded()
 	{
 		QueryStringDecoder qsd = new QueryStringDecoder(getBody().toString(ContentType.CHARSET), ContentType.CHARSET, false);
 		return qsd.getParameters();
 	}
 
-	public SerializationProcessor getSerializationProcessor()
-    {
-    	return serializationProcessor;
-    }
-
 	public void setSerializationProcessor(SerializationProcessor serializationProcessor)
     {
     	this.serializationProcessor = serializationProcessor;
     }
-
-	public void setBody(ChannelBuffer body)
-    {
-		httpRequest.setContent(body);
-    }
-
-	public void clearHeaders()
-	{
-		httpRequest.clearHeaders();
-	}
 	
 	/**
 	 * Gets the named header as it came in on the request (without URL decoding it).
@@ -414,14 +396,13 @@ public class Request
 	}
 
 	/**
-	 * Get the protocol of the request.  RESTExpress currently only supports 'http'
-	 * and will always return that value.
+	 * Get the protocol of the request.
 	 * 
 	 * @return "http"
 	 */
 	public String getProtocol()
 	{
-		return DEFAULT_PROTOCOL;
+		return protocol;
 	}
 	
 	/**
@@ -536,12 +517,13 @@ public class Request
 	
 	public HttpVersion getHttpVersion()
 	{
-		return httpVersion;
+		return httpRequest.getProtocolVersion();
 	}
 	
 	public boolean isHttpVersion1_0()
 	{
-		return ((httpVersion.getMajorVersion() == 1) && (httpVersion.getMinorVersion() == 0));
+		HttpVersion v = getHttpVersion();
+		return ((v.getMajorVersion() == 1) && (v.getMinorVersion() == 0));
 	}
 
 	
@@ -600,7 +582,7 @@ public class Request
 		}
 	}
 	
-	private void createCorrelationId()
+	private void generateCorrelationId()
 	{
 		this.correlationId = String.valueOf(nextCorrelationId.incrementAndGet());
 	}
