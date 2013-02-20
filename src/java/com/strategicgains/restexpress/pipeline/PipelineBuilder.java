@@ -11,7 +11,6 @@ import org.jboss.netty.handler.codec.http.HttpContentCompressor;
 import org.jboss.netty.handler.codec.http.HttpContentDecompressor;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
-import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 /**
@@ -25,7 +24,6 @@ implements ChannelPipelineFactory
 {
 	// SECTION: INSTANCE VARIABLES
 
-	private ExecutionHandler executionHandler = null;
 	private ChannelHandler dispatcher = null;
 
 	
@@ -36,16 +34,6 @@ implements ChannelPipelineFactory
 		super();
 		this.dispatcher = handler;
 	}
-
-	
-	// SECTION: BUILDER METHODS
-	
-	public PipelineBuilder setExecutionHandler(ExecutionHandler handler)
-	{
-		this.executionHandler = handler;
-		return this;
-	}
-
 
 	// SECTION: CHANNEL PIPELINE FACTORY
 
@@ -60,12 +48,6 @@ implements ChannelPipelineFactory
 		pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
 		pipeline.addLast("inflater", new HttpContentDecompressor());
 		pipeline.addLast("deflater", new HttpContentCompressor());
-
-		if (executionHandler != null)
-		{
-			pipeline.addLast("executionHandler", executionHandler);
-		}
-
 		pipeline.addLast(dispatcher.getClass().getSimpleName(), dispatcher);
 		return pipeline;
 	}
