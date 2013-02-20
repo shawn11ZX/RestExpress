@@ -28,9 +28,6 @@ public class ServerSettings
 	private int port;
 	private boolean keepAlive = true;
 	private boolean reuseAddress = true;
-	private boolean handleChunking = true;
-	private boolean useCompression = true;
-	private Integer maxChunkSize = null;
 
 	// This controls the number of concurrent connections the application can
 	// handle.
@@ -70,36 +67,6 @@ public class ServerSettings
 	public void setReuseAddress(boolean reuseAddress)
 	{
 		this.reuseAddress = reuseAddress;
-	}
-
-	public boolean isHandleChunking()
-	{
-		return handleChunking;
-	}
-
-	public void setHandleChunking(boolean handleChunking)
-	{
-		this.handleChunking = handleChunking;
-	}
-
-	public boolean isUseCompression()
-	{
-		return useCompression;
-	}
-
-	public void setUseCompression(boolean useCompression)
-	{
-		this.useCompression = useCompression;
-	}
-
-	public Integer getMaxChunkSize()
-	{
-		return maxChunkSize;
-	}
-
-	public void setMaxChunkSize(Integer maxChunkSize)
-	{
-		this.maxChunkSize = maxChunkSize;
 	}
 
 	public int getIoThreadCount()

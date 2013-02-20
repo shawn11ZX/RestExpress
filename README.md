@@ -103,6 +103,11 @@ Release 0.9.0 - SNAPSHOT (in branch 'master')
   ObjectIdSerializer and JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/mongodb/src/main/java/com/strategicgains/restexpress/scaffold/mongodb/serialization
   for MongoDB-based projects.  Or just the JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/minimal/src/main/java/com/strategicgains/restexpress/scaffold/minimal/serialization
   for a minimal project.
+* BREAKING CHANGE: Removed Chunking and compression settings. RestExpress does not support
+  chunking/streaming uploads.  So the setting were superfluous.  The facility is still there
+  to support streaming downloads, however, and these will be chunked as necessary. As compression
+  is based on the Accept header, support is always provided--settings are superfluous.
+  NOTE: streaming downloads are not fully implemented yet.
 
 Release 0.8.2 - 19 Feb 2013
 ---------------------------------------------------------------------------------------------------

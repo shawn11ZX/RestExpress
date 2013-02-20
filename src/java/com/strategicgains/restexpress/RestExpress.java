@@ -297,36 +297,6 @@ public class RestExpress
 		return this;
 	}
 
-	public RestExpress supportChunking()
-	{
-		serverSettings.setHandleChunking(true);
-		return this;
-	}
-
-	public RestExpress noChunking()
-	{
-		serverSettings.setHandleChunking(false);
-		return this;
-	}
-
-	public RestExpress setMaxChunkSize(int size)
-	{
-		serverSettings.setMaxChunkSize(size);
-		return this;
-	}
-
-	public RestExpress supportCompression()
-	{
-		serverSettings.setUseCompression(true);
-		return this;
-	}
-
-	public RestExpress noCompression()
-	{
-		serverSettings.setUseCompression(false);
-		return this;
-	}
-
 	/**
 	 * Tell RestExpress to support TXT format specifiers in routes, outgoing
 	 * only at present.
@@ -683,21 +653,6 @@ public class RestExpress
 			ExecutionHandler executionHandler = new ExecutionHandler(
 	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
 			pf.setExecutionHandler(executionHandler);
-		}
-
-		if (serverSettings.isHandleChunking())
-		{
-			pf.handleChunked();
-
-			if (serverSettings.getMaxChunkSize() != null)
-			{
-				pf.maxChunkSize(serverSettings.getMaxChunkSize().intValue());
-			}
-		}
-
-		if (serverSettings.isUseCompression())
-		{
-			pf.useCompression();
 		}
 
 		bootstrap.setPipelineFactory(pf);

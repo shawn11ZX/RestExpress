@@ -45,7 +45,7 @@ public class DefaultJsonProcessorTest
 	public void shouldSerializeObject()
 	{
 		String json = processor.serialize(new KnownObject());
-		System.out.println(json);
+//		System.out.println(json);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
