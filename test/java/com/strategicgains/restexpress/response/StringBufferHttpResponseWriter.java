@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.WriteCompletionEvent;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;

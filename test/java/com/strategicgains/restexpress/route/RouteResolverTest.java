@@ -58,7 +58,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo/bar/bar432.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.GET, action.getRoute().getMethod());
@@ -70,7 +70,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/bar/bar432.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.GET, action.getRoute().getMethod());
@@ -82,7 +82,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.POST, action.getRoute().getMethod());
@@ -94,7 +94,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/yada/yada.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.POST, action.getRoute().getMethod());
@@ -106,7 +106,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.GET, action.getRoute().getMethod());
@@ -118,7 +118,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/blah/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.GET, action.getRoute().getMethod());
@@ -130,7 +130,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, "/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.PUT, action.getRoute().getMethod());
@@ -142,7 +142,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, "/blah/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.PUT, action.getRoute().getMethod());
@@ -154,7 +154,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.POST, action.getRoute().getMethod());
@@ -166,7 +166,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/blah/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.POST, action.getRoute().getMethod());
@@ -178,7 +178,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, "/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.DELETE, action.getRoute().getMethod());
@@ -190,7 +190,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, "/blah/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		Action action = resolver.resolve(request);
 		assertNotNull(action);
 		assertEquals(HttpMethod.DELETE, action.getRoute().getMethod());
@@ -202,7 +202,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.OPTIONS, "/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		resolver.resolve(request);
 	}
 
@@ -211,7 +211,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.OPTIONS, "/foo/foo23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		try
 		{
 			resolver.resolve(request);
@@ -232,7 +232,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.OPTIONS, "/foo.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		try
 		{
 			resolver.resolve(request);
@@ -250,7 +250,7 @@ public class RouteResolverTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.OPTIONS, "/foo/bar/bar23.json?value=ignored");
 		httpRequest.addHeader("Host", "testing-host");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		try
 		{
 			resolver.resolve(request);

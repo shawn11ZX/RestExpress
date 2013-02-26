@@ -87,7 +87,7 @@ public class DefaultRequestHandlerTest
 		messageHandler.addMessageObserver(observer);
 		responseBody = new StringBuffer();
 		responseHeaders = new HashMap<String, List<String>>();
-		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(responseHeaders, responseBody));
+//		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(responseHeaders, responseBody));
 		PipelineBuilder pf = new PipelineBuilder(messageHandler);
 	    pl = pf.getPipeline();
 	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();

@@ -45,7 +45,7 @@ public class QueryOrderTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("sort", "-name|description|-createdAt");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		QueryOrder o = QueryOrders.parseFrom(request);
 		assertTrue(o.isSorted());
 		OCallback callback = new OCallback();

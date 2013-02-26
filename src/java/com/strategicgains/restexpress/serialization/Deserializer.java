@@ -17,7 +17,11 @@
 
 package com.strategicgains.restexpress.serialization;
 
+import java.util.List;
+
 import org.jboss.netty.buffer.ChannelBuffer;
+
+import com.strategicgains.restexpress.mediatype.MediaRange;
 
 
 
@@ -29,4 +33,5 @@ public interface Deserializer
 {
 	public <T> T deserialize(String string, Class<T> type);
 	public <T> T deserialize(ChannelBuffer buffer, Class<T> type);
+	public List<MediaRange> getSupportedMediaRanges();
 }

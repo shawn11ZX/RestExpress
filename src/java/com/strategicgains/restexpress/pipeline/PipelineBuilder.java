@@ -14,7 +14,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 /**
- * Provides a tiny DSL to define the pipeline features.
+ * Builds the Netty pipeline to support handling RestExpress requests.
  * 
  * @author toddf
  * @since Aug 27, 2010
@@ -29,10 +29,10 @@ implements ChannelPipelineFactory
 	
 	// SECTION: CONSTRUCTORS
 
-	public PipelineBuilder(ChannelHandler handler)
+	public PipelineBuilder(ChannelHandler dispatcher)
 	{
 		super();
-		this.dispatcher = handler;
+		this.dispatcher = dispatcher;
 	}
 
 	// SECTION: CHANNEL PIPELINE FACTORY
@@ -48,7 +48,7 @@ implements ChannelPipelineFactory
 		pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
 		pipeline.addLast("inflater", new HttpContentDecompressor());
 		pipeline.addLast("deflater", new HttpContentCompressor());
-		pipeline.addLast(dispatcher.getClass().getSimpleName(), dispatcher);
+		pipeline.addLast("dispatcher", dispatcher);
 		return pipeline;
 	}
 }

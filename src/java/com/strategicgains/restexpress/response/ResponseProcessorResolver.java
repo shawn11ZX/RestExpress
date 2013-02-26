@@ -16,8 +16,16 @@
 package com.strategicgains.restexpress.response;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.jboss.netty.handler.codec.http.HttpHeaders;
+
+import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.exception.NotAcceptableException;
+import com.strategicgains.restexpress.mediatype.MediaRange;
+import com.strategicgains.restexpress.mediatype.MediaTypeParser;
 
 /**
  * @author toddf
@@ -25,8 +33,10 @@ import java.util.Map;
  */
 public class ResponseProcessorResolver
 {
-	private Map<String, ResponseProcessor> processors = new HashMap<String, ResponseProcessor>();
+	private Map<String, ResponseProcessor> processorsByFormatExtension = new LinkedHashMap<String, ResponseProcessor>();
+	private Map<String, ResponseProcessor> processorsByMediaType = new LinkedHashMap<String, ResponseProcessor>();
 	private String defaultFormat;
+	private List<MediaRange> supported;
 	
 	public ResponseProcessorResolver()
 	{
@@ -36,13 +46,13 @@ public class ResponseProcessorResolver
 	public ResponseProcessorResolver(Map<String, ResponseProcessor> processors, String defaultFormat)
 	{
 		super();
-		this.processors.putAll(processors);
+		this.processorsByFormatExtension.putAll(processors);
 		this.defaultFormat = defaultFormat;
 	}
 	
-	public ResponseProcessor put(String format, ResponseProcessor processor)
+	public void put(String format, ResponseProcessor processor)
 	{
-		return processors.put(format, processor);
+		processorsByFormatExtension.put(format, processor);
 	}
 	
 	public void setDefaultFormat(String format)
@@ -50,36 +60,63 @@ public class ResponseProcessorResolver
 		this.defaultFormat = format;
 	}
 
-	public ResponseProcessor resolve(String requestFormat)
-	{
-		if (requestFormat == null || requestFormat.trim().isEmpty())
-		{
-			return getDefault();
-		}
-
-		return resolveViaSpecifiedFormat(requestFormat);
-	}
-
     public ResponseProcessor getDefault()
     {
-		return resolveViaSpecifiedFormat(defaultFormat);
+		return resolveViaFormat(defaultFormat);
     }
-	
-	private ResponseProcessor resolveViaSpecifiedFormat(String format)
-	{
-		if (format == null || format.trim().isEmpty())
-		{
-			return null;
-		}
-		
-		return processors.get(format);
-	}
 
 	/**
      * @return
      */
     public Collection<String> getSupportedFormats()
     {
-    	return processors.keySet();
+    	return processorsByFormatExtension.keySet();
+    }
+
+	public ResponseProcessor resolveContentType(Request request)
+    {
+		ResponseProcessor rp = resolveViaFormat(request.getFormat());
+		
+		if (rp == null)
+		{
+			return resolveViaHeader(request.getRawHeader(HttpHeaders.Names.CONTENT_TYPE));
+		}
+
+		return rp;
+    }
+
+	public ResponseProcessor resolveAccept(Request request)
+    {
+		ResponseProcessor rp = resolveViaFormat(request.getFormat());
+		
+		if (rp == null)
+		{
+			return resolveViaHeader(request.getRawHeader(HttpHeaders.Names.ACCEPT));
+		}
+
+		return rp;
+    }
+
+	private ResponseProcessor resolveViaFormat(String format)
+	{
+		if (format == null || format.trim().isEmpty())
+		{
+			return null;
+		}
+		
+		return processorsByFormatExtension.get(format);
+	}
+
+	private ResponseProcessor resolveViaHeader(String rawHeader)
+    {
+		List<MediaRange> requested = MediaTypeParser.parse(rawHeader);
+		String mediaType = MediaTypeParser.getBestMatch(supported, requested);
+		
+		if (mediaType == null)
+		{
+			throw new NotAcceptableException(rawHeader);
+		}
+
+		return processorsByMediaType.get(mediaType);
     }
 }

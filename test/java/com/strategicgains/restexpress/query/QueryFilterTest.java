@@ -44,7 +44,7 @@ public class QueryFilterTest
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
 		httpRequest.addHeader("filter", "name::todd|description::amazing");
-		Request request = new Request(httpRequest, null);
+		Request request = new Request(httpRequest);
 		QueryFilter f = QueryFilters.parseFrom(request);
 		assertTrue(f.hasFilters());
 		FCallback callback = new FCallback();

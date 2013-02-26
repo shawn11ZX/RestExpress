@@ -19,13 +19,17 @@ package com.strategicgains.restexpress.serialization.xml;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 
 import com.strategicgains.restexpress.ContentType;
+import com.strategicgains.restexpress.common.util.StringUtils;
 import com.strategicgains.restexpress.domain.ResultWrapper;
+import com.strategicgains.restexpress.mediatype.MediaRange;
+import com.strategicgains.restexpress.mediatype.MediaTypeParser;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.SingleValueConverter;
@@ -40,6 +44,11 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
 public class DefaultXmlProcessor
 implements AliasingSerializationProcessor
 {
+	private static final String SUPPORTED_MEDIA_TYPES = StringUtils.join(",",
+		ContentType.XML,
+		"text/xml; charset=" + ContentType.ENCODING);
+	private static List<MediaRange> SUPPORTED_MEDIA_RANGES = MediaTypeParser.parse(SUPPORTED_MEDIA_TYPES);
+
 	private XStream xstream;
 	private Map<Class<?>, String> aliases = new HashMap<Class<?>, String>();
 	private boolean shouldAutoAlias = true;
@@ -113,9 +122,9 @@ implements AliasingSerializationProcessor
 	}
 
 	@Override
-	public String getResultingContentType()
+	public List<MediaRange> getSupportedMediaRanges()
 	{
-		return ContentType.XML;
+		return SUPPORTED_MEDIA_RANGES;
 	}
 
 	private void addAliasIfNecessary(Class<?> type)

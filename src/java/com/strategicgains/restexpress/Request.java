@@ -54,25 +54,25 @@ public class Request
 
 	private HttpRequest httpRequest;
 	private String protocol;
-	private SerializationProcessor serializationProcessor;
-//	PE-ewe!  This smells...
-	private RouteResolver urlRouter;
 	private HttpMethod effectiveHttpMethod;
-	private Route resolvedRoute;
 	private String correlationId;
 	private Map<String, Object> attachments;
 	private Map<String, String> queryStringMap;
 
+	// These are set after the Route is resolved and content-type negotiation has occurred.
+	private SerializationProcessor serializationProcessor;
+	private Route resolvedRoute;
+	private RouteResolver routeResolver;
+
 	
 	// SECTION: CONSTRUCTOR
 
-	public Request(HttpRequest request, RouteResolver routes)
+	public Request(HttpRequest request)
 	{
 		super();
 		this.httpRequest = request;
 		this.protocol = request.getProtocolVersion().getProtocolName().toLowerCase();
 		this.effectiveHttpMethod = request.getMethod();
-		this.urlRouter = routes;
 	    generateCorrelationId();
 		parseQueryString(request);
 		determineEffectiveHttpMethod(request);
@@ -299,6 +299,11 @@ public class Request
 		this.resolvedRoute = route;
 	}
 
+	public void setRouteResolver(RouteResolver resolver)
+    {
+		this.routeResolver = resolver;
+    }
+
 	/**
 	 * Gets the path for this request.
 	 * 
@@ -350,7 +355,7 @@ public class Request
 	 */
 	public String getNamedUrl(HttpMethod method, String resourceName)
 	{
-		Route route = urlRouter.getNamedRoute(resourceName, method);
+		Route route =  routeResolver.getNamedRoute(resourceName, method);
 		
 		if (route != null)
 		{
@@ -448,7 +453,7 @@ public class Request
 	{
 		return resolvedRoute.isFlagged(flag);
 	}
-	
+
 	/**
 	 * Get a named parameter.  Parameters are named settings that are created at route definition time. These parameters
 	 * can be used to pass data to subsequent preprocessors, controllers, or postprocessors.  This is a way to pass data

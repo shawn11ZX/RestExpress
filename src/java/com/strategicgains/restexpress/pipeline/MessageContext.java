@@ -15,16 +15,11 @@
  */
 package com.strategicgains.restexpress.pipeline;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
-import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.route.Action;
 
 /**
  * @author toddf
@@ -34,7 +29,6 @@ public class MessageContext
 {
 	private Request request;
 	private Response response;
-	private Action action = null;
 
 	public MessageContext(Request request, Response response)
 	{
@@ -51,24 +45,6 @@ public class MessageContext
 	public Response getResponse()
 	{
 		return response;
-	}
-
-	public Action getAction()
-	{
-		return action;
-	}
-
-	public boolean hasAction()
-	{
-		return (getAction() != null);
-	}
-
-	public void setAction(Action action)
-	{
-		this.action = action;
-		getRequest().addAllHeaders(action.getParameters());
-		getRequest().setResolvedRoute(action.getRoute());
-		getResponse().setIsSerialized(action.shouldSerializeResponse());
 	}
 
 	/**
@@ -123,41 +99,4 @@ public class MessageContext
 	{
 		getResponse().setResponseStatus(httpStatus);
 	}
-	
-	public String getRequestedFormat()
-	{
-		String format=null;
-
-		if (hasAction())
-		{
-			format = getAction().getParameter(Parameters.Query.FORMAT);
-		}
-
-		if (format == null || format.trim().isEmpty())
-		{
-			format = getRequest().getRawHeader(Parameters.Query.FORMAT);
-		}
-		
-		return format;
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean supportsRequestedFormat()
-	{
-		if (!hasAction()) return false;
-
-		return getAction().getRoute().supportsFormat(getRequest().getFormat());
-	}
-
-	/**
-     * @return
-     */
-    public Collection<String> getSupportedRouteFormats()
-    {
-    	if (!hasAction()) return Collections.emptyList();
-
-    	return getAction().getRoute().getSupportedFormats();
-    }
 }

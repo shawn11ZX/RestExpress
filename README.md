@@ -98,6 +98,9 @@ Content-Length: 115
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.9.0 - SNAPSHOT (in branch 'master')
+* Release 0.9.0 is a major departure from 0.8.x, in a final push to get RestExpress to
+  a 1.0 version.  The goal is to move RestExpress to a more polished model that supports
+  asynchronous programming concepts, but doesn't enforce them.
 * BREAKING CHANGE: eliminated GSON. RestExpress now uses Jackson for JSON processing.
   The changes are localized to the 'serialization' package.  Simply copy the ObjectIdDeserializer,
   ObjectIdSerializer and JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/mongodb/src/main/java/com/strategicgains/restexpress/scaffold/mongodb/serialization

@@ -24,6 +24,9 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.strategicgains.restexpress.mediatype.MediaRange;
+import com.strategicgains.restexpress.mediatype.MediaTypeParser;
+
 /**
  * @author toddf
  * @since Jan 18, 2013

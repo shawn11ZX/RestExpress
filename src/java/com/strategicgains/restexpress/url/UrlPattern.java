@@ -15,6 +15,7 @@
  */
 package com.strategicgains.restexpress.url;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.strategicgains.restexpress.ContentType;
 
 /**
  * UrlPattern leverages Regex Pattern to represent a parameterized URL. Parameters within the URL are
@@ -219,7 +222,15 @@ implements UrlMatcher
 	    	
 	    	if (value != null)
 	    	{
-	    		values.put(parameterNames.get(i), value);
+	    		try
+                {
+	                values.put(parameterNames.get(i), URLDecoder.decode(value, ContentType.ENCODING));
+                }
+                catch (Throwable t)
+                {
+                	// If we can't decode it, we'll put the raw, un-decoded value in the map.
+	                values.put(parameterNames.get(i), value);
+                }
 	    	}
 	    }
 

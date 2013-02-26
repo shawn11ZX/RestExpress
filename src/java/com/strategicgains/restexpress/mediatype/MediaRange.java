@@ -13,7 +13,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package com.strategicgains.restexpress.contenttype;
+package com.strategicgains.restexpress.mediatype;
 
 import java.util.HashMap;
 import java.util.Map;

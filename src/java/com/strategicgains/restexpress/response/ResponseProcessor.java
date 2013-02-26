@@ -18,7 +18,6 @@ package com.strategicgains.restexpress.response;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
 import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
-import com.strategicgains.restexpress.serialization.text.DefaultTxtProcessor;
 import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
 
 /**
@@ -50,8 +49,7 @@ public class ResponseProcessor
 	public String process(Response response)
 	{
 		Object wrapped = wrapper.wrap(response);
-		response.setContentType(serializer.getResultingContentType());
-		
+
 		if (wrapped != null)
 		{
 			return serializer.serialize(wrapped);
@@ -81,15 +79,5 @@ public class ResponseProcessor
 	public static ResponseProcessor newXmlProcessor(ResponseWrapper wrapper)
 	{
 		return new ResponseProcessor(new DefaultXmlProcessor(), wrapper);
-	}
-
-	public static ResponseProcessor defaultTxtProcessor()
-	{
-		return newTxtProcessor(new RawResponseWrapper());
-	}
-	
-	public static ResponseProcessor newTxtProcessor(ResponseWrapper wrapper)
-	{
-		return new ResponseProcessor(new DefaultTxtProcessor(), wrapper);		
 	}
 }

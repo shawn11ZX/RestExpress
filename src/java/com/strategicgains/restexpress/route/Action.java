@@ -23,7 +23,7 @@ import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.url.UrlMatch;
 
 /**
- * Contains the Route that matches a requested URL, as well as the parameters from the URL.
+ * Contains the Route that matches a requested URL, as well as the parameters parsed from the URL.
  * 
  * @author toddf
  * @since July 30, 2010

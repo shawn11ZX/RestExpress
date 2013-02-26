@@ -18,7 +18,6 @@ package com.strategicgains.restexpress;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,17 +28,15 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.handler.execution.ExecutionHandler;
-import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 
 import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
 import com.strategicgains.restexpress.exception.ServiceException;
-import com.strategicgains.restexpress.pipeline.RequestDispatcher;
 import com.strategicgains.restexpress.pipeline.MessageObserver;
 import com.strategicgains.restexpress.pipeline.PipelineBuilder;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
+import com.strategicgains.restexpress.pipeline.RequestDispatcher;
 import com.strategicgains.restexpress.plugin.Plugin;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
@@ -53,7 +50,6 @@ import com.strategicgains.restexpress.settings.ServerSettings;
 import com.strategicgains.restexpress.settings.SocketSettings;
 import com.strategicgains.restexpress.util.Bootstraps;
 import com.strategicgains.restexpress.util.DefaultShutdownHook;
-import com.strategicgains.restexpress.util.LogLevel;
 import com.strategicgains.restexpress.util.Resolver;
 
 /**
@@ -65,7 +61,7 @@ import com.strategicgains.restexpress.util.Resolver;
  */
 public class RestExpress
 {
-	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress");
+	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpressChannels");
 
 	public static final String DEFAULT_NAME = "RestExpress";
 	public static final int DEFAULT_PORT = 8081;
@@ -74,18 +70,14 @@ public class RestExpress
 	private SocketSettings socketSettings = new SocketSettings();
 	private ServerSettings serverSettings = new ServerSettings();
 	private RouteDefaults routeDefaults = new RouteDefaults();
-	private LogLevel logLevel = LogLevel.DEBUG; // Netty default
-	private boolean useSystemOut;
 
 	Map<String, ResponseProcessor> responseProcessors = new HashMap<String, ResponseProcessor>();
-	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
-	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
-	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
-	private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
-	private Resolver<ResponseProcessor> responseResolver;
-	private ExceptionMapping exceptionMap = new ExceptionMapping();
-	private List<Plugin> plugins = new ArrayList<Plugin>();
+	
+	private Resolver<ResponseProcessor> responseProcessorResolver;
 	private RouteDeclaration routeDeclarations = new RouteDeclaration();
+	private List<Plugin> plugins = new ArrayList<Plugin>();
+
+	private RequestDispatcher dispatcher = new RequestDispatcher();
 
 	/**
 	 * Create a new RestExpress service. By default, RestExpress uses port 8081.
@@ -119,7 +111,6 @@ public class RestExpress
 		setName(DEFAULT_NAME);
 		supportJson(true);
 		supportXml();
-		useSystemOut();
 	}
 
 	public String getBaseUrl()
@@ -178,14 +169,14 @@ public class RestExpress
 		return responseProcessors;
 	}
 
-	public Resolver<ResponseProcessor> getResponseResolver()
+	public Resolver<ResponseProcessor> getResponseProcessorResolver()
 	{
-		return responseResolver;
+		return responseProcessorResolver;
 	}
 
-	public RestExpress setResponseResolver(Resolver<ResponseProcessor> responseResolver)
+	public RestExpress setResponseProcessorResolver(Resolver<ResponseProcessor> responseResolver)
 	{
-		this.responseResolver = responseResolver;
+		this.responseProcessorResolver = responseResolver;
 		return this;
 	}
 
@@ -296,52 +287,10 @@ public class RestExpress
 		return this;
 	}
 
-	/**
-	 * Tell RestExpress to support TXT format specifiers in routes, outgoing
-	 * only at present.
-	 * 
-	 * @param isDefault true to make TXT the default format.
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress supportTxt(boolean isDefault)
+	public RestExpress addMessageObserver(MessageObserver... observers)
 	{
-		if (!getResponseProcessors().containsKey(Format.TXT))
-		{
-			getResponseProcessors().put(Format.TXT, ResponseProcessor.defaultTxtProcessor());
-		}
-
-		if (isDefault)
-		{
-			setDefaultFormat(Format.TXT);
-		}
-
+		dispatcher.addMessageObserver(observers);
 		return this;
-	}
-
-	/**
-	 * Tell RestExpress to support TXT format specifier in routes, outgoing only
-	 * at present.
-	 * 
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress supportTxt()
-	{
-		return supportTxt(false);
-	}
-
-	public RestExpress addMessageObserver(MessageObserver observer)
-	{
-		if (!messageObservers.contains(observer))
-		{
-			messageObservers.add(observer);
-		}
-
-		return this;
-	}
-
-	public List<MessageObserver> getMessageObservers()
-	{
-		return Collections.unmodifiableList(messageObservers);
 	}
 
 	/**
@@ -354,17 +303,8 @@ public class RestExpress
 	 */
 	public RestExpress addPreprocessor(Preprocessor processor)
 	{
-		if (!preprocessors.contains(processor))
-		{
-			preprocessors.add(processor);
-		}
-
+		dispatcher.addPreprocessor(processor);
 		return this;
-	}
-
-	public List<Preprocessor> getPreprocessors()
-	{
-		return Collections.unmodifiableList(preprocessors);
 	}
 
 	/**
@@ -380,17 +320,8 @@ public class RestExpress
 	 */
 	public RestExpress addPostprocessor(Postprocessor processor)
 	{
-		if (!postprocessors.contains(processor))
-		{
-			postprocessors.add(processor);
-		}
-
+		dispatcher.addPostprocessor(processor);
 		return this;
-	}
-
-	public List<Postprocessor> getPostprocessors()
-	{
-		return Collections.unmodifiableList(postprocessors);
 	}
 
 	/**
@@ -409,39 +340,7 @@ public class RestExpress
 	 */
 	public RestExpress addFinallyProcessor(Postprocessor processor)
 	{
-		if (!postprocessors.contains(processor))
-		{
-			postprocessors.add(processor);
-		}
-
-		return this;
-	}
-
-	public List<Postprocessor> getFinallyProcessors()
-	{
-		return Collections.unmodifiableList(finallyProcessors);
-	}
-
-	public boolean shouldUseSystemOut()
-	{
-		return useSystemOut;
-	}
-
-	public RestExpress setUseSystemOut(boolean useSystemOut)
-	{
-		this.useSystemOut = useSystemOut;
-		return this;
-	}
-
-	public RestExpress useSystemOut()
-	{
-		setUseSystemOut(true);
-		return this;
-	}
-
-	public RestExpress noSystemOut()
-	{
-		setUseSystemOut(false);
+		dispatcher.addFinallyProcessor(processor);
 		return this;
 	}
 
@@ -464,17 +363,6 @@ public class RestExpress
 	public RestExpress setKeepAlive(boolean useKeepAlive)
 	{
 		serverSettings.setKeepAlive(useKeepAlive);
-		return this;
-	}
-
-	public LogLevel getLogLevel()
-	{
-		return logLevel;
-	}
-
-	public RestExpress setLogLevel(LogLevel logLevel)
-	{
-		this.logLevel = logLevel;
 		return this;
 	}
 
@@ -534,16 +422,15 @@ public class RestExpress
 		return this;
 	}
 
-	public <T extends Exception, U extends ServiceException> RestExpress mapException(
-	    Class<T> from, Class<U> to)
+	public <T extends Exception, U extends ServiceException> RestExpress mapException(Class<T> from, Class<U> to)
 	{
-		exceptionMap.map(from, to);
+		dispatcher.mapException(from, to);
 		return this;
 	}
 
 	public RestExpress setExceptionMap(ExceptionMapping mapping)
 	{
-		this.exceptionMap = mapping;
+		dispatcher.setExceptionMap(mapping);
 		return this;
 	}
 
@@ -629,38 +516,14 @@ public class RestExpress
 			bootstrap = Bootstraps.createServerNioBootstrap(getIoThreadCount());
 		}
 
-		// Set up the event pipeline factory.
-		RequestDispatcher requestHandler = new RequestDispatcher(
-		    createRouteResolver(), createResponseProcessorResolver());
-
-		// Add MessageObservers to the request handler here, if desired...
-		requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));
-
-		requestHandler.setExceptionMap(exceptionMap);
-
-		// Add pre/post processors to the request handler here...
-		addPreprocessors(requestHandler);
-		addPostprocessors(requestHandler);
-		addFinallyProcessors(requestHandler);
-
-		PipelineBuilder pf = new PipelineBuilder(requestHandler);
-
-		if (getExecutorThreadCount() > 0)
-		{
-			ExecutionHandler executionHandler = new ExecutionHandler(
-	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
-			pf.setExecutionHandler(executionHandler);
-		}
-
-		bootstrap.setPipelineFactory(pf);
+		dispatcher.setRouteResolver(createRouteResolver());
+		dispatcher.setResponseProcessorResolver(createResponseProcessorResolver());
+		bootstrap.setPipelineFactory(new PipelineBuilder(dispatcher));
 		setBootstrapOptions();
 
 		// Bind and start to accept incoming connections.
-		if (shouldUseSystemOut())
-		{
-			System.out.println("Starting " + getName() + " Server on port "
-			    + port);
-		}
+
+		System.out.println(getName() + " Server listening on port " + port);
 
 		Channel channel = bootstrap.bind(new InetSocketAddress(port));
 		allChannels.add(channel);
@@ -776,6 +639,7 @@ public class RestExpress
 
 		for (Entry<String, ResponseProcessor> entry : getResponseProcessors().entrySet())
 		{
+			//TODO: this doesn't work for WXML
 			if (entry.getKey().equals(Format.XML))
 			{
 				setXmlAliases((AliasingSerializationProcessor) entry.getValue().getSerializer());
@@ -793,39 +657,6 @@ public class RestExpress
 	private void setXmlAliases(AliasingSerializationProcessor processor)
 	{
 		routeDefaults.setXmlAliases(processor);
-	}
-
-	/**
-	 * @param requestHandler
-	 */
-	private void addPreprocessors(RequestDispatcher requestHandler)
-	{
-		for (Preprocessor processor : getPreprocessors())
-		{
-			requestHandler.addPreprocessor(processor);
-		}
-	}
-
-	/**
-	 * @param requestHandler
-	 */
-	private void addPostprocessors(RequestDispatcher requestHandler)
-	{
-		for (Postprocessor processor : getPostprocessors())
-		{
-			requestHandler.addPostprocessor(processor);
-		}
-	}
-
-	/**
-	 * @param requestHandler
-	 */
-	private void addFinallyProcessors(RequestDispatcher requestHandler)
-	{
-		for (Postprocessor processor : getFinallyProcessors())
-		{
-			requestHandler.addFinallyProcessor(processor);
-		}
 	}
 
 
