@@ -17,6 +17,10 @@
 
 package com.strategicgains.restexpress.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.Response;
@@ -32,6 +36,7 @@ extends RuntimeException
 	private static final HttpResponseStatus STATUS = HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
 	private HttpResponseStatus httpStatus;
+	private Map<String, String> headers;
 
 	
 	// SECTION: CONSTRUCTORS
@@ -108,7 +113,33 @@ extends RuntimeException
 	 */
 	public void augmentResponse(Response response)
 	{
-		// default behavior is to do nothing.
+		if (hasHeaders())
+		{
+			for (Entry<String, String> header : headers.entrySet())
+			{
+				response.addHeader(header.getKey(), header.getValue());
+			}
+		}
+	}
+
+	public void setHeader(String name, String value)
+	{
+		if (headers == null)
+		{
+			headers = new HashMap<String, String>();
+		}
+		
+		headers.put(name, value);
+	}
+	
+	public boolean hasHeaders()
+	{
+		return (headers != null && !headers.isEmpty());
+	}
+
+	public String getHeader(String name)
+	{
+		return (headers == null ? null : headers.get(name));
 	}
 
 	
