@@ -26,7 +26,7 @@ import com.strategicgains.restexpress.pipeline.Preprocessor;
 /**
  * This preprocessor implements HTTP Basic authentication.  To use it, simply add it to your server as follows:
  * <code>
- * server.addPreprocessor(new HttpBasicAuthenticationPreprocessor());
+ * server.addPreprocessor(new HttpBasicAuthenticationPreprocessor("my realm"));
  * </code>
  * <p/>
  * Once this preprocessor completes successfully, it places the username and password in the request as headers,
@@ -46,21 +46,41 @@ implements Preprocessor
 	public static final String X_AUTHENTICATED_USER = "X-AuthenticatedUser";
 	public static final String X_AUTHENTICATED_PASSWORD = "X-AuthenticatedPassword";
 
+	private String realm;
+
+	/**
+	 * Utilize HTTP Basic Authentication with the given realm returned on an unauthenticated request.
+	 * 
+	 * @param realm any value to identify the secure area and may used by HTTP clients to manage passwords.
+	 */
+	public HttpBasicAuthenticationPreprocessor(String realm)
+	{
+		super();
+		this.realm = realm;
+	}
+
 	@Override
     public void process(Request request)
     {
 		String authorization = request.getRawHeader(HttpHeaders.Names.AUTHORIZATION);
 		
-		if (authorization == null || !authorization.startsWith("Basic"))
+		if (authorization == null || !authorization.startsWith("Basic "))
 		{
-			// TODO: need to set response "WWW-Authenticate" header
-			throw new UnauthorizedException("Authentorization required");
+			UnauthorizedException e = new UnauthorizedException("Authenticationrequired");
+			e.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"");
+			throw e;
 		}
 
 		String[] pieces = authorization.split(" ");
 		byte[] bytes = DatatypeConverter.parseBase64Binary(pieces[1]);
 		String credentials = new String(bytes);
 		String[] parts = credentials.split(":");
+		
+		if (parts.length < 2)
+		{
+			throw new UnauthorizedException("Authenticationrequired");
+		}
+
 		request.addHeader(X_AUTHENTICATED_USER, parts[0]);
 		request.addHeader(X_AUTHENTICATED_PASSWORD, parts[1]);
     }
