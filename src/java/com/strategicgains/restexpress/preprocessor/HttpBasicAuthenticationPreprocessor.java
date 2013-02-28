@@ -72,7 +72,7 @@ implements Preprocessor
 
 		if (authorization == null || !authorization.startsWith("Basic "))
 		{
-			UnauthorizedException e = new UnauthorizedException("Authenticationrequired");
+			UnauthorizedException e = new UnauthorizedException("Authentication required");
 			e.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"");
 			throw e;
 		}
@@ -84,7 +84,7 @@ implements Preprocessor
 
 		if (parts.length < 2)
 		{
-			throw new UnauthorizedException("Authenticationrequired");
+			throw new UnauthorizedException("Authentication required");
 		}
 
 		request.addHeader(X_AUTHENTICATED_USER, parts[0]);
