@@ -19,13 +19,18 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 
+import com.strategicgains.restexpress.Flags;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.exception.UnauthorizedException;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
+import com.strategicgains.restexpress.route.Route;
 
 /**
- * This preprocessor implements HTTP Basic authentication. To use it, simply add
- * it to your server as follows: <code>
+ * This preprocessor implements HTTP Basic authentication. It simply parses the
+ * Authorization header, putting the username and password in request headers.
+ * To use it, simply add it to your RestExpress server as follows:
+ * 
+ * <code>
  * server.addPreprocessor(new HttpBasicAuthenticationPreprocessor("my realm"));
  * </code>
  * <p/>
@@ -33,12 +38,13 @@ import com.strategicgains.restexpress.pipeline.Preprocessor;
  * password in the request as headers, X-AuthenticatedUser and
  * X-AuthenticatedPassword, respectively.
  * <p/>
- * If the preprocessor fails, it throws UnauthorizedException, which results in
- * an HTTP status of 401 to the caller.
+ * If the preprocessor fails, it throws an UnauthorizedException, which results in
+ * an HTTP status of 401 to the caller.  It also sets the WWW-Authenticate header
+ * to 'Basic realm=<provided realm>' where <provided realm> is the arbitrary realm
+ * name passed in on instantiation.
  * <p/>
  * Use of this preprocessor assumes you'll implement an authorization
- * preprocessor that validates the username and password extracted from the
- * Authorization header in the request.
+ * preprocessor that validates the username and password.
  * 
  * @author toddf
  * @since Feb 28, 2013
@@ -68,13 +74,19 @@ implements Preprocessor
 	@Override
 	public void process(Request request)
 	{
+		Route route = request.getResolvedRoute();
+
+		if (route != null && (route.isFlagged(Flags.Auth.PUBLIC_ROUTE)
+			|| route.isFlagged(Flags.Auth.NO_AUTHENTICATION)))
+		{
+			return;
+		}
+
 		String authorization = request.getRawHeader(HttpHeaders.Names.AUTHORIZATION);
 
 		if (authorization == null || !authorization.startsWith("Basic "))
 		{
-			UnauthorizedException e = new UnauthorizedException("Authentication required");
-			e.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"");
-			throw e;
+			throwUnauthorizedException();
 		}
 
 		String[] pieces = authorization.split(" ");
@@ -84,10 +96,17 @@ implements Preprocessor
 
 		if (parts.length < 2)
 		{
-			throw new UnauthorizedException("Authentication required");
+			throwUnauthorizedException();
 		}
 
 		request.addHeader(X_AUTHENTICATED_USER, parts[0]);
 		request.addHeader(X_AUTHENTICATED_PASSWORD, parts[1]);
 	}
+
+	private void throwUnauthorizedException()
+    {
+	    UnauthorizedException e = new UnauthorizedException("Authentication required");
+	    e.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"");
+	    throw e;
+    }
 }
