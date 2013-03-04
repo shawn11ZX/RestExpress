@@ -24,7 +24,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.8.2</version>
+			<version>0.9.0</version>
 		</dependency>
 ```
 Development:
@@ -32,7 +32,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>0.9.1-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -97,7 +97,10 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.9.0 - SNAPSHOT (in branch 'master')
+Release 0.9.1 - SNAPSHOT (in branch 'master')
+
+Release 0.9.0 - 4 Mar 2013
+---------------------------------------------------------------------------------------------------
 * BREAKING CHANGE: eliminated GSON. RestExpress now uses Jackson for JSON processing.
   The changes are localized to the 'serialization' package.  Simply copy the ObjectIdDeserializer,
   ObjectIdSerializer and JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/mongodb/src/main/java/com/strategicgains/restexpress/scaffold/mongodb/serialization
@@ -108,6 +111,11 @@ Release 0.9.0 - SNAPSHOT (in branch 'master')
   to support streaming downloads, however, and these will be chunked as necessary. As compression
   is based on the Accept header, support is always provided--settings are superfluous.
   NOTE: streaming downloads are not fully implemented yet.
+* BREAKING CHANGE: Removed LoggingHandler from the Netty pipeline and related setter methods.
+* Added HttpBasicAuthenticationPreprocessor to facilitate HTTP Basic Authentication. Added
+  Flags.Auth.PUBLIC_ROUTE, NO_AUTHENTICATION, and NO_AUTHORIZATION to support configuration
+  of HttpBasicAuthenticationPreprocessor (and other authentication/authorization 
+  related routes).
 
 Release 0.8.2 - 19 Feb 2013
 ---------------------------------------------------------------------------------------------------
