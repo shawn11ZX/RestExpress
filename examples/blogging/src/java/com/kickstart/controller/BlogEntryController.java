@@ -13,10 +13,13 @@ import com.strategicgains.hyperexpress.domain.LinkableCollection;
 import com.strategicgains.hyperexpress.util.LinkUtils;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.common.query.QueryFilter;
+import com.strategicgains.restexpress.common.query.QueryOrder;
+import com.strategicgains.restexpress.common.query.QueryRange;
 import com.strategicgains.restexpress.exception.BadRequestException;
-import com.strategicgains.restexpress.query.QueryFilter;
-import com.strategicgains.restexpress.query.QueryOrder;
-import com.strategicgains.restexpress.query.QueryRange;
+import com.strategicgains.restexpress.query.QueryFilters;
+import com.strategicgains.restexpress.query.QueryOrders;
+import com.strategicgains.restexpress.query.QueryRanges;
 import com.strategicgains.syntaxe.ValidationEngine;
 
 public class BlogEntryController
@@ -80,9 +83,9 @@ public class BlogEntryController
 	public LinkableCollection<BlogEntry> readAll(Request request, Response response)
 	{
 		String blogId = request.getUrlDecodedHeader(Constants.BLOG_ID_PARAMETER, "Blog ID not provided");
-		QueryFilter filter = QueryFilter.parseFrom(request);
-		QueryOrder order = QueryOrder.parseFrom(request);
-		QueryRange range = QueryRange.parseFrom(request, 20);
+		QueryFilter filter = QueryFilters.parseFrom(request);
+		QueryOrder order = QueryOrders.parseFrom(request);
+		QueryRange range = QueryRanges.parseFrom(request, 20);
 
 		filter.addCriteria("blogId", blogId);
 		List<BlogEntry> results = blogEntries.readAll(filter, range, order);

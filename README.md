@@ -1,3 +1,5 @@
+[![Build Status](https://buildhive.cloudbees.com/job/RestExpress/job/RestExpress/badge/icon)](https://buildhive.cloudbees.com/job/RestExpress/job/RestExpress/)
+
 RestExpress is a thin wrapper on the JBOSS Netty HTTP stack to provide a simple and easy way to
 create RESTful services in Java that support massive Internet Scale and performance.
 
@@ -22,7 +24,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.8.1</version>
+			<version>0.9.1</version>
 		</dependency>
 ```
 Development:
@@ -30,7 +32,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.8.2-SNAPSHOT</version>
+			<version>0.9.2-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -95,7 +97,30 @@ Content-Length: 115
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.8.2 - SNAPSHOT (in branch 'master')
+Release 0.9.2 - SNAPSHOT (in branch 'master')
+
+Release 0.9.1 - 4 Mar 2013
+---------------------------------------------------------------------------------------------------
+* BREAKING CHANGE: eliminated GSON. RestExpress now uses Jackson for JSON processing.
+  The changes are localized to the 'serialization' package.  Simply copy the ObjectIdDeserializer,
+  ObjectIdSerializer and JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/mongodb/src/main/java/com/strategicgains/restexpress/scaffold/mongodb/serialization
+  for MongoDB-based projects.  Or just the JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/minimal/src/main/java/com/strategicgains/restexpress/scaffold/minimal/serialization
+  for a minimal project.
+* BREAKING CHANGE: Removed Chunking and compression settings. RestExpress does not support
+  chunking/streaming uploads.  So the setting were superfluous.  The facility is still there
+  to support streaming downloads, however, and these will be chunked as necessary. As compression
+  is based on the Accept header, support is always provided--settings are superfluous.
+  NOTE: streaming downloads are not fully implemented yet.
+* BREAKING CHANGE: Removed LoggingHandler from the Netty pipeline and related setter methods.
+* Added HttpBasicAuthenticationPreprocessor to facilitate HTTP Basic Authentication. Added
+  Flags.Auth.PUBLIC_ROUTE, NO_AUTHENTICATION, and NO_AUTHORIZATION to support configuration
+  of HttpBasicAuthenticationPreprocessor (and other authentication/authorization 
+  related routes).
+
+Release 0.8.2 - 19 Feb 2013
+---------------------------------------------------------------------------------------------------
+* Fixed issue in Request.parseQueryString() to URL decode query-string parameters before putting
+  them in the Request header.
 
 Release 0.8.1 - 16 Jan 2013
 ---------------------------------------------------------------------------------------------------

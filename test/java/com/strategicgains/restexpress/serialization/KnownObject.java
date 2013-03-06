@@ -23,8 +23,22 @@ import java.util.Date;
  */
 public class KnownObject
 {
+	public static final String CONSTANT = "i hope you don't see this";
+	private static final String INTERNAL = "or this";
+
 	public int integer = 1;
 	public String string = "string value";
 	@SuppressWarnings("deprecation")
     public Date date = new Date(64, 11, 17, 16, 30);
+	private String p = "something private";
+	
+	public String getP()
+	{
+		return p;
+	}
+	
+	public String getQ()
+	{
+		return "Q(" + p + ")";
+	}
 }

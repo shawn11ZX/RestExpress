@@ -33,9 +33,10 @@ public class Main
 	{
 		Configuration config = loadEnvironment(args);
 		RestExpress server = new RestExpress()
-		    .setName(config.getName())
+		    .setName("Sample Blogging")
 		    .setBaseUrl(config.getBaseUrl())
 		    .setDefaultFormat(config.getDefaultFormat())
+		    .setExecutorThreadCount(config.getExecutorThreadPoolSize())
 		    .putResponseProcessor(Format.JSON, ResponseProcessors.json())
 		    .putResponseProcessor(Format.XML, ResponseProcessors.xml())
 		    .putResponseProcessor(Format.WRAPPED_JSON, ResponseProcessors.wrappedJson())
@@ -97,7 +98,7 @@ public class Main
 	    	.mapException(DuplicateItemException.class, ConflictException.class)
 	    	.mapException(ValidationException.class, BadRequestException.class)
 	    	.mapException(InvalidObjectIdException.class, NotFoundException.class)
-	    	.mapException(com.google.code.morphia.query.ValidationException.class, BadRequestException.class);
+	    	.mapException(com.github.jmkgreen.morphia.query.ValidationException.class, BadRequestException.class);
     }
 
 	private static void registerDomainEvents(RestExpress server, Configuration config)

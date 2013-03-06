@@ -16,6 +16,7 @@
 package com.strategicgains.restexpress.serialization.json;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -35,7 +36,7 @@ import com.strategicgains.restexpress.serialization.KnownObject;
  */
 public class DefaultJsonProcessorTest
 {
-	private static final String JSON = "{\"integer\":2,\"string\":\"another string value\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
+	private static final String JSON = "{\"integer\":2,\"string\":\"another string value\",\"date\":\"1963-12-06T12:30:00.000Z\",\"p\":\"good stuff\"}";
 	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"我能吞下\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
 
 	private DefaultJsonProcessor processor = new DefaultJsonProcessor();
@@ -44,11 +45,14 @@ public class DefaultJsonProcessorTest
 	public void shouldSerializeObject()
 	{
 		String json = processor.serialize(new KnownObject());
+//		System.out.println(json);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
 		assertTrue(json.contains("\"string\":\"string value\""));
 		assertTrue(json.contains("\"date\":\"1964-12-17T"));
+		assertTrue(json.contains("\"p\":\"something private"));
+		assertFalse(json.contains("\"q\":"));
 		assertTrue(json.endsWith("}"));
 	}
 
@@ -72,6 +76,7 @@ public class DefaultJsonProcessorTest
 		assertEquals(11, c.get(Calendar.MONTH));
 		assertEquals(6, c.get(Calendar.DAY_OF_MONTH));
 		assertEquals(1963, c.get(Calendar.YEAR));
+		assertEquals("good stuff", o.getP());
 	}
 
 	@Test

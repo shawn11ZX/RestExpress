@@ -29,6 +29,21 @@ public abstract class Flags
 		public static final String DONT_CACHE = "no.caching";
 	}
 	
+	/**
+	 * Use these flags on routes where the security (e.g. preprocessors) is altered.
+	 * For instance, when all routes are behind authentication and authorization,
+	 * some routes may be made public (such as OAuth2 authentication routes).
+	 *  
+	 * @author toddf
+	 * @since Mar 1, 2013
+	 */
+	public static final class Auth
+	{
+		public static final String PUBLIC_ROUTE = "not.secured";
+		public static final String NO_AUTHENTICATION = "no.authentication";
+		public static final String NO_AUTHORIZATION = "no.authorization";
+	}
+	
 	private Flags()
 	{
 		// prevents instantiation.

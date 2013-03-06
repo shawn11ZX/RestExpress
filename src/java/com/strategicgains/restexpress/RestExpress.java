@@ -31,7 +31,6 @@ import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
-import org.jboss.netty.handler.logging.LoggingHandler;
 
 import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
@@ -294,36 +293,6 @@ public class RestExpress
 	public RestExpress noXml()
 	{
 		responseProcessors.remove(Format.XML);
-		return this;
-	}
-
-	public RestExpress supportChunking()
-	{
-		serverSettings.setHandleChunking(true);
-		return this;
-	}
-
-	public RestExpress noChunking()
-	{
-		serverSettings.setHandleChunking(false);
-		return this;
-	}
-
-	public RestExpress setMaxChunkSize(int size)
-	{
-		serverSettings.setMaxChunkSize(size);
-		return this;
-	}
-
-	public RestExpress supportCompression()
-	{
-		serverSettings.setUseCompression(true);
-		return this;
-	}
-
-	public RestExpress noCompression()
-	{
-		serverSettings.setUseCompression(false);
 		return this;
 	}
 
@@ -611,27 +580,27 @@ public class RestExpress
 	 * 
 	 * @return the number of executor threads.
 	 */
-	public int getProcessingThreadCount()
+	public int getExecutorThreadCount()
 	{
-		return serverSettings.getProcessingThreadCount();
+		return serverSettings.getExecutorThreadPoolSize();
 	}
 	
 	/**
 	 * Set the number of background request-handling (executor) threads.
-	 * This value controls the number of simultaneous requests that the
-	 * application can handle.  For longer-running requests, a higher number
+	 * This value controls the number of simultaneous blocking requests that
+	 * the server can handle.  For longer-running requests, a higher number
 	 * may be indicated.
 	 * 
 	 * For VERY short-running requests, a value of zero will cause no
 	 * background threads to be created, causing all processing to occur in
-	 * the NIO worker.
+	 * the NIO (front-end) worker thread.
 	 * 
 	 * @param value the number of executor threads to create.
 	 * @return the RestExpress instance.
 	 */
 	public RestExpress setExecutorThreadCount(int value)
 	{
-		serverSettings.setProcessingThreadCount(value);
+		serverSettings.setExecutorThreadPoolSize(value);
 		return this;
 	}
 
@@ -674,30 +643,15 @@ public class RestExpress
 		addPostprocessors(requestHandler);
 		addFinallyProcessors(requestHandler);
 
-		PipelineBuilder pf = new PipelineBuilder().addRequestHandler(
-		    new LoggingHandler(getLogLevel().getNettyLogLevel()))
+		PipelineBuilder pf = new PipelineBuilder()
+//			.addRequestHandler(new LoggingHandler(getLogLevel().getNettyLogLevel()))
 		    .addRequestHandler(requestHandler);
 
-		if (getProcessingThreadCount() > 0)
+		if (getExecutorThreadCount() > 0)
 		{
 			ExecutionHandler executionHandler = new ExecutionHandler(
-	             new OrderedMemoryAwareThreadPoolExecutor(getProcessingThreadCount(), 0, 0));
+	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
 			pf.setExecutionHandler(executionHandler);
-		}
-
-		if (serverSettings.isHandleChunking())
-		{
-			pf.handleChunked();
-
-			if (serverSettings.getMaxChunkSize() != null)
-			{
-				pf.maxChunkSize(serverSettings.getMaxChunkSize().intValue());
-			}
-		}
-
-		if (serverSettings.isUseCompression())
-		{
-			pf.useCompression();
 		}
 
 		bootstrap.setPipelineFactory(pf);

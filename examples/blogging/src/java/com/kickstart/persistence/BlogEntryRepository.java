@@ -1,6 +1,6 @@
 package com.kickstart.persistence;
 
-import com.google.code.morphia.query.Query;
+import com.github.jmkgreen.morphia.query.Query;
 import com.kickstart.domain.BlogEntry;
 import com.mongodb.Mongo;
 import com.strategicgains.repoexpress.util.IdentifiableIterable;

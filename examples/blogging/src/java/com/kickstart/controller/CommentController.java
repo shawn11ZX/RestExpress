@@ -13,10 +13,13 @@ import com.strategicgains.hyperexpress.domain.LinkableCollection;
 import com.strategicgains.hyperexpress.util.LinkUtils;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.common.query.QueryFilter;
+import com.strategicgains.restexpress.common.query.QueryOrder;
+import com.strategicgains.restexpress.common.query.QueryRange;
 import com.strategicgains.restexpress.exception.BadRequestException;
-import com.strategicgains.restexpress.query.QueryFilter;
-import com.strategicgains.restexpress.query.QueryOrder;
-import com.strategicgains.restexpress.query.QueryRange;
+import com.strategicgains.restexpress.query.QueryFilters;
+import com.strategicgains.restexpress.query.QueryOrders;
+import com.strategicgains.restexpress.query.QueryRanges;
 import com.strategicgains.syntaxe.ValidationEngine;
 
 public class CommentController
@@ -79,9 +82,9 @@ public class CommentController
 	{
 		String blogId = request.getUrlDecodedHeader(Constants.BLOG_ID_PARAMETER, "No Blog ID supplied");
 		String blogEntryId = request.getUrlDecodedHeader(Constants.BLOG_ENTRY_ID_PARAMETER, "No Blog Entry ID supplied");
-		QueryFilter filter = QueryFilter.parseFrom(request);
-		QueryOrder order = QueryOrder.parseFrom(request);
-		QueryRange range = QueryRange.parseFrom(request, 20);
+		QueryFilter filter = QueryFilters.parseFrom(request);
+		QueryOrder order = QueryOrders.parseFrom(request);
+		QueryRange range = QueryRanges.parseFrom(request, 20);
 		
 		filter.addCriteria("blogEntryId", blogEntryId);
 		List<Comment> results = comments.readAll(filter, range, order);

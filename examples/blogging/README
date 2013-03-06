@@ -14,7 +14,7 @@ Additionally, the project illustrates how to map exceptions that are non-runtime
 (checked exceptions) into ServiceExceptions that RestExpress knows how to translate into an HTTP
 response.
 
-To run it, install and start MongoDB, then type 'ant run'.
+To run it, install and start MongoDB, then type 'mvn clean package exec:java'.
 
 The URL '/console/routes' will show you the routes available in the application
 (e.g. curl -i localhost:8081/console/routes.xml).  Or simply look in the Routes.java file.

@@ -21,24 +21,23 @@ package com.strategicgains.restexpress.settings;
  */
 public class ServerSettings
 {
-	private static final int DEFAULT_EXECUTOR_THREAD_COUNT = 0;
+	private static final int DEFAULT_IO_THREAD_COUNT = 0;
+	private static final int DEFAULT_EXECUTOR_THREAD_POOL_SIZE = 10;
 
 	private String name;
 	private int port;
 	private boolean keepAlive = true;
 	private boolean reuseAddress = true;
-	private boolean handleChunking = true;
-	private boolean useCompression = true;
-	private Integer maxChunkSize = null;
 
 	// This controls the number of concurrent connections the application can
 	// handle.
 	// Netty default is 2 * number of processors (or cores).
-	private int ioThreadCount = 0;
+	// Zero (0) indicates to use the Netty default.
+	private int ioThreadCount = DEFAULT_IO_THREAD_COUNT;
 
-	// This controls the number of concurrent requests the application can
-	// process.
-	private int processingThreadCount = DEFAULT_EXECUTOR_THREAD_COUNT;
+	// This controls the size of the thread pool for back-end executors.  In essence,
+	// this is the number of blocking requests the application can process simultaneously.
+	private int executorThreadPoolSize = DEFAULT_EXECUTOR_THREAD_POOL_SIZE;
 
 	public String getName()
 	{
@@ -70,36 +69,6 @@ public class ServerSettings
 		this.reuseAddress = reuseAddress;
 	}
 
-	public boolean isHandleChunking()
-	{
-		return handleChunking;
-	}
-
-	public void setHandleChunking(boolean handleChunking)
-	{
-		this.handleChunking = handleChunking;
-	}
-
-	public boolean isUseCompression()
-	{
-		return useCompression;
-	}
-
-	public void setUseCompression(boolean useCompression)
-	{
-		this.useCompression = useCompression;
-	}
-
-	public Integer getMaxChunkSize()
-	{
-		return maxChunkSize;
-	}
-
-	public void setMaxChunkSize(Integer maxChunkSize)
-	{
-		this.maxChunkSize = maxChunkSize;
-	}
-
 	public int getIoThreadCount()
 	{
 		return ioThreadCount;
@@ -110,14 +79,14 @@ public class ServerSettings
 		this.ioThreadCount = ioThreadCount;
 	}
 
-	public int getProcessingThreadCount()
+	public int getExecutorThreadPoolSize()
 	{
-		return processingThreadCount;
+		return executorThreadPoolSize;
 	}
 
-	public void setProcessingThreadCount(int processingThreadCount)
+	public void setExecutorThreadPoolSize(int executorThreadCount)
 	{
-		this.processingThreadCount = processingThreadCount;
+		this.executorThreadPoolSize = executorThreadCount;
 	}
 	
 	public int getPort()

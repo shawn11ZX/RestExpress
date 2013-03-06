@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
@@ -50,7 +51,7 @@ public class Request
 
 	private static final String DEFAULT_PROTOCOL = "http";
 	
-	private static long nextCorrelationId = 0;
+	private static AtomicLong nextCorrelationId = new AtomicLong(0);
 
 
 	// SECTION: INSTANCE VARIABLES
@@ -75,16 +76,10 @@ public class Request
 		this.httpVersion = request.getProtocolVersion();
 		this.effectiveHttpMethod = request.getMethod();
 		this.urlRouter = routes;
-		initialize();
-	}
-
-	private void initialize()
-    {
 	    createCorrelationId();
-//		parseRequestedFormatToHeader(httpRequest);
-		parseQueryString(httpRequest);
-		determineEffectiveHttpMethod(httpRequest);
-    }
+		parseQueryString(request);
+		determineEffectiveHttpMethod(request);
+	}
 
 
 	// SECTION: ACCESSORS/MUTATORS
@@ -574,7 +569,14 @@ public class Request
 
 			for (String value : entry.getValue())
 			{
-				request.addHeader(entry.getKey(), value);
+				try
+                {
+	                request.addHeader(entry.getKey(), URLDecoder.decode(value, ContentType.ENCODING));
+                }
+                catch (Exception e)
+                {
+	                request.addHeader(entry.getKey(), value);
+                }
 			}
 		}
 	}
@@ -600,7 +602,7 @@ public class Request
 	
 	private void createCorrelationId()
 	{
-		this.correlationId = String.valueOf(++nextCorrelationId);
+		this.correlationId = String.valueOf(nextCorrelationId.incrementAndGet());
 	}
 
 	private String urlDecode(String value)
