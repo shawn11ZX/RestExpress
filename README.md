@@ -75,26 +75,6 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 * For more real-world examples, see the examples/ directory which contains additional projects that setup RestExpress services.  Simply do '**ant run**' to run them.  Then to see what's available perform a GET on the route: '/routes/metadata' to get a list of all the routes (or endpoints) available (e.g. localhost:8000/routes/metadata in the browser).
 
 ===================================================================================================
-BTW, if you're on a Mac or Linux box, you can do the following to get Ruby on Rails "scaffolding"
--like behavior by running the following from the RestExpress root directory:
-1) ant release
-2) ./src/scripts/install.sh
-3) cd <a new directory> (e.g. '~/src')
-4) <restexpress home>/src/scripts/restexpress.sh <name of project> (e.g. Sample)
-5) cd <new project directory> (e.g. Sample)
-6) ant run
-
-From another console, enter something like the following to test your new service suite:
-1) curl -i localhost:8081/sample/42
-
-You should see something like this:
-HTTP/1.1 404 Not Found
-Content-Type: application/json; charset=UTF-8
-Content-Length: 115
-
-{"code":404,"status":"error","message":"The order ID you requested was not found: 42","data":"NotFoundException"}
-
-===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.9.2 - SNAPSHOT (in branch 'master')
@@ -105,6 +85,7 @@ Release 0.9.2 - SNAPSHOT (in branch 'master')
   to simply call getHeader()--so no URL decoding is done in getUrlDecodedHeader().
 * Ensured that parameters extracted from the URL are decoded before setting them as headers
   on the Request.  Now all headers are URL decoded before any call to Request.getHeader(String).
+* Added Request.getRemoteAddress(), which returns the remote address of the request originator.
 
 Release 0.9.1 - 4 Mar 2013
 ---------------------------------------------------------------------------------------------------

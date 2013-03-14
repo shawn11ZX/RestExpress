@@ -17,6 +17,7 @@
 
 package com.strategicgains.restexpress;
 
+import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -56,6 +58,7 @@ public class Request
 
 	private HttpRequest httpRequest;
 	private HttpVersion httpVersion;
+	private InetSocketAddress remoteAddress;
 	private SerializationProcessor serializationProcessor;
 	private RouteResolver urlRouter;
 	private HttpMethod effectiveHttpMethod;
@@ -77,6 +80,12 @@ public class Request
 	    createCorrelationId();
 		parseQueryString(request);
 		determineEffectiveHttpMethod(request);
+	}
+
+	public Request(MessageEvent event, RouteResolver routes)
+	{
+		this((HttpRequest) event.getMessage(), routes);
+		this.remoteAddress = (InetSocketAddress) event.getRemoteAddress();
 	}
 
 
@@ -578,6 +587,11 @@ public class Request
 	public boolean isHttpVersion1_0()
 	{
 		return ((httpVersion.getMajorVersion() == 1) && (httpVersion.getMinorVersion() == 0));
+	}
+	
+	public InetSocketAddress getRemoteAddress()
+	{
+		return remoteAddress;
 	}
 
 	
