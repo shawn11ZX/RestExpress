@@ -236,6 +236,23 @@ public class Request
 	{
 		return httpRequest.getHeader(name);
 	}
+
+	/**
+	 * Gets the list of named headers from the request.
+	 * Returns null if the header name is not present.
+	 * <p/>
+	 * NOTE: because HTTP headers are handled by Netty, which processes them with
+	 *       QueryStringDecoder, HTTP headers are URL decoded. Also query-string
+	 *       parameters that get processed by RestExpress are URL decoded before
+	 *       being set as headers on the request.
+	 * 
+	 * @param name
+	 * @return the requested list of headers, or null if 'name' doesn't exist as a header.
+	 */
+	public List<String> getHeaders(String name)
+	{
+		return httpRequest.getHeaders(name);
+	}
 	
 	/**
 	 * Gets the named header fromthe request. Throws BadRequestException(message)

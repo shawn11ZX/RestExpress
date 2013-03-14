@@ -256,4 +256,12 @@ public class RequestTest
 		assertTrue(request.getHeaderNames().contains("header-key-1"));
 		assertTrue(request.getHeaderNames().contains("header-key-2"));
 	}
+	
+	@Test
+	public void shouldGetAllRawHeadersWithSameName() {
+		request.addHeader("common-key", "header-value");
+		request.addHeader("common-key", "header-value-1");
+		assertTrue(request.getHeaders("common-key").contains("header-value"));
+		assertTrue(request.getHeaders("common-key").contains("header-value-1"));
+	}
 }
