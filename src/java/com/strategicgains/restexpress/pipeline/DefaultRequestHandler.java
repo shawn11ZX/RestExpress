@@ -125,7 +125,7 @@ extends SimpleChannelUpstreamHandler
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event)
 	throws Exception
 	{
-		MessageContext context = createInitialContext(ctx, event);
+		MessageContext context = createInitialContext(ctx, (HttpRequest)event.getMessage());
 
 		try
 		{
@@ -243,9 +243,9 @@ extends SimpleChannelUpstreamHandler
 		}
 	}
 
-	private MessageContext createInitialContext(ChannelHandlerContext ctx, MessageEvent event)
+	private MessageContext createInitialContext(ChannelHandlerContext ctx, HttpRequest httpRequest)
 	{
-		Request request = createRequest((HttpRequest) event.getMessage(), ctx);
+		Request request = createRequest(httpRequest, ctx);
 		Response response = createResponse();
 		MessageContext context = new MessageContext(request, response);
 		ctx.setAttachment(context);
@@ -437,9 +437,9 @@ extends SimpleChannelUpstreamHandler
      * @param request
      * @return
      */
-    private Request createRequest(HttpRequest request, ChannelHandlerContext context)
+    private Request createRequest(HttpRequest httpRequest, ChannelHandlerContext context)
     {
-    	return new Request(request, routeResolver);
+    	return new Request(httpRequest, routeResolver);
     }
 
 	/**

@@ -15,11 +15,14 @@
  */
 package com.strategicgains.restexpress.pipeline;
 
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map.Entry;
 
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
+import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
@@ -66,7 +69,7 @@ public class MessageContext
 	public void setAction(Action action)
 	{
 		this.action = action;
-		getRequest().addAllHeaders(action.getParameters());
+		addUrlParametersAsHeaders(getRequest(), action.getParameters());
 		getRequest().setResolvedRoute(action.getRoute());
 		getResponse().setIsSerialized(action.shouldSerializeResponse());
 	}
@@ -135,7 +138,7 @@ public class MessageContext
 
 		if (format == null || format.trim().isEmpty())
 		{
-			format = getRequest().getRawHeader(Parameters.Query.FORMAT);
+			format = getRequest().getHeader(Parameters.Query.FORMAT);
 		}
 		
 		return format;
@@ -159,5 +162,20 @@ public class MessageContext
     	if (!hasAction()) return Collections.emptyList();
 
     	return getAction().getRoute().getSupportedFormats();
+    }
+
+	private void addUrlParametersAsHeaders(Request request, Collection<Entry<String, String>> parameters)
+    {
+		for (Entry<String, String> entry : parameters)
+		{
+			try
+            {
+	            request.addHeader(entry.getKey(), URLDecoder.decode(entry.getValue(), ContentType.ENCODING));
+            }
+            catch (Exception e)
+            {
+	            request.addHeader(entry.getKey(), entry.getValue());
+            }
+		}
     }
 }

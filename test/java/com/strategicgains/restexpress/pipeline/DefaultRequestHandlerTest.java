@@ -175,6 +175,19 @@ public class DefaultRequestHandlerTest
 	}
 
 	@Test
+	public void shouldUrlDecodeUrlParameters()
+	throws Exception
+	{
+		sendGetEvent("/foo/Todd%7CFredrich%2Bwas%20here.json");
+		assertEquals(1, observer.getReceivedCount());
+		assertEquals(1, observer.getCompleteCount());
+		assertEquals(1, observer.getSuccessCount());
+		assertEquals(0, observer.getExceptionCount());
+//		System.out.println(httpResponse.toString());
+		assertEquals("\"Todd|Fredrich+was here\"", responseBody.toString());
+	}
+
+	@Test
 	public void shouldNotifyObserverOnError()
 	throws Exception
 	{
@@ -464,6 +477,9 @@ public class DefaultRequestHandlerTest
         	uri("/foo.{format}", controller, defaults)
         		.action("fooAction", HttpMethod.GET);
 
+        	uri("/foo/{userPhrase}.{format}", controller, defaults)
+    			.action("verifyUrlDecodedParameters", HttpMethod.GET);
+
         	uri("/bar.{format}", controller, defaults)
         		.action("barAction", HttpMethod.GET);
 
@@ -495,6 +511,11 @@ public class DefaultRequestHandlerTest
 			// do nothing.
 		}
 		
+		public String verifyUrlDecodedParameters(Request request, Response response)
+		{
+			return request.getHeader("userPhrase");
+		}
+		
 		public void barAction(Request request, Response response)
 		{
 			throw new BadRequestException("foobar'd");
@@ -520,7 +541,7 @@ public class DefaultRequestHandlerTest
 
 		public String serializedStringAction(Request request, Response response)
 		{
-			return request.getRawHeader("returnValue");
+			return request.getHeader("returnValue");
 		}
 
 		public String contentHeaderAction(Request request, Response response)

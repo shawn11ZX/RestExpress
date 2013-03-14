@@ -98,6 +98,13 @@ Content-Length: 115
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.9.2 - SNAPSHOT (in branch 'master')
+---------------------------------------------------------------------------------------------------
+* Deprecated: Request.getUrlDecodedHeader() and Request.getRawHeader() in favor of getHeader(). Since
+  all HTTP headers and query-string parameters are URL decoded before being put on the Request
+  object, these methods are redundant and cause problems.  Their functionality was also changed
+  to simply call getHeader()--so no URL decoding is done in getUrlDecodedHeader().
+* Ensured that parameters extracted from the URL are decoded before setting them as headers
+  on the Request.  Now all headers are URL decoded before any call to Request.getHeader(String).
 
 Release 0.9.1 - 4 Mar 2013
 ---------------------------------------------------------------------------------------------------

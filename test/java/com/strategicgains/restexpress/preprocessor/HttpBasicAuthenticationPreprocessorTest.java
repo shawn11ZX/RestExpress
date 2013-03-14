@@ -49,8 +49,8 @@ public class HttpBasicAuthenticationPreprocessorTest
 	{
 		r.addHeader(HttpHeaders.Names.AUTHORIZATION, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 		p.process(r);
-		assertEquals("Aladdin", r.getRawHeader(HttpBasicAuthenticationPreprocessor.X_AUTHENTICATED_USER));
-		assertEquals("open sesame", r.getRawHeader(HttpBasicAuthenticationPreprocessor.X_AUTHENTICATED_PASSWORD));
+		assertEquals("Aladdin", r.getHeader(HttpBasicAuthenticationPreprocessor.X_AUTHENTICATED_USER));
+		assertEquals("open sesame", r.getHeader(HttpBasicAuthenticationPreprocessor.X_AUTHENTICATED_PASSWORD));
 	}
 
 	@Test

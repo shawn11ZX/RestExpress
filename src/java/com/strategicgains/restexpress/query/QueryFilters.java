@@ -47,7 +47,7 @@ public abstract class QueryFilters
 	 */
 	public static QueryFilter parseFrom(Request request)
 	{
-		String filterString = request.getUrlDecodedHeader(FILTER_HEADER_NAME);
+		String filterString = request.getHeader(FILTER_HEADER_NAME);
 		
 		if (filterString == null || filterString.trim().isEmpty())
 		{

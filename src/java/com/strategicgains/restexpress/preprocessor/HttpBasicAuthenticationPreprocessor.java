@@ -82,7 +82,7 @@ implements Preprocessor
 			return;
 		}
 
-		String authorization = request.getRawHeader(HttpHeaders.Names.AUTHORIZATION);
+		String authorization = request.getHeader(HttpHeaders.Names.AUTHORIZATION);
 
 		if (authorization == null || !authorization.startsWith("Basic "))
 		{

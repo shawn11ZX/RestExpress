@@ -71,9 +71,9 @@ public class RequestTest
 	@Test
 	public void shouldApplyQueryStringParamsAsHeaders()
 	{
-		assertEquals("bar", request.getRawHeader("param1"));
-		assertEquals("blah", request.getRawHeader("param2"));
-		assertEquals("", request.getRawHeader("yada"));
+		assertEquals("bar", request.getHeader("param1"));
+		assertEquals("blah", request.getHeader("param2"));
+		assertEquals("", request.getHeader("yada"));
 	}
 	
 	@Test
@@ -112,53 +112,61 @@ public class RequestTest
 	}
 
 	@Test
+	public void shouldHandleUrlEncodedQueryString()
+	{
+		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?assertion=assertion%7CfitnesseIdm40%40ecollege.com%7C2013-03-14T18%3A02%3A08%2B00%3A00%7C2f6f1b0fa8ecce7d092c1c45cc44e4c7"), null);
+		assertEquals("assertion|fitnesseIdm40@ecollege.com|2013-03-14T18:02:08+00:00|2f6f1b0fa8ecce7d092c1c45cc44e4c7", r.getHeader("assertion"));
+	}
+
+	@Test
+	public void shouldSetHeaderOnInvalidUrlDecodedQueryString()
+	{
+		String key = "invalidUrlDecode";
+		String value = "%invalid";
+		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?" + key + "=" + value), null);
+		assertEquals(value, r.getHeader(key));
+	}
+
+	@Test
 	public void shouldSetAndGetHeader()
 	{
 		String key = "header-key";
 		String value = "header value";
 		request.addHeader(key, value);
-		assertEquals(value, request.getRawHeader(key));
+		assertEquals(value, request.getHeader(key));
 	}
 
 	@Test
-	public void shouldUrlDecodeHeader()
+	public void shouldSetAndGetInvalidUrlEncodedHeader()
+	{
+		String key = "invalid-header-key";
+		String value = "%invalidUrlEncode";
+		request.addHeader(key, value);
+		assertEquals(value, request.getHeader(key));
+	}
+
+	@Test
+	public void shouldNotAlterUrlEncodedHeader()
 	{
 		String key = "validUrlDecode";
 		String value = "%20this%20that";
 		request.addHeader(key, value);
-		assertEquals(value, request.getRawHeader(key));
-		assertEquals(" this that", request.getUrlDecodedHeader(key));
+		assertEquals(value, request.getHeader(key));
 	}
 
 	@Test
-	public void shouldUrlDecodeHeaderWithMessage()
+	public void shouldNotAlterUrlDecodedHeaderWithMessage()
 	{
 		String key = "validUrlDecode";
 		String value = "%20this%20that";
 		request.addHeader(key, value);
-		assertEquals(value, request.getRawHeader(key, "This should not display"));
-		assertEquals(" this that", request.getUrlDecodedHeader(key, "This should not display"));
-	}
-
-	@Test(expected=BadRequestException.class)
-	public void shouldThrowBadRequestExceptionOnInvalidUrlDecodeHeader()
-	{
-		String key = "invalidUrlDecode";
-		String value = "%invalid";
-		request.addHeader(key, value);
-		request.getUrlDecodedHeader(key);
-	}
-
-	@Test(expected=BadRequestException.class)
-	public void shouldThrowBadRequestExceptionOnMissingRawHeader()
-	{
-		request.getRawHeader("missing", "missing header");
+		assertEquals(value, request.getHeader(key, "This should not display"));
 	}
 
 	@Test(expected=BadRequestException.class)
 	public void shouldThrowBadRequestExceptionOnMissingUrlDecodedHeader()
 	{
-		request.getUrlDecodedHeader("missing", "missing header");
+		request.getHeader("missing", "missing header");
 	}
 	
 	@Test
