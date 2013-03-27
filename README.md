@@ -77,7 +77,9 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.9.2 - SNAPSHOT (in branch 'master')
+Release 0.9.3 - SNAPSHOT (in branch 'master')
+
+Release 0.9.2 - 27 Mar 2013
 ---------------------------------------------------------------------------------------------------
 * **DEPRECATED:** Request.getUrlDecodedHeader() and Request.getRawHeader() in favor of getHeader(). Since
   all HTTP headers and query-string parameters are URL decoded before being put on the Request
@@ -87,6 +89,9 @@ Release 0.9.2 - SNAPSHOT (in branch 'master')
   on the Request.  Now all headers are URL decoded before any call to Request.getHeader(String).
 * Added Request.getRemoteAddress(), which returns the remote address of the request originator.
 * Merged pull request (Issue #58) from amitkarmakar13: add List&lt;String&gt; getHeaders(String)
+* Removed '?' and '#' as valid path segment characters in UrlPattern to conform better with
+  IETF RFC 3986, section 3.3-path. Made '{format}' a first-class element for matching URL route
+  patterns (by using '{format}' instead of a regex to match).
 
 Release 0.9.1 - 4 Mar 2013
 ---------------------------------------------------------------------------------------------------
