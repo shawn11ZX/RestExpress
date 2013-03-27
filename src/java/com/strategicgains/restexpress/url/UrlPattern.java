@@ -40,7 +40,10 @@ import java.util.regex.Pattern;
  *   <li>/api/{version}/search/users/{userid}</li>
  * </ul>
  * 
- * RestExpress accepts URIs with the following BNF values taken from the URI Generic Syntax IETF RFC 3986 as follows:
+ * RestExpress parses URI paths which is described in the URI Generic Syntax IETF RFC 3986 specifcation,
+ * section 3.3 (http://tools.ietf.org/html/rfc3986#section-3.3). RestExpress parses paths into segments
+ * separated by slashes ("/"), the segments of which are composed of unreserved, percent encoded,
+ * sub-delimiters, colon (":") or asperand ("@"), each of which are defined below (from the spec):
  * <p/>
  * pct-encoded   = "%" HEXDIG HEXDIG
  * <p/>
@@ -49,6 +52,9 @@ import java.util.regex.Pattern;
  * gen-delims    = ":" / "/" / "?" / "#" / "[" / "]" / "@"</br>
  * sub-delims    = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "=" *
  * <p/>
+ * In other words, RestExpress accepts path segments containing: [A-Z] [a-z] [0-9] % - . _ ~ ! $ & ' ( ) * + , ; = : @
+ * <p/>
+ * RestExpress also accepts square brackets ('[' and ']'), but this is deprecated and not recommended.
  * 
  * @author toddf
  * @since Apr 28, 2010
@@ -61,15 +67,15 @@ implements UrlMatcher
 
 	// Finds parameters in the URL pattern string.
 	private static final String URL_PARAM_REGEX = "\\{(\\w*?)\\}";
-	
+
 	// Replaces parameter names in the URL pattern string to match parameters in URLs.
-	private static final String URL_PARAM_MATCH_REGEX = "\\([%\\\\w-.\\\\~!\\$&'\\\\(\\\\)\\\\*\\\\+,;=:\\\\?#\\\\[\\\\]@]+?\\)";
-	
+	private static final String URL_PARAM_MATCH_REGEX = "\\([%\\\\w-.\\\\~!\\$&'\\\\(\\\\)\\\\*\\\\+,;=:\\\\[\\\\]@]+?\\)";
+
 	// Pattern to match URL pattern parameter names.
 	private static final Pattern URL_PARAM_PATTERN = Pattern.compile(URL_PARAM_REGEX);
 
-	// Finds the format portion of the URL pattern string.
-	private static final String URL_FORMAT_REGEX = "(?:\\.\\{(\\w+)\\})$";
+	// Finds the 'format' portion of the URL pattern string.
+	private static final String URL_FORMAT_REGEX = "(?:\\.\\{format\\})$";
 
 	// Replaces the format parameter name in the URL pattern string to match the format specifier in URLs. Appended to the end of the regex string
 	// when a URL pattern contains a format parameter.
@@ -184,9 +190,7 @@ implements UrlMatcher
 		acquireParameterNames();
 		String parsedPattern = getUrlPattern().replaceFirst(URL_FORMAT_REGEX, URL_FORMAT_MATCH_REGEX);
 		parsedPattern = parsedPattern.replaceAll(URL_PARAM_REGEX, URL_PARAM_MATCH_REGEX);
-		@SuppressWarnings("unused")
-        String completePattern = parsedPattern + URL_QUERY_STRING_REGEX;
-		compiledUrl = Pattern.compile(parsedPattern + URL_QUERY_STRING_REGEX);
+		this.compiledUrl = Pattern.compile(parsedPattern + URL_QUERY_STRING_REGEX);
 	}
 
 	/**
@@ -204,7 +208,7 @@ implements UrlMatcher
     }
 
 	/**
-	 * Extracts parameter values from a Matcher instance.
+	 * Extracts parameter values from a Matcher instance using the regular expression groupings.
 	 * 
 	 * @param matcher
 	 * @return a Map containing parameter values indexed by their corresponding parameter name.
