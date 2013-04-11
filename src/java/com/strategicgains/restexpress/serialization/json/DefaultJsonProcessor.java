@@ -107,6 +107,7 @@ implements SerializationProcessor
 			.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 			.setVisibility(PropertyAccessor.FIELD, Visibility.ANY)
 			.setVisibility(PropertyAccessor.GETTER, Visibility.NONE)
+			.setVisibility(PropertyAccessor.SETTER, Visibility.NONE)
 			.setVisibility(PropertyAccessor.IS_GETTER, Visibility.NONE)
 			.setDateFormat(new SimpleDateFormat(DateAdapterConstants.TIME_POINT_OUTPUT_FORMAT));
     }

@@ -78,6 +78,7 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.9.3 - SNAPSHOT (in branch 'master')
+* Fixed issue with setter getting called in deserialization instead of Jackson deserializer.
 
 Release 0.9.2 - 27 Mar 2013
 ---------------------------------------------------------------------------------------------------
