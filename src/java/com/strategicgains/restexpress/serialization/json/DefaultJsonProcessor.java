@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
@@ -34,6 +35,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.strategicgains.restexpress.ContentType;
+import com.strategicgains.restexpress.common.util.StringUtils;
+import com.strategicgains.restexpress.contenttype.MediaRange;
+import com.strategicgains.restexpress.contenttype.MediaTypeParser;
 import com.strategicgains.restexpress.serialization.DeserializationException;
 import com.strategicgains.restexpress.serialization.SerializationException;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
@@ -50,6 +54,12 @@ import com.strategicgains.util.date.DateAdapterConstants;
 public class DefaultJsonProcessor
 implements SerializationProcessor
 {
+	private static final String SUPPORTED_MEDIA_TYPES = StringUtils.join(",",
+		ContentType.JSON,
+		"application/javasctript; charset=" + ContentType.ENCODING,
+		"text/javascript; charset=" + ContentType.ENCODING);
+	private static List<MediaRange> SUPPORTED_MEDIA_RANGES = MediaTypeParser.parse(SUPPORTED_MEDIA_TYPES);
+	
 	private ObjectMapper mapper;
 
 	public DefaultJsonProcessor()
@@ -171,8 +181,8 @@ implements SerializationProcessor
 	}
 
 	@Override
-	public String getResultingContentType()
-	{
-		return ContentType.JSON;
-	}
+    public List<MediaRange> getSupportedMediaRanges()
+    {
+	    return SUPPORTED_MEDIA_RANGES;
+    }
 }

@@ -17,6 +17,10 @@
 
 package com.strategicgains.restexpress.serialization;
 
+import java.util.List;
+
+import com.strategicgains.restexpress.contenttype.MediaRange;
+
 
 /**
  * @author toddf
@@ -25,5 +29,5 @@ package com.strategicgains.restexpress.serialization;
 public interface Serializer
 {
 	public String serialize(Object object);
-	public String getResultingContentType();
+	public List<MediaRange> getSupportedMediaRanges();
 }

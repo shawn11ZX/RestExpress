@@ -193,7 +193,6 @@ extends SimpleChannelUpstreamHandler
 	{
 		MessageContext context = (MessageContext) ctx.getAttachment();
 		resolveResponseProcessor(context);
-		resolveResponseProcessorViaUrlFormat(context);
 		Throwable rootCause = mapServiceException(cause);
 		
 		if (rootCause != null) // was/is a ServiceException
@@ -263,7 +262,7 @@ extends SimpleChannelUpstreamHandler
 		boolean isResolved = true;
 		if (context.hasResponseProcessor()) return isResolved;
 
-		ResponseProcessor rp = responseProcessorResolver.resolve(context.getRequestedFormat());
+		ResponseProcessor rp = responseProcessorResolver.resolve(context.getRequest());
 		
 		if (rp == null)
 		{
@@ -274,30 +273,6 @@ extends SimpleChannelUpstreamHandler
 		context.setResponseProcessor(rp);
 		return isResolved;
 	}
-
-	private void resolveResponseProcessorViaUrlFormat(MessageContext context)
-    {
-	    String urlFormat = parseRequestedFormatFromUrl(context.getRequest());
-		
-		if (urlFormat != null && !urlFormat.isEmpty() && !urlFormat.equalsIgnoreCase(context.getRequestedFormat()))
-		{
-			ResponseProcessor rp = responseProcessorResolver.resolve(urlFormat);
-			
-			if (rp != null)
-			{
-				context.setResponseProcessor(rp);
-			}
-		}
-    }
-
-	private String parseRequestedFormatFromUrl(Request request)
-    {
-    	String uri = request.getUrl();
-		int queryDelimiterIndex = uri.indexOf('?');
-		String path = (queryDelimiterIndex > 0 ? uri.substring(0, queryDelimiterIndex) : uri);
-    	int formatDelimiterIndex = path.indexOf('.');
-    	return (formatDelimiterIndex > 0 ? path.substring(formatDelimiterIndex + 1) : null);
-    }
 
 	private void resolveRoute(MessageContext context)
     {
