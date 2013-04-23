@@ -296,39 +296,6 @@ public class RestExpress
 		return this;
 	}
 
-	/**
-	 * Tell RestExpress to support TXT format specifiers in routes, outgoing
-	 * only at present.
-	 * 
-	 * @param isDefault true to make TXT the default format.
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress supportTxt(boolean isDefault)
-	{
-		if (!getResponseProcessors().containsKey(Format.TXT))
-		{
-			getResponseProcessors().put(Format.TXT, ResponseProcessor.defaultTxtProcessor());
-		}
-
-		if (isDefault)
-		{
-			setDefaultFormat(Format.TXT);
-		}
-
-		return this;
-	}
-
-	/**
-	 * Tell RestExpress to support TXT format specifier in routes, outgoing only
-	 * at present.
-	 * 
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress supportTxt()
-	{
-		return supportTxt(false);
-	}
-
 	public RestExpress addMessageObserver(MessageObserver observer)
 	{
 		if (!messageObservers.contains(observer))
