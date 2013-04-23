@@ -24,7 +24,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.8.2</version>
+			<version>0.9.2</version>
 		</dependency>
 ```
 Development:
@@ -32,7 +32,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>0.9.3-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -75,42 +75,42 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 * For more real-world examples, see the examples/ directory which contains additional projects that setup RestExpress services.  Simply do '**ant run**' to run them.  Then to see what's available perform a GET on the route: '/routes/metadata' to get a list of all the routes (or endpoints) available (e.g. localhost:8000/routes/metadata in the browser).
 
 ===================================================================================================
-BTW, if you're on a Mac or Linux box, you can do the following to get Ruby on Rails "scaffolding"
--like behavior by running the following from the RestExpress root directory:
-1) ant release
-2) ./src/scripts/install.sh
-3) cd <a new directory> (e.g. '~/src')
-4) <restexpress home>/src/scripts/restexpress.sh <name of project> (e.g. Sample)
-5) cd <new project directory> (e.g. Sample)
-6) ant run
-
-From another console, enter something like the following to test your new service suite:
-1) curl -i localhost:8081/sample/42
-
-You should see something like this:
-HTTP/1.1 404 Not Found
-Content-Type: application/json; charset=UTF-8
-Content-Length: 115
-
-{"code":404,"status":"error","message":"The order ID you requested was not found: 42","data":"NotFoundException"}
-
-===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.9.0 - SNAPSHOT (in branch 'master')
-* Release 0.9.0 is a major departure from 0.8.x, in a final push to get RestExpress to
-  a 1.0 version.  The goal is to move RestExpress to a more polished model that supports
-  asynchronous programming concepts, but doesn't enforce them.
-* BREAKING CHANGE: eliminated GSON. RestExpress now uses Jackson for JSON processing.
+Release 0.9.3 - SNAPSHOT (in branch 'master')
+* Fixed issue with setter getting called in deserialization instead of Jackson deserializer.
+
+Release 0.9.2 - 27 Mar 2013
+---------------------------------------------------------------------------------------------------
+* **DEPRECATED:** Request.getUrlDecodedHeader() and Request.getRawHeader() in favor of getHeader(). Since
+  all HTTP headers and query-string parameters are URL decoded before being put on the Request
+  object, these methods are redundant and cause problems.  Their functionality was also changed
+  to simply call getHeader()--so no URL decoding is done in getUrlDecodedHeader().
+* Ensured that parameters extracted from the URL are decoded before setting them as headers
+  on the Request.  Now all headers are URL decoded before any call to Request.getHeader(String).
+* Added Request.getRemoteAddress(), which returns the remote address of the request originator.
+* Merged pull request (Issue #58) from amitkarmakar13: add List&lt;String&gt; getHeaders(String)
+* Removed '?' and '#' as valid path segment characters in UrlPattern to conform better with
+  IETF RFC 3986, section 3.3-path. Made '{format}' a first-class element for matching URL route
+  patterns (by using '{format}' instead of a regex to match).
+
+Release 0.9.1 - 4 Mar 2013
+---------------------------------------------------------------------------------------------------
+* **BREAKING CHANGE:** eliminated GSON. RestExpress now uses Jackson for JSON processing.
   The changes are localized to the 'serialization' package.  Simply copy the ObjectIdDeserializer,
   ObjectIdSerializer and JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/mongodb/src/main/java/com/strategicgains/restexpress/scaffold/mongodb/serialization
   for MongoDB-based projects.  Or just the JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/minimal/src/main/java/com/strategicgains/restexpress/scaffold/minimal/serialization
   for a minimal project.
-* BREAKING CHANGE: Removed Chunking and compression settings. RestExpress does not support
+* **BREAKING CHANGE:** Removed Chunking and compression settings. RestExpress does not support
   chunking/streaming uploads.  So the setting were superfluous.  The facility is still there
   to support streaming downloads, however, and these will be chunked as necessary. As compression
   is based on the Accept header, support is always provided--settings are superfluous.
   NOTE: streaming downloads are not fully implemented yet.
+* **BREAKING CHANGE:** Removed LoggingHandler from the Netty pipeline and related setter methods.
+* Added HttpBasicAuthenticationPreprocessor to facilitate HTTP Basic Authentication. Added
+  Flags.Auth.PUBLIC_ROUTE, NO_AUTHENTICATION, and NO_AUTHORIZATION to support configuration
+  of HttpBasicAuthenticationPreprocessor (and other authentication/authorization 
+  related routes).
 
 Release 0.8.2 - 19 Feb 2013
 ---------------------------------------------------------------------------------------------------

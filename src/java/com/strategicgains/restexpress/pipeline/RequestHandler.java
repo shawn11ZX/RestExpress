@@ -28,7 +28,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.Request;
@@ -245,7 +244,7 @@ extends SimpleChannelUpstreamHandler
 
 	private MessageContext createInitialContext(ChannelHandlerContext ctx, MessageEvent event)
 	{
-		Request request = createRequest((HttpRequest) event.getMessage(), ctx);
+		Request request = createRequest(event, ctx);
 		Response response = createResponse();
 		MessageContext context = new MessageContext(request, response);
 		ctx.setAttachment(context);
@@ -437,9 +436,9 @@ extends SimpleChannelUpstreamHandler
      * @param request
      * @return
      */
-    private Request createRequest(HttpRequest request, ChannelHandlerContext context)
+    private Request createRequest(MessageEvent event, ChannelHandlerContext context)
     {
-    	return new Request(request, routeResolver);
+    	return new Request(event, routeResolver);
     }
 
 	/**

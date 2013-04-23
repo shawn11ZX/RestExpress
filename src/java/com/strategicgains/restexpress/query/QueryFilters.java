@@ -16,10 +16,12 @@
  */
 package com.strategicgains.restexpress.query;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.common.query.FilterComponent;
+import com.strategicgains.restexpress.common.query.FilterOperator;
 import com.strategicgains.restexpress.common.query.QueryFilter;
 
 /**
@@ -45,7 +47,7 @@ public abstract class QueryFilters
 	 */
 	public static QueryFilter parseFrom(Request request)
 	{
-		String filterString = request.getUrlDecodedHeader(FILTER_HEADER_NAME);
+		String filterString = request.getHeader(FILTER_HEADER_NAME);
 		
 		if (filterString == null || filterString.trim().isEmpty())
 		{
@@ -60,7 +62,7 @@ public abstract class QueryFilters
 		}
 
 		String[] nameValuePair;
-		Map<String, String> filters = new HashMap<String, String>();
+		List<FilterComponent> filters = new ArrayList<FilterComponent>();
 		
 		for (String nameValue : nameValues)
 		{
@@ -68,11 +70,11 @@ public abstract class QueryFilters
 			
 			if (nameValuePair.length == 1)
 			{
-				filters.put(nameValuePair[0], "");
+				filters.add(new FilterComponent(nameValuePair[0], FilterOperator.CONTAINS, ""));
 			}
 			else
 			{
-				filters.put(nameValuePair[0], nameValuePair[1]);
+				filters.add( new FilterComponent(nameValuePair[0], FilterOperator.CONTAINS, nameValuePair[1]));
 			}
 		}
 

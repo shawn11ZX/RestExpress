@@ -75,8 +75,8 @@ public abstract class QueryRanges
 
 	private static void parseInto(Request request, QueryRange range)
 	{
-		String limit = request.getUrlDecodedHeader(LIMIT_HEADER_NAME);
-		String offset = request.getUrlDecodedHeader(OFFSET_HEADER_NAME);
+		String limit = request.getHeader(LIMIT_HEADER_NAME);
+		String offset = request.getHeader(OFFSET_HEADER_NAME);
 
 		if (!parseLimitAndOffset(limit, offset, range))
 		{
@@ -126,7 +126,7 @@ public abstract class QueryRanges
 
 	private static void parseRangeHeader(Request request, QueryRange range)
 	{
-		String rangeHeader = request.getUrlDecodedHeader(RANGE_HEADER_NAME);
+		String rangeHeader = request.getHeader(RANGE_HEADER_NAME);
 
 		if (rangeHeader != null && !rangeHeader.trim().isEmpty())
 		{

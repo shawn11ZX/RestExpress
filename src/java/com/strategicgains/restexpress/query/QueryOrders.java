@@ -39,7 +39,7 @@ public abstract class QueryOrders
 	 */
 	public static QueryOrder parseFrom(Request request)
 	{
-		String sortString = request.getUrlDecodedHeader(SORT_HEADER_NAME);
+		String sortString = request.getHeader(SORT_HEADER_NAME);
 
 		if (sortString == null || sortString.trim().isEmpty())
 		{

@@ -31,6 +31,7 @@ import org.junit.Test;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.common.query.FilterCallback;
 import com.strategicgains.restexpress.common.query.FilterComponent;
+import com.strategicgains.restexpress.common.query.FilterOperator;
 import com.strategicgains.restexpress.common.query.QueryFilter;
 
 /**
@@ -59,7 +60,7 @@ public class QueryFilterTest
 	{
 		QueryFilter f = new QueryFilter();
 		assertFalse(f.hasFilters());
-		f.addCriteria("test", "something");
+		f.addCriteria("test", FilterOperator.CONTAINS, "something");
 		assertTrue(f.hasFilters());
 		
 		f.iterate(new FilterCallback()

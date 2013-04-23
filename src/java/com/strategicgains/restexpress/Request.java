@@ -17,7 +17,7 @@
 
 package com.strategicgains.restexpress;
 
-import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -35,7 +36,6 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import com.strategicgains.restexpress.exception.BadRequestException;
-import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
@@ -54,6 +54,7 @@ public class Request
 
 	private HttpRequest httpRequest;
 	private String protocol;
+	private InetSocketAddress remoteAddress;
 	private HttpMethod effectiveHttpMethod;
 	private String correlationId;
 	private Map<String, Object> attachments;
@@ -76,6 +77,12 @@ public class Request
 	    generateCorrelationId();
 		parseQueryString(request);
 		determineEffectiveHttpMethod(request);
+	}
+
+	public Request(MessageEvent event)
+	{
+		this((HttpRequest) event.getMessage());
+		this.remoteAddress = (InetSocketAddress) event.getRemoteAddress();
 	}
 
 
@@ -193,38 +200,70 @@ public class Request
     {
     	this.serializationProcessor = serializationProcessor;
     }
-	
+
+	public void setBody(ChannelBuffer body)
+    {
+		httpRequest.setContent(body);
+    }
+
+	public void clearHeaders()
+	{
+		httpRequest.clearHeaders();
+	}
+
 	/**
-	 * Gets the named header as it came in on the request (without URL decoding it).
-	 * Returns null if the header is not present.
+	 * Gets the named header from the request. Returns null if the header is not present.
+	 * Both HTTP headers and query-string parameters are set as headers on the Request,
+	 * with query-string parameters overriding headers if there is a name clash.
 	 * <p/>
 	 * NOTE: because HTTP headers are handled by Netty, which processes them with
-	 *       QueryStringDecoder, HTTP headers are URL decoded. Only query-string
-	 *       parameters that get processed by RestExpress are NOT URL decoded.
+	 *       QueryStringDecoder, HTTP headers are URL decoded. Also query-string
+	 *       parameters that get processed by RestExpress are URL decoded before
+	 *       being set as headers on the request.
 	 * 
 	 * @param name
 	 * @return the requested header, or null if 'name' doesn't exist as a header.
 	 */
-	public String getRawHeader(String name)
+	public String getHeader(String name)
 	{
 		return httpRequest.getHeader(name);
 	}
+
+	/**
+	 * Gets the list of named headers from the request.
+	 * Returns null if the header name is not present.
+	 * <p/>
+	 * NOTE: because HTTP headers are handled by Netty, which processes them with
+	 *       QueryStringDecoder, HTTP headers are URL decoded. Also query-string
+	 *       parameters that get processed by RestExpress are URL decoded before
+	 *       being set as headers on the request.
+	 * 
+	 * @param name
+	 * @return the requested list of headers, or null if 'name' doesn't exist as a header.
+	 */
+	public List<String> getHeaders(String name)
+	{
+		return httpRequest.getHeaders(name);
+	}
 	
 	/**
-	 * Gets the named header as it came in on the request (without URL decoding it).
-	 * Throws BadRequestException(message) if the header is not present.
-	 * 
+	 * Gets the named header fromthe request. Throws BadRequestException(message)
+	 * if the header is not present.
+	 * Both HTTP headers and query-string parameters are set as headers on the Request,
+	 * with query-string parameters overriding headers if there is a name clash.
+	 * <p/>
 	 * NOTE: because HTTP headers are handled by Netty, which processes them with
-	 *       QueryStringDecoder, HTTP headers are URL decoded. Only query-string
-	 *       parameters that get processed by RestExpress are NOT URL decoded.
+	 *       QueryStringDecoder, HTTP headers are URL decoded. Also query-string
+	 *       parameters that get processed by RestExpress are URL decoded before
+	 *       being set as headers on the request.
 	 * 
 	 * @param name
 	 * @return the requested header
 	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
 	 */
-	public String getRawHeader(String name, String message)
+	public String getHeader(String name, String message)
 	{
-		String value = getRawHeader(name);
+		String value = getHeader(name);
 		
 		if (value == null)
 		{
@@ -232,6 +271,39 @@ public class Request
 		}
 
 		return value;
+	}
+
+	/**
+	 * Gets the named header from the request.
+	 * Returns null if the header is not present.
+	 * <p/>
+	 * NOTE: All headers and query-string parameters are URL decoded before
+	 *       being put on the Request as headers.
+	 * 
+	 * @param name
+	 * @return the requested header, or null if 'name' doesn't exist as a header.
+	 * @deprecated Use getHeader() instead as all headers are URL decoded.
+	 */
+	public String getRawHeader(String name)
+	{
+		return getHeader(name);
+	}
+	
+	/**
+	 * Gets the named header from the request.
+	 * Throws BadRequestException(message) if the header is not present.
+	 * 
+	 * NOTE: All headers and query-string parameters are URL decoded before
+	 *       being put on the Request as headers.
+	 * 
+	 * @param name
+	 * @return the requested header
+	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
+	 * @deprecated Use getHeader() instead as all headers are URL decoded.
+	 */
+	public String getRawHeader(String name, String message)
+	{
+		return getHeader(name, message);
 	}
 
 	/**
@@ -245,35 +317,35 @@ public class Request
 	}
 
 	/**
-	 * Gets the named header, URL decoding it before returning it.
+	 * Gets the named header from the request.
 	 * Returns null if the header is not present.
+	 * <p/>
+	 * NOTE: All headers and query-string parameters are URL decoded before
+	 *       being put on the Request as headers.
 	 * 
 	 * @param name
 	 * @return the requested header, or null if 'name' doesn't exist as a header.
+	 * @deprecated Use getHeader() instead as all headers are URL decoded.
 	 */
 	public String getUrlDecodedHeader(String name)
 	{
-		String value = httpRequest.getHeader(name);
-		return (value != null ? urlDecode(value) : null);
+		return getHeader(name);
 	}
 	
 	/**
-	 * Gets the named header, URL decoding it before returning it.
+	 * Gets the named header from the request.
 	 * Throws BadRequestException(message) if the header is not present.
-	 * 
+	 * <p/>
+	 * NOTE: All headers and query-string parameters are URL decoded before
+	 *       being put on the Request as headers.
+	 *       
 	 * @return the requested header
 	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
+	 * @deprecated Use getHeader() instead as all headers are URL decoded.
 	 */
 	public String getUrlDecodedHeader(String name, String message)
 	{
-		String value = getUrlDecodedHeader(name);
-		
-		if (value == null)
-		{
-			throw new BadRequestException(message);
-		}
-
-		return value;
+		return getHeader(name, message);
 	}
 	
 	public void addHeader(String name, String value)
@@ -530,6 +602,11 @@ public class Request
 		HttpVersion v = getHttpVersion();
 		return ((v.getMajorVersion() == 1) && (v.getMinorVersion() == 0));
 	}
+	
+	public InetSocketAddress getRemoteAddress()
+	{
+		return remoteAddress;
+	}
 
 	
 	// SECTION: UTILITY - PRIVATE
@@ -590,21 +667,5 @@ public class Request
 	private void generateCorrelationId()
 	{
 		this.correlationId = String.valueOf(nextCorrelationId.incrementAndGet());
-	}
-
-	private String urlDecode(String value)
-	{
-        try
-        {
-	        return URLDecoder.decode(value, ContentType.ENCODING);
-        }
-        catch (UnsupportedEncodingException e)
-        {
-        	throw new ServiceException(e);
-        }
-        catch(IllegalArgumentException iae)
-        {
-        	throw new BadRequestException(iae);
-        }
 	}
 }

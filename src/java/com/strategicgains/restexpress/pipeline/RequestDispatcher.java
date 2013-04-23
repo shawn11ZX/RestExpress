@@ -26,7 +26,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import com.strategicgains.restexpress.Request;
@@ -38,7 +37,6 @@ import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.SerializationProcessor;
 
 /**
  * @author toddf
@@ -139,12 +137,15 @@ extends SimpleChannelUpstreamHandler
 		response.setIsSerialized(action.shouldSerializeResponse());
 
 		// Content-Type negotiation.
-		// GET doesn't have a message body, so no need to negotiate request content type.
-		if (!HttpMethod.GET.equals(request.getEffectiveHttpMethod()))
-		{
-			// resolve request content type.  Can throw an exception...
-			request.setSerializationProcessor(resolveRequestContentType(request));
-		}
+		
+		// Lazily resolve the Request content type as it's possible that
+		// serialization will NOT be required.
+//		// GET doesn't have a message body, so no need to negotiate request content type.
+//		if (!HttpMethod.GET.equals(request.getEffectiveHttpMethod()))
+//		{
+//			// resolve request content type.  Can throw an exception...
+//			request.setSerializationProcessor(resolveRequestContentType(request));
+//		}
 
 		// If the response is not serialized, no need to resolve the response content type.
 		if (response.isSerialized())
@@ -214,11 +215,11 @@ extends SimpleChannelUpstreamHandler
 		}
 	}
 
-	private SerializationProcessor resolveRequestContentType(Request request)
-    {
-	    ResponseProcessor rp = responseProcessorResolver.resolveContentType(request);
-	    return rp.getSerializer();
-    }
+//	private SerializationProcessor resolveRequestContentType(Request request)
+//    {
+//	    ResponseProcessor rp = responseProcessorResolver.resolveContentType(request);
+//	    return rp.getSerializer();
+//    }
 
 
 	private ResponseProcessor resolveResponseContentType(Request request)

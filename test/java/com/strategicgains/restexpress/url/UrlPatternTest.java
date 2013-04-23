@@ -51,6 +51,8 @@ public class UrlPatternTest
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/jose.%20json"));
 		assertTrue(pFormat.matches("/xxx/toddf/yyy/jose.%json"));
 		assertTrue(pFormat.matches("/xxx/$-_@&+-[]/yyy/!*'(),.json"));
+		assertTrue(pFormat.matches("/xxx/toddf/yyy/.json"));
+		assertTrue(pFormat.matches("/xxx/.toddf/yyy/.json?a=foo"));
 	}
 
 	@Test
@@ -63,11 +65,14 @@ public class UrlPatternTest
 		assertTrue(p.matches("/xxx/12345/yyy/67890"));
 		assertTrue(p.matches("/xxx/toddf/yyy/joez"));
 		assertTrue(p.matches("/xxx/toddf/yyy/joez?x=y&a=b"));
+		assertTrue(p.matches("/xxx/toddf/yyy/.json"));
+		assertTrue(p.matches("/xxx/.toddf/yyy/.json"));
 	}
 
 	@Test
 	public void shouldNotMatchUrlWithFormat()
 	{
+		assertFalse(pFormat.matches("/xxx/toddf/yyy/?a=foo"));
 		assertFalse(pFormat.matches("/xxx/toddf/yyy/joez/"));
 		assertFalse(pFormat.matches("/xxx/todd.fredrich/yyy/joez/"));
 		assertFalse(pFormat.matches("/aaa/toddf/yyy/joez.json"));
@@ -99,10 +104,10 @@ public class UrlPatternTest
 	@Test
 	public void shouldParseSpecialParametersWithFormat()
 	{
-		UrlMatch match = pFormat.match("/xxx/~?#,;=$-_@&+-[toddf]:12345/yyy/!*'(fredt),.json");
+		UrlMatch match = pFormat.match("/xxx/~,;=$-_@&+-[toddf]:12345/yyy/!*'(fredt),.json");
 		assertNotNull(match);
 		assertEquals("json", match.get("format"));
-		assertEquals("~?#,;=$-_@&+-[toddf]:12345", match.get("a_id"));
+		assertEquals("~,;=$-_@&+-[toddf]:12345", match.get("a_id"));
 		assertEquals("!*'(fredt),", match.get("b_id"));
 	}
 
@@ -119,10 +124,10 @@ public class UrlPatternTest
 	@Test
 	public void shouldParseSpecialParametersWithoutFormat()
 	{
-		UrlMatch match = p.match("/xxx/~?#,;=$-_@&+-[toddf]:12345/yyy/!*'(fredt),");
+		UrlMatch match = p.match("/xxx/~,;=$-_@&+-[toddf]:12345/yyy/!*'(fredt),");
 		assertNotNull(match);
 		assertNull(match.get("format"));
-		assertEquals("~?#,;=$-_@&+-[toddf]:12345", match.get("a_id"));
+		assertEquals("~,;=$-_@&+-[toddf]:12345", match.get("a_id"));
 		assertEquals("!*'(fredt),", match.get("b_id"));
 	}
 

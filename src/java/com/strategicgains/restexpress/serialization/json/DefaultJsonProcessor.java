@@ -111,13 +111,24 @@ implements SerializationProcessor
 	protected void initializeMapper(ObjectMapper mapper)
     {
 		mapper
-			.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+//			.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
 			.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+
+			// Ignore additional/unknown properties in a payload.
 			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			
+			// Only serialize populated properties (do no serialize nulls)
 			.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+			
+			// Use fields directly.
 			.setVisibility(PropertyAccessor.FIELD, Visibility.ANY)
+			
+			// Ignore accessor and mutator methods (use fields per above).
 			.setVisibility(PropertyAccessor.GETTER, Visibility.NONE)
+			.setVisibility(PropertyAccessor.SETTER, Visibility.NONE)
 			.setVisibility(PropertyAccessor.IS_GETTER, Visibility.NONE)
+			
+			// Set default date output format.
 			.setDateFormat(new SimpleDateFormat(DateAdapterConstants.TIME_POINT_OUTPUT_FORMAT));
     }
 
