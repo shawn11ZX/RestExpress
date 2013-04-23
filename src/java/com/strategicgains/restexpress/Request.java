@@ -462,7 +462,7 @@ public class Request
 	 */
 	public String getFormat()
 	{
-		return getRawHeader(Parameters.Query.FORMAT);
+		return getHeader(Parameters.Query.FORMAT);
 	}
 	
 	/**
