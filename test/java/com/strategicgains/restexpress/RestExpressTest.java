@@ -80,28 +80,6 @@ public class RestExpressTest
 	}
 
 	@Test
-	public void shouldSupportText()
-	{
-		server.supportTxt();
-		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertTrue(server.getResponseProcessors().containsKey(Format.TXT));
-		assertEquals(3, server.getResponseProcessors().size());
-	}
-
-	@Test
-	public void shouldMakeTextDefault()
-	{
-		server.supportTxt(true);
-		assertEquals(Format.TXT, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertTrue(server.getResponseProcessors().containsKey(Format.TXT));
-		assertEquals(3, server.getResponseProcessors().size());
-	}
-
-	@Test
 	public void shouldCustomizeJsonSerializer()
 	{
 		server.putResponseProcessor(Format.JSON, ResponseProcessor.defaultJsonProcessor());
@@ -147,21 +125,6 @@ public class RestExpressTest
 		assertEquals(2, server.getResponseProcessors().size());
 		
 		assertTrue(rp == server.getResponseProcessors().get(Format.XML));
-	}
-
-	@Test
-	public void shouldNotUpdateTxtSerializer()
-	{
-		ResponseProcessor rp = ResponseProcessor.defaultTxtProcessor();
-		server.putResponseProcessor(Format.TXT, rp);
-		server.supportTxt(true);
-		assertEquals(Format.TXT, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertTrue(server.getResponseProcessors().containsKey(Format.TXT));
-		assertEquals(3, server.getResponseProcessors().size());
-		
-		assertTrue(rp == server.getResponseProcessors().get(Format.TXT));
 	}
 	
 	@Test
