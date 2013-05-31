@@ -160,7 +160,7 @@ public class Response
 	 */
 	public void setCollectionResponse(QueryRange queryRange, int size, long count)
 	{
-		QueryRange range = new QueryRange(queryRange.getOffset(), queryRange.getLimit());
+		QueryRange range = queryRange.clone();
 		
 		if (range.isOutside(size, count))
 		{

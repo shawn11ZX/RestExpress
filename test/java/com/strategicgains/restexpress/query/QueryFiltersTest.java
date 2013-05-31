@@ -16,7 +16,6 @@
 package com.strategicgains.restexpress.query;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
@@ -31,14 +30,13 @@ import org.junit.Test;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.common.query.FilterCallback;
 import com.strategicgains.restexpress.common.query.FilterComponent;
-import com.strategicgains.restexpress.common.query.FilterOperator;
 import com.strategicgains.restexpress.common.query.QueryFilter;
 
 /**
  * @author toddf
  * @since Jul 27, 2012
  */
-public class QueryFilterTest
+public class QueryFiltersTest
 {
 	@Test
 	public void shouldParseFilterHeader()
@@ -53,25 +51,6 @@ public class QueryFilterTest
 		assertEquals(2, callback.getFilterCount());
 		assertEquals("todd", callback.get("name"));
 		assertEquals("amazing", callback.get("description"));
-	}
-	
-	@Test
-	public void shouldAddFilterCriteria()
-	{
-		QueryFilter f = new QueryFilter();
-		assertFalse(f.hasFilters());
-		f.addCriteria("test", FilterOperator.CONTAINS, "something");
-		assertTrue(f.hasFilters());
-		
-		f.iterate(new FilterCallback()
-		{
-			@Override
-			public void filterOn(FilterComponent component)
-			{
-				assertEquals("test", component.getField());
-				assertEquals("something", component.getValue());
-			}
-		});
 	}
 	
 	private class FCallback
