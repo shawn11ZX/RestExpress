@@ -16,9 +16,7 @@
 package com.strategicgains.restexpress.query;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +36,7 @@ import com.strategicgains.restexpress.common.query.QueryOrder;
  * @author toddf
  * @since Jul 27, 2012
  */
-public class QueryOrderTest
+public class QueryOrdersTest
 {
 	@Test
 	public void shouldParseSortHeader()
@@ -57,41 +55,6 @@ public class QueryOrderTest
 		assertTrue(callback.get("description").isAscending());
 		assertEquals("createdAt", callback.get("createdAt").getFieldName());
 		assertTrue(callback.get("createdAt").isDescending());
-	}
-	
-	@Test
-	public void shouldAddSortCriteria()
-	{
-		QueryOrder o = new QueryOrder();
-		assertFalse(o.isSorted());
-		o.addSort("name", "-zip");
-		assertTrue(o.isSorted());
-		
-		o.iterate(new OrderCallback()
-		{
-			int i = 0;
-
-			@Override
-			public void orderBy(OrderComponent component)
-			{
-				if (i == 0)
-				{
-					assertEquals("name", component.getFieldName());
-					assertTrue(component.isAscending());
-				}
-				else if (i == 1)
-				{
-					assertEquals("zip", component.getFieldName());
-					assertTrue(component.isDescending());
-				}
-				else
-				{
-					fail("Called too many times");
-				}
-				
-				++i;
-			}
-		});
 	}
 	
 	private class OCallback
