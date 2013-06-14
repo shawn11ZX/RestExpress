@@ -77,8 +77,18 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.9.3 - SNAPSHOT (in branch 'master')
+Release 0.9.4 - SNAPSHOT (in branch 'master')
+
+Release 0.9.3 - 14 Jun 2013
+---------------------------------------------------------------------------------------------------
 * Fixed issue with setter getting called in deserialization instead of Jackson deserializer.
+* Removed LogLevel enumeration due to lack of use.
+* Fixed issue #61 - Large Chunked Request Causes Errors.  Added HttpChunkAggregator to the
+  pipeline.
+* Added RestExpress.setMaxContentSize(int) to allow limiting of total content length of requests
+  even if chunked.  Default max content size is 25K.
+* Added RestExpress.iterateRouteBuilders(Callback<RouteBuilder> callback) to facilitate
+  plugins, etc. augmenting or extracting information from the declared routes.
 
 Release 0.9.2 - 27 Mar 2013
 ---------------------------------------------------------------------------------------------------
