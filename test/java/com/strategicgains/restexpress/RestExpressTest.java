@@ -19,6 +19,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.response.ResponseProcessor;
@@ -30,6 +40,10 @@ import com.strategicgains.restexpress.response.ResponseProcessor;
  */
 public class RestExpressTest
 {
+	private static final String TEST_PATH = "/restexpress/test1";
+	private static final int TEST_PORT = 8888;
+	private static final String TEST_URL = "http://localhost:" + TEST_PORT + TEST_PATH;
+
 	private RestExpress server = new RestExpress();
 
 	@Test
@@ -170,4 +184,77 @@ public class RestExpressTest
 		server.noSystemOut();
 		assertFalse(server.shouldUseSystemOut());
 	}
+	
+	@Test
+	public void shouldCallDefaultMethods()
+	throws ClientProtocolException, IOException
+	{
+		RestExpress re = new RestExpress();
+		NoopController controller = new NoopController();
+		re.uri(TEST_PATH, controller);
+		re.bind(TEST_PORT);
+		
+		HttpClient client = new DefaultHttpClient();
+		HttpGet get = new HttpGet(TEST_URL);
+		HttpResponse response = (HttpResponse) client.execute(get);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(1, controller.read);
+		assertEquals(0, controller.create);
+		assertEquals(0, controller.update);
+		assertEquals(0, controller.delete);
+		get.releaseConnection();
+		
+		HttpPost post = new HttpPost(TEST_URL);
+		response = (HttpResponse) client.execute(post);
+		assertEquals(201, response.getStatusLine().getStatusCode());
+		assertEquals(1, controller.create);
+		assertEquals(1, controller.read);
+		assertEquals(0, controller.update);
+		assertEquals(0, controller.delete);
+		post.releaseConnection();
+
+		HttpPut put = new HttpPut(TEST_URL);
+		response = (HttpResponse) client.execute(put);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(1, controller.update);
+		assertEquals(1, controller.read);
+		assertEquals(1, controller.create);
+		assertEquals(0, controller.delete);
+		put.releaseConnection();
+
+		HttpDelete delete = new HttpDelete(TEST_URL);
+		response = (HttpResponse) client.execute(delete);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(1, controller.delete);
+		assertEquals(1, controller.read);
+		assertEquals(1, controller.create);
+		assertEquals(1, controller.update);
+		delete.releaseConnection();
+	}
+
+	public class NoopController
+    {
+		int create, read, update, delete = 0;
+
+		public void create(Request req, Response res)
+		{
+			++create;
+			res.setResponseCreated();
+		}
+
+		public void read(Request req, Response res)
+		{
+			++read;
+		}
+
+		public void update(Request req, Response res)
+		{
+			++update;
+		}
+
+		public void delete(Request req, Response res)
+		{
+			++delete;
+		}
+    }
 }
