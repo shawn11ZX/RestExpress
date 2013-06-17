@@ -77,7 +77,12 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+
 Release 0.9.4 - SNAPSHOT (in branch 'master')
+---------------------------------------------------------------------------------------------------
+* Fixed issue for plugins that are dependent on RouteMetadata. Fixed issue with routes
+  that depend on GET, PUT, POST, DELETE as the default--wasn't generating metadata
+  correctly for that corner case.
 
 Release 0.9.3 - 14 Jun 2013
 ---------------------------------------------------------------------------------------------------
