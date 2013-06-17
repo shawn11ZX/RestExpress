@@ -287,17 +287,13 @@ public abstract class RouteBuilder
 		metadata.addAllSupportedFormats(supportedFormats);
 		metadata.setBaseUrl(baseUrl);
 		
-		for (HttpMethod method : methods)
-		{
-			metadata.addMethod(method.getName());
-		}
-		
 		UriMetadata uriMeta = new UriMetadata(uri);
 		List<Route> routes = build();
 
 		for (Route route : routes)
 		{
 			uriMeta.addAllParameters(route.getUrlParameters());
+			metadata.addMethod(route.getMethod().getName());
 		}
 
 		metadata.setUri(uriMeta);
