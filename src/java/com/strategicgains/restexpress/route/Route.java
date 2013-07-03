@@ -128,11 +128,21 @@ public abstract class Route
 		return baseUrl;
 	}
 
+	/**
+	 * Returns the base URL + the URL pattern.  Useful in creating links.
+	 * 
+	 * @return a string URL pattern containing the base URL.
+	 */
 	public String getFullPattern()
 	{
 		return getBaseUrl() + getPattern();
 	}
 
+	/**
+	 * Returns the URL pattern without any '.{format}' at the end.  In essence, a 'short' URL pattern.
+	 * 
+	 * @return a URL pattern
+	 */
 	public String getPattern()
 	{
 		return urlMatcher.getPattern();
