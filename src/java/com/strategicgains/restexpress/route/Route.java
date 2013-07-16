@@ -33,6 +33,7 @@ import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.url.UrlMatch;
 import com.strategicgains.restexpress.url.UrlMatcher;
+import com.strategicgains.restexpress.util.StringUtils;
 
 
 /**
@@ -125,7 +126,7 @@ public abstract class Route
 
 	public String getBaseUrl()
 	{
-		return baseUrl;
+		return (baseUrl == null ? StringUtils.EMPTY_STRING : baseUrl);
 	}
 
 	/**
