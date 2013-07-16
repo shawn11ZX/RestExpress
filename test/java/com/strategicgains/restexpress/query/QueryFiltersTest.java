@@ -56,7 +56,7 @@ public class QueryFiltersTest
 	private class FCallback
 	implements FilterCallback
 	{
-		private Map<String, String> filters = new HashMap<String, String>();
+		private Map<String, Object> filters = new HashMap<String, Object>();
 
         @Override
         public void filterOn(FilterComponent c)
@@ -69,7 +69,7 @@ public class QueryFiltersTest
         	return filters.size();
         }
         
-        public String get(String name)
+        public Object get(String name)
         {
         	return filters.get(name);
         }
