@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
@@ -625,9 +626,10 @@ public class RestExpress
     /**
      * Build a default request handler so it may be used injected into any existing pipeline.
      *
-     * @return DefaultRequestHandler
+     * @return ChannelHandler
      */
-    public DefaultRequestHandler buildRequestHandler() {
+	public ChannelHandler buildRequestHandler()
+	{
 		// Set up the event pipeline factory.
 		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
 		    createRouteResolver(), createResponseProcessorResolver());
@@ -642,8 +644,8 @@ public class RestExpress
 		addPostprocessors(requestHandler);
 		addFinallyProcessors(requestHandler);
 
-        return requestHandler;
-    }
+		return requestHandler;
+	}
 
 	/**
 	 * The last call in the building of a RestExpress server, bind() causes
@@ -665,7 +667,7 @@ public class RestExpress
 			bootstrap = Bootstraps.createServerNioBootstrap(getIoThreadCount());
 		}
 
-        DefaultRequestHandler requestHandler = buildRequestHandler();
+        ChannelHandler requestHandler = buildRequestHandler();
 
 		PipelineBuilder pf = new PipelineBuilder()
 		    .addRequestHandler(requestHandler)
