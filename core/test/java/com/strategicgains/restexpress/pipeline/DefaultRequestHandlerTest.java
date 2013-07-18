@@ -43,9 +43,11 @@ import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.exception.BadRequestException;
+import com.strategicgains.restexpress.response.DefaultResponseProcessorFactory;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
@@ -71,10 +73,11 @@ public class DefaultRequestHandlerTest
 	public void initialize()
 	throws Exception
 	{
+		ResponseProcessorFactory rpFactory = new DefaultResponseProcessorFactory();
 		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.put(Format.WRAPPED_JSON, ResponseProcessor.newJsonProcessor(new DefaultResponseWrapper()));
-		resolver.put(Format.JSON, ResponseProcessor.newJsonProcessor(new RawResponseWrapper()));
-		ResponseProcessor xmlProcessor = ResponseProcessor.newXmlProcessor(new DefaultResponseWrapper());
+		resolver.put(Format.WRAPPED_JSON, rpFactory.newJsonProcessor(new DefaultResponseWrapper()));
+		resolver.put(Format.JSON, rpFactory.newJsonProcessor(new RawResponseWrapper()));
+		ResponseProcessor xmlProcessor = rpFactory.newXmlProcessor(new DefaultResponseWrapper());
 		AliasingSerializationProcessor xmlSerializer = (AliasingSerializationProcessor) xmlProcessor.getSerializer();
 		xmlSerializer.alias("dated", Dated.class);
 		resolver.put(Format.XML, xmlProcessor);

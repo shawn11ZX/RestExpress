@@ -34,7 +34,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Format;
+import com.strategicgains.restexpress.response.DefaultResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
@@ -58,9 +60,10 @@ public class RawWrappedResponseTest
 	public void initialize()
 	throws Exception
 	{
+		ResponseProcessorFactory factory = new DefaultResponseProcessorFactory();
 		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.put(Format.JSON, ResponseProcessor.defaultJsonProcessor());
-		resolver.put(Format.XML, ResponseProcessor.defaultXmlProcessor());
+		resolver.put(Format.JSON, factory.defaultJsonProcessor());
+		resolver.put(Format.XML, factory.defaultXmlProcessor());
 		resolver.setDefaultFormat(Format.JSON);
 		
 		DummyRoutes routes = new DummyRoutes();

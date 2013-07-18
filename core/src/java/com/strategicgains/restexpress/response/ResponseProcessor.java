@@ -17,9 +17,6 @@ package com.strategicgains.restexpress.response;
 
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
-import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
-import com.strategicgains.restexpress.serialization.text.DefaultTxtProcessor;
-import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
 
 /**
  * @author toddf
@@ -58,38 +55,5 @@ public class ResponseProcessor
 		}
 		
 		return null;
-	}
-	
-
-	// SECTION: FACTORY
-
-	public static ResponseProcessor defaultJsonProcessor()
-	{
-		return newJsonProcessor(new RawResponseWrapper());
-	}
-
-	public static ResponseProcessor newJsonProcessor(ResponseWrapper wrapper)
-	{
-		return new ResponseProcessor(new DefaultJsonProcessor(), wrapper);
-	}
-
-	public static ResponseProcessor defaultXmlProcessor()
-	{
-		return newXmlProcessor(new RawResponseWrapper());
-	}
-
-	public static ResponseProcessor newXmlProcessor(ResponseWrapper wrapper)
-	{
-		return new ResponseProcessor(new DefaultXmlProcessor(), wrapper);
-	}
-
-	public static ResponseProcessor defaultTxtProcessor()
-	{
-		return newTxtProcessor(new RawResponseWrapper());
-	}
-	
-	public static ResponseProcessor newTxtProcessor(ResponseWrapper wrapper)
-	{
-		return new ResponseProcessor(new DefaultTxtProcessor(), wrapper);		
 	}
 }

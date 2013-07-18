@@ -35,8 +35,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Format;
+import com.strategicgains.restexpress.response.DefaultResponseProcessorFactory;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
-import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
@@ -60,11 +61,12 @@ public class JsendWrappedResponseTest
 	public void initialize()
 	throws Exception
 	{
+		ResponseProcessorFactory factory = new DefaultResponseProcessorFactory();
 		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.put(Format.JSON, ResponseProcessor.newJsonProcessor(new DefaultResponseWrapper()));
-		resolver.put(Format.XML, ResponseProcessor.newXmlProcessor(new DefaultResponseWrapper()));
+		resolver.put(Format.JSON, factory.newJsonProcessor(new DefaultResponseWrapper()));
+		resolver.put(Format.XML, factory.newXmlProcessor(new DefaultResponseWrapper()));
 		resolver.setDefaultFormat(Format.JSON);
-		
+
 		DummyRoutes routes = new DummyRoutes();
 		routes.defineRoutes();
 		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), resolver);

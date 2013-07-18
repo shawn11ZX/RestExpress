@@ -41,7 +41,9 @@ import com.strategicgains.restexpress.pipeline.PipelineBuilder;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
 import com.strategicgains.restexpress.plugin.Plugin;
+import com.strategicgains.restexpress.response.DefaultResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.RouteBuilder;
 import com.strategicgains.restexpress.route.RouteDeclaration;
@@ -71,13 +73,15 @@ public class RestExpress
 	public static final String DEFAULT_NAME = "RestExpress";
 	public static final int DEFAULT_PORT = 8081;
 
+	private static ResponseProcessorFactory RESPONSE_PROCESSOR_FACTORY = null;
+
 	private ServerBootstrap bootstrap;
 	private SocketSettings socketSettings = new SocketSettings();
 	private ServerSettings serverSettings = new ServerSettings();
 	private RouteDefaults routeDefaults = new RouteDefaults();
 	private boolean useSystemOut;
 
-	Map<String, ResponseProcessor> responseProcessors = new HashMap<String, ResponseProcessor>();
+	private Map<String, ResponseProcessor> responseProcessors = new HashMap<String, ResponseProcessor>();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
@@ -86,6 +90,28 @@ public class RestExpress
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<Plugin> plugins = new ArrayList<Plugin>();
 	private RouteDeclaration routeDeclarations = new RouteDeclaration();
+	
+	/**
+	 * Change the default behavior for creating ResponseProcessor instances for
+	 * serialization.  Must be called before new RestExpress() server is created.
+	 * If not, default of DefaultResponseProcessorFactory is used, which uses Jackson.
+	 * 
+	 * @param factory a ResponseProcessorFactory instance.
+	 */
+	public static void setResponseProcessorFactory(ResponseProcessorFactory factory)
+	{
+		RESPONSE_PROCESSOR_FACTORY = factory;
+	}
+	
+	public static ResponseProcessorFactory getResponseProcessorFactory()
+	{
+		if (RESPONSE_PROCESSOR_FACTORY == null)
+		{
+			RESPONSE_PROCESSOR_FACTORY = new DefaultResponseProcessorFactory();
+		}
+
+		return RESPONSE_PROCESSOR_FACTORY;
+	}
 
 	/**
 	 * Create a new RestExpress service. By default, RestExpress uses port 8081.
@@ -214,7 +240,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.JSON))
 		{
-			responseProcessors.put(Format.JSON, ResponseProcessor.defaultJsonProcessor());
+			responseProcessors.put(Format.JSON, getResponseProcessorFactory().defaultJsonProcessor());
 		}
 
 		if (isDefault)
@@ -261,7 +287,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.XML))
 		{
-			getResponseProcessors().put(Format.XML, ResponseProcessor.defaultXmlProcessor());
+			getResponseProcessors().put(Format.XML, getResponseProcessorFactory().defaultXmlProcessor());
 		}
 
 		if (isDefault)
@@ -307,7 +333,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.TXT))
 		{
-			getResponseProcessors().put(Format.TXT, ResponseProcessor.defaultTxtProcessor());
+			getResponseProcessors().put(Format.TXT, getResponseProcessorFactory().defaultTxtProcessor());
 		}
 
 		if (isDefault)
