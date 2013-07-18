@@ -1,13 +1,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<name>RestExpress</name>
-	<description>Internet Scale and Performance RESTful Services in Java</description>
+	<name>RestExpress-Parent</name>
+	<description>Master, Parent pom for RestExpress (core) and RestExpress-Common</description>
 	<url>https://github.com/RestExpress/RestExpress</url>
 	<groupId>com.strategicgains</groupId>
-	<artifactId>RestExpress</artifactId>
-	<version>0.9.3-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<artifactId>restexpress-parent</artifactId>
+	<version>0.9.5-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>common</module>
+		<module>core</module>
+	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<type>jar</type>
+			<scope>test</scope>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -23,59 +39,7 @@
 		</license>
 	</licenses>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.strategicgains</groupId>
-			<artifactId>RestExpress-Common</artifactId>
-			<version>1.0.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.strategicgains</groupId>
-			<artifactId>DateAdapterJ</artifactId>
-			<version>1.1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.1.4</version>
-		</dependency>
-		<dependency>
-			<groupId>com.thoughtworks.xstream</groupId>
-			<artifactId>xstream</artifactId>
-			<version>1.4.4</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty</artifactId>
-			<version>3.6.5.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.11</version>
-			<type>jar</type>
-			<scope>test</scope>
-			<optional>true</optional>
-		</dependency>
-	</dependencies>
-
-	<issueManagement>
-		<system>GitHub.com</system>
-		<url>https://github.com/RestExpress/RestExpress/issues</url>
-	</issueManagement>
-
-	<scm>
-		<url>git@github.com:RestExpress/RestExpress.git</url>
-		<connection>scm:git:git@github.com:RestExpress/RestExpress.git</connection>
-		<developerConnection>scm:git:git@github.com:RestExpress/RestExpress.git</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
-
 	<build>
-		<defaultGoal>compile</defaultGoal>
-		<sourceDirectory>src/java</sourceDirectory>
-		<testSourceDirectory>test/java</testSourceDirectory>
-
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -131,26 +95,20 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<downloadJavadocs>true</downloadJavadocs>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.0</version>
-			</plugin>
-		</plugins>
-	</reporting>
+	<issueManagement>
+		<system>GitHub.com</system>
+		<url>https://github.com/RestExpress/RestExpress/issues</url>
+	</issueManagement>
+
+	<scm>
+		<url>git@github.com:RestExpress/RestExpress.git</url>
+		<connection>scm:git:git@github.com:RestExpress/RestExpress.git</connection>
+		<developerConnection>scm:git:git@github.com:RestExpress/RestExpress.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
 
 	<developers>
 		<developer>
@@ -159,4 +117,21 @@
 			<email>tfredrich@gmail.com</email>
 		</developer>
 	</developers>
+
+	<reporting>
+	  <plugins>
+		<plugin>
+		  <groupId>org.codehaus.mojo</groupId>
+		  <artifactId>versions-maven-plugin</artifactId>
+		  <version>2.0</version>
+		  <reportSets>
+			<reportSet>
+			  <reports>
+				<report>dependency-updates-report</report>
+			  </reports>
+			</reportSet>
+		  </reportSets>
+		</plugin>
+	  </plugins>
+	</reporting>
 </project>
