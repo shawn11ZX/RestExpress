@@ -46,13 +46,13 @@ import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.response.DefaultResponseWrapper;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
-import com.strategicgains.restexpress.serialization.DefaultResponseProcessorFactory;
+import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
+import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.settings.RouteDefaults;
 
 
@@ -73,7 +73,7 @@ public class DefaultRequestHandlerTest
 	public void initialize()
 	throws Exception
 	{
-		ResponseProcessorFactory rpFactory = new DefaultResponseProcessorFactory();
+		SerializationProvider rpFactory = new DefaultSerializationProvider();
 		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
 		resolver.put(Format.WRAPPED_JSON, rpFactory.newJsonProcessor(new DefaultResponseWrapper()));
 		resolver.put(Format.JSON, rpFactory.newJsonProcessor(new RawResponseWrapper()));

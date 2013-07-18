@@ -13,14 +13,17 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package com.strategicgains.restexpress.response;
+package com.strategicgains.restexpress.serialization;
+
+import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseWrapper;
 
 
 /**
  * @author toddf
  * @since Jul 17, 2013
  */
-public interface ResponseProcessorFactory
+public interface SerializationProvider
 {
 	public ResponseProcessor newJsonProcessor();
 	public ResponseProcessor newJsonProcessor(ResponseWrapper wrapper);

@@ -42,7 +42,6 @@ import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
 import com.strategicgains.restexpress.plugin.Plugin;
 import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.RouteBuilder;
 import com.strategicgains.restexpress.route.RouteDeclaration;
@@ -50,7 +49,8 @@ import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.route.parameterized.ParameterizedRouteBuilder;
 import com.strategicgains.restexpress.route.regex.RegexRouteBuilder;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
-import com.strategicgains.restexpress.serialization.DefaultResponseProcessorFactory;
+import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
+import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.settings.RouteDefaults;
 import com.strategicgains.restexpress.settings.ServerSettings;
 import com.strategicgains.restexpress.settings.SocketSettings;
@@ -73,7 +73,7 @@ public class RestExpress
 	public static final String DEFAULT_NAME = "RestExpress";
 	public static final int DEFAULT_PORT = 8081;
 
-	private static ResponseProcessorFactory RESPONSE_PROCESSOR_FACTORY = null;
+	private static SerializationProvider SERIALIZATION_PROVIDER = null;
 
 	private ServerBootstrap bootstrap;
 	private SocketSettings socketSettings = new SocketSettings();
@@ -98,19 +98,19 @@ public class RestExpress
 	 * 
 	 * @param factory a ResponseProcessorFactory instance.
 	 */
-	public static void setResponseProcessorFactory(ResponseProcessorFactory factory)
+	public static void setSerializationProvider(SerializationProvider factory)
 	{
-		RESPONSE_PROCESSOR_FACTORY = factory;
+		SERIALIZATION_PROVIDER = factory;
 	}
 	
-	public static ResponseProcessorFactory getResponseProcessorFactory()
+	public static SerializationProvider getSerializationProvider()
 	{
-		if (RESPONSE_PROCESSOR_FACTORY == null)
+		if (SERIALIZATION_PROVIDER == null)
 		{
-			RESPONSE_PROCESSOR_FACTORY = new DefaultResponseProcessorFactory();
+			SERIALIZATION_PROVIDER = new DefaultSerializationProvider();
 		}
 
-		return RESPONSE_PROCESSOR_FACTORY;
+		return SERIALIZATION_PROVIDER;
 	}
 
 	/**
@@ -240,7 +240,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.JSON))
 		{
-			responseProcessors.put(Format.JSON, getResponseProcessorFactory().newJsonProcessor());
+			responseProcessors.put(Format.JSON, getSerializationProvider().newJsonProcessor());
 		}
 
 		if (isDefault)
@@ -287,7 +287,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.XML))
 		{
-			getResponseProcessors().put(Format.XML, getResponseProcessorFactory().newXmlProcessor());
+			getResponseProcessors().put(Format.XML, getSerializationProvider().newXmlProcessor());
 		}
 
 		if (isDefault)
@@ -333,7 +333,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.TXT))
 		{
-			getResponseProcessors().put(Format.TXT, getResponseProcessorFactory().newTxtProcessor());
+			getResponseProcessors().put(Format.TXT, getSerializationProvider().newTxtProcessor());
 		}
 
 		if (isDefault)

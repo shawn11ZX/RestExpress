@@ -79,9 +79,10 @@ Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.10.0 - SNAPSHOT (in branch 'master')
 * **Breaking Change** Re-added GSON capability from version 0.8.2, making things a little
-  more pluggable with RestExpress.setResponseProcessorFactory(ResponseProcessorFactory).
+  more pluggable with RestExpress.setSerializationProvider(SerializationProvider).
   If you're using your own ResponseProcessor class, need to move the factory portion to
-  a ResponseProcessorFactory implementor.
+  a SerializationProvider implementor.  DefaultSerializationProvider is the default.
+  GsonSerializationProvider is also available, but requires adding GSON to your pom file.
 
 Release 0.9.4 - 17 Jul 2013
 ---------------------------------------------------------------------------------------------------

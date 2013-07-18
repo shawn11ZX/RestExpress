@@ -17,18 +17,17 @@ package com.strategicgains.restexpress.serialization;
 
 import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseWrapper;
-import com.strategicgains.restexpress.serialization.json.GsonJsonProcessor;
+import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
 import com.strategicgains.restexpress.serialization.text.DefaultTxtProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 
 /**
  * @author toddf
- * @since Jul 18, 2013
+ * @since Jul 17, 2013
  */
-public class GsonResponseProcessorFactory
-implements ResponseProcessorFactory
+public class DefaultSerializationProvider
+implements SerializationProvider
 {
 	@Override
 	public ResponseProcessor newJsonProcessor()
@@ -39,7 +38,7 @@ implements ResponseProcessorFactory
 	@Override
 	public ResponseProcessor newJsonProcessor(ResponseWrapper wrapper)
 	{
-		return new ResponseProcessor(new GsonJsonProcessor(), wrapper);
+		return new ResponseProcessor(new JacksonJsonProcessor(), wrapper);
 	}
 
 	@Override

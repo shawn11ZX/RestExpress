@@ -32,8 +32,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseProcessorFactory;
-import com.strategicgains.restexpress.serialization.DefaultResponseProcessorFactory;
+import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
+import com.strategicgains.restexpress.serialization.SerializationProvider;
 
 
 /**
@@ -47,7 +47,7 @@ public class RestExpressTest
 	private static final String TEST_URL = "http://localhost:" + TEST_PORT + TEST_PATH;
 
 	private RestExpress server = new RestExpress();
-	private ResponseProcessorFactory rpFactory = new DefaultResponseProcessorFactory();
+	private SerializationProvider rpFactory = new DefaultSerializationProvider();
 
 	@Test
 	public void shouldUseDefaults()
