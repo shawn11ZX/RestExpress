@@ -35,12 +35,12 @@ import com.strategicgains.restexpress.serialization.SerializationProcessor;
  * @author toddf
  * @since Aug 4, 2011
  */
-public class JacksonJsonProcessorTest
+public class GsonJsonProcessorTest
 {
 	private static final String JSON = "{\"integer\":2,\"string\":\"another string value\",\"date\":\"1963-12-06T12:30:00.000Z\",\"p\":\"good stuff\"}";
 	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"我能吞下\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
 
-	private SerializationProcessor processor = new JacksonJsonProcessor();
+	private SerializationProcessor processor = new GsonJsonProcessor();
 
 	@Test
 	public void shouldSerializeObject()
