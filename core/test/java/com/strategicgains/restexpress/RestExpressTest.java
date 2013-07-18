@@ -47,7 +47,7 @@ public class RestExpressTest
 	private static final String TEST_URL = "http://localhost:" + TEST_PORT + TEST_PATH;
 
 	private RestExpress server = new RestExpress();
-	private SerializationProvider rpFactory = new DefaultSerializationProvider();
+	private SerializationProvider provider = new DefaultSerializationProvider();
 
 	@Test
 	public void shouldUseDefaults()
@@ -121,7 +121,7 @@ public class RestExpressTest
 	@Test
 	public void shouldCustomizeJsonSerializer()
 	{
-		server.putResponseProcessor(Format.JSON, rpFactory.newJsonProcessor());
+		server.putResponseProcessor(Format.JSON, provider.newProcessor(Format.JSON));
 		assertEquals(Format.JSON, server.getDefaultFormat());
 		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
 		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
@@ -131,7 +131,7 @@ public class RestExpressTest
 	@Test
 	public void shouldCustomizeXmlSerializer()
 	{
-		server.putResponseProcessor(Format.XML, rpFactory.newXmlProcessor());
+		server.putResponseProcessor(Format.XML, provider.newProcessor(Format.XML));
 		assertEquals(Format.JSON, server.getDefaultFormat());
 		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
 		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
@@ -141,7 +141,7 @@ public class RestExpressTest
 	@Test
 	public void shouldNotUpdateJsonSerializer()
 	{
-		ResponseProcessor rp = rpFactory.newJsonProcessor();
+		ResponseProcessor rp = provider.newProcessor(Format.JSON);
 		server.putResponseProcessor(Format.JSON, rp);
 		server.supportJson(true);
 		assertEquals(Format.JSON, server.getDefaultFormat());
@@ -155,7 +155,7 @@ public class RestExpressTest
 	@Test
 	public void shouldNotUpdateXmlSerializer()
 	{
-		ResponseProcessor rp = rpFactory.newXmlProcessor();
+		ResponseProcessor rp = provider.newProcessor(Format.XML);
 		server.putResponseProcessor(Format.XML, rp);
 		server.supportXml(true);
 		assertEquals(Format.XML, server.getDefaultFormat());
@@ -169,7 +169,7 @@ public class RestExpressTest
 	@Test
 	public void shouldNotUpdateTxtSerializer()
 	{
-		ResponseProcessor rp = rpFactory.newTxtProcessor();
+		ResponseProcessor rp = provider.newProcessor(Format.TXT);
 		server.putResponseProcessor(Format.TXT, rp);
 		server.supportTxt(true);
 		assertEquals(Format.TXT, server.getDefaultFormat());

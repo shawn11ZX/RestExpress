@@ -1,5 +1,5 @@
 /*
-    Copyright 2011, Strategic Gains, Inc.
+    Copyright 2013, Strategic Gains, Inc.
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -15,31 +15,19 @@
 */
 package com.strategicgains.restexpress.serialization;
 
-import java.util.Date;
+import com.strategicgains.restexpress.response.RawResponseWrapper;
+import com.strategicgains.restexpress.response.ResponseProcessor;
 
 /**
  * @author toddf
- * @since Aug 4, 2011
+ * @since Jul 18, 2013
  */
-public class KnownObject
+public abstract class AbstractSerializationProvider
+implements SerializationProvider
 {
-	public static final String CONSTANT = "i hope you don't see this";
-	@SuppressWarnings("unused")
-    private static final String INTERNAL = "or this";
-
-	public int integer = 1;
-	public String string = "string value";
-	@SuppressWarnings("deprecation")
-    public Date date = new Date(64, 11, 17, 16, 30);
-	private String p = "something private";
-	
-	public String getP()
-	{
-		return p;
-	}
-	
-	public String getQ()
-	{
-		return "Q(" + p + ")";
-	}
+	@Override
+    public ResponseProcessor newProcessor(String format)
+    {
+		return newProcessor(format, new RawResponseWrapper());
+    }
 }

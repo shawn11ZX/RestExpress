@@ -25,10 +25,6 @@ import com.strategicgains.restexpress.response.ResponseWrapper;
  */
 public interface SerializationProvider
 {
-	public ResponseProcessor newJsonProcessor();
-	public ResponseProcessor newJsonProcessor(ResponseWrapper wrapper);
-	public ResponseProcessor newXmlProcessor();
-	public ResponseProcessor newXmlProcessor(ResponseWrapper wrapper);
-	public ResponseProcessor newTxtProcessor();
-	public ResponseProcessor newTxtProcessor(ResponseWrapper wrapper);
+	public ResponseProcessor newProcessor(String format);
+	public ResponseProcessor newProcessor(String format, ResponseWrapper wrapper);
 }

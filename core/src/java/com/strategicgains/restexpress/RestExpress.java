@@ -240,7 +240,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.JSON))
 		{
-			responseProcessors.put(Format.JSON, getSerializationProvider().newJsonProcessor());
+			responseProcessors.put(Format.JSON, getSerializationProvider().newProcessor(Format.JSON));
 		}
 
 		if (isDefault)
@@ -287,7 +287,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.XML))
 		{
-			getResponseProcessors().put(Format.XML, getSerializationProvider().newXmlProcessor());
+			getResponseProcessors().put(Format.XML, getSerializationProvider().newProcessor(Format.XML));
 		}
 
 		if (isDefault)
@@ -333,7 +333,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.TXT))
 		{
-			getResponseProcessors().put(Format.TXT, getSerializationProvider().newTxtProcessor());
+			getResponseProcessors().put(Format.TXT, getSerializationProvider().newProcessor(Format.TXT));
 		}
 
 		if (isDefault)

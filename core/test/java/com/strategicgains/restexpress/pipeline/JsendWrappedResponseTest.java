@@ -63,8 +63,8 @@ public class JsendWrappedResponseTest
 	{
 		SerializationProvider factory = new DefaultSerializationProvider();
 		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.put(Format.JSON, factory.newJsonProcessor(new DefaultResponseWrapper()));
-		resolver.put(Format.XML, factory.newXmlProcessor(new DefaultResponseWrapper()));
+		resolver.put(Format.JSON, factory.newProcessor(Format.JSON, new DefaultResponseWrapper()));
+		resolver.put(Format.XML, factory.newProcessor(Format.XML, new DefaultResponseWrapper()));
 		resolver.setDefaultFormat(Format.JSON);
 
 		DummyRoutes routes = new DummyRoutes();

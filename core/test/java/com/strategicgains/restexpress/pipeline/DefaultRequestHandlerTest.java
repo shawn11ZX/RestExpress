@@ -73,11 +73,11 @@ public class DefaultRequestHandlerTest
 	public void initialize()
 	throws Exception
 	{
-		SerializationProvider rpFactory = new DefaultSerializationProvider();
+		SerializationProvider provider = new DefaultSerializationProvider();
 		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.put(Format.WRAPPED_JSON, rpFactory.newJsonProcessor(new DefaultResponseWrapper()));
-		resolver.put(Format.JSON, rpFactory.newJsonProcessor(new RawResponseWrapper()));
-		ResponseProcessor xmlProcessor = rpFactory.newXmlProcessor(new DefaultResponseWrapper());
+		resolver.put(Format.WRAPPED_JSON, provider.newProcessor(Format.JSON, new DefaultResponseWrapper()));
+		resolver.put(Format.JSON, provider.newProcessor(Format.JSON, new RawResponseWrapper()));
+		ResponseProcessor xmlProcessor = provider.newProcessor(Format.XML, new DefaultResponseWrapper());
 		AliasingSerializationProcessor xmlSerializer = (AliasingSerializationProcessor) xmlProcessor.getSerializer();
 		xmlSerializer.alias("dated", Dated.class);
 		resolver.put(Format.XML, xmlProcessor);

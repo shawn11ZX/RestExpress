@@ -15,7 +15,8 @@
 */
 package com.strategicgains.restexpress.serialization;
 
-import com.strategicgains.restexpress.response.RawResponseWrapper;
+import com.strategicgains.restexpress.Format;
+import com.strategicgains.restexpress.exception.NotAcceptableException;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseWrapper;
 import com.strategicgains.restexpress.serialization.json.GsonJsonProcessor;
@@ -27,41 +28,26 @@ import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
  * @since Jul 18, 2013
  */
 public class GsonSerializationProvider
-implements SerializationProvider
+extends AbstractSerializationProvider
 {
 	@Override
-	public ResponseProcessor newJsonProcessor()
-	{
-		return newJsonProcessor(new RawResponseWrapper());
-	}
-
-	@Override
-	public ResponseProcessor newJsonProcessor(ResponseWrapper wrapper)
-	{
-		return new ResponseProcessor(new GsonJsonProcessor(), wrapper);
-	}
-
-	@Override
-	public ResponseProcessor newXmlProcessor()
-	{
-		return newXmlProcessor(new RawResponseWrapper());
-	}
-
-	@Override
-	public ResponseProcessor newXmlProcessor(ResponseWrapper wrapper)
-	{
-		return new ResponseProcessor(new XstreamXmlProcessor(), wrapper);
-	}
-
-	@Override
-    public ResponseProcessor newTxtProcessor()
+    public ResponseProcessor newProcessor(String format, ResponseWrapper wrapper)
     {
-		return newTxtProcessor(new RawResponseWrapper());
-    }
-
-	@Override
-    public ResponseProcessor newTxtProcessor(ResponseWrapper wrapper)
-    {
-		return new ResponseProcessor(new DefaultTxtProcessor(), wrapper);
+		if (Format.JSON.equalsIgnoreCase(format))
+		{
+			return new ResponseProcessor(new GsonJsonProcessor(), wrapper);
+		}
+		
+		if (Format.XML.equalsIgnoreCase(format))
+		{
+			return new ResponseProcessor(new XstreamXmlProcessor(), wrapper);
+		}
+		
+		if (Format.TXT.equalsIgnoreCase(format))
+		{
+			return new ResponseProcessor(new DefaultTxtProcessor(), wrapper);
+		}
+		
+		throw new NotAcceptableException(format);
     }
 }
