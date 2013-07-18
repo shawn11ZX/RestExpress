@@ -31,7 +31,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.Test;
 
-import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
 import com.strategicgains.restexpress.serialization.SerializationProvider;
 
@@ -57,92 +56,90 @@ public class RestExpressTest
 		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
 		assertEquals(2, server.getResponseProcessors().size());
 
-//		assertEquals(8081, server.getPort());
 		assertEquals(0, server.getPort());
 		assertTrue(server.getMessageObservers().isEmpty());
 		assertTrue(server.getPostprocessors().isEmpty());
 		assertTrue(server.getPreprocessors().isEmpty());
 		assertTrue(server.shouldUseSystemOut());
-//		assertNotNull(server.getRouteDeclarations());
 	}
+
+//	@Test
+//	public void shouldDisableJson()
+//	{
+//		server.noJson();
+//		assertEquals(Format.JSON, server.getDefaultFormat());
+//		assertFalse(server.getResponseProcessors().containsKey(Format.JSON));
+//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+//		assertEquals(1, server.getResponseProcessors().size());
+//	}
 	
-	@Test
-	public void shouldDisableJson()
-	{
-		server.noJson();
-		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertFalse(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertEquals(1, server.getResponseProcessors().size());
-	}
+//	@Test
+//	public void shouldDisableXml()
+//	{
+//		server.noXml();
+//		assertEquals(Format.JSON, server.getDefaultFormat());
+//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+//		assertFalse(server.getResponseProcessors().containsKey(Format.XML));
+//		assertEquals(1, server.getResponseProcessors().size());
+//	}
 	
-	@Test
-	public void shouldDisableXml()
-	{
-		server.noXml();
-		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertFalse(server.getResponseProcessors().containsKey(Format.XML));
-		assertEquals(1, server.getResponseProcessors().size());
-	}
-	
-	@Test
-	public void shouldMakeXmlDefault()
-	{
-		server.supportXml(true);
-		assertEquals(Format.XML, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getResponseProcessors().size());
-	}
+//	@Test
+//	public void shouldMakeXmlDefault()
+//	{
+//		server.supportXml(true);
+//		assertEquals(Format.XML, server.getDefaultFormat());
+//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+//		assertEquals(2, server.getResponseProcessors().size());
+//	}
 
-	@Test
-	public void shouldCustomizeJsonSerializer()
-	{
-		server.putResponseProcessor(Format.JSON, provider.newProcessor(Format.JSON));
-		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getResponseProcessors().size());
-	}
+//	@Test
+//	public void shouldCustomizeJsonSerializer()
+//	{
+//		server.putResponseProcessor(Format.JSON, provider.newProcessor(Format.JSON));
+//		assertEquals(Format.JSON, server.getDefaultFormat());
+//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+//		assertEquals(2, server.getResponseProcessors().size());
+//	}
 
-	@Test
-	public void shouldCustomizeXmlSerializer()
-	{
-		server.putResponseProcessor(Format.XML, provider.newProcessor(Format.XML));
-		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getResponseProcessors().size());
-	}
+//	@Test
+//	public void shouldCustomizeXmlSerializer()
+//	{
+//		server.putResponseProcessor(Format.XML, provider.newProcessor(Format.XML));
+//		assertEquals(Format.JSON, server.getDefaultFormat());
+//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+//		assertEquals(2, server.getResponseProcessors().size());
+//	}
 
-	@Test
-	public void shouldNotUpdateJsonSerializer()
-	{
-		ResponseProcessor rp = provider.newProcessor(Format.JSON);
-		server.putResponseProcessor(Format.JSON, rp);
-		server.supportJson(true);
-		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getResponseProcessors().size());
-		
-		assertTrue(rp == server.getResponseProcessors().get(Format.JSON));
-	}
+//	@Test
+//	public void shouldNotUpdateJsonSerializer()
+//	{
+//		ResponseProcessor rp = provider.newProcessor(Format.JSON);
+//		server.putResponseProcessor(Format.JSON, rp);
+//		server.supportJson(true);
+//		assertEquals(Format.JSON, server.getDefaultFormat());
+//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+//		assertEquals(2, server.getResponseProcessors().size());
+//		
+//		assertTrue(rp == server.getResponseProcessors().get(Format.JSON));
+//	}
 
-	@Test
-	public void shouldNotUpdateXmlSerializer()
-	{
-		ResponseProcessor rp = provider.newProcessor(Format.XML);
-		server.putResponseProcessor(Format.XML, rp);
-		server.supportXml(true);
-		assertEquals(Format.XML, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getResponseProcessors().size());
-		
-		assertTrue(rp == server.getResponseProcessors().get(Format.XML));
-	}
+//	@Test
+//	public void shouldNotUpdateXmlSerializer()
+//	{
+//		ResponseProcessor rp = provider.newProcessor(Format.XML);
+//		server.putResponseProcessor(Format.XML, rp);
+//		server.supportXml(true);
+//		assertEquals(Format.XML, server.getDefaultFormat());
+//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+//		assertEquals(2, server.getResponseProcessors().size());
+//		
+//		assertTrue(rp == server.getResponseProcessors().get(Format.XML));
+//	}
 	
 	@Test
 	public void shouldNotUseSystemOut()

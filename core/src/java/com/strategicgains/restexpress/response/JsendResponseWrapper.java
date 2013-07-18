@@ -1,5 +1,5 @@
 /*
-    Copyright 2013, Strategic Gains, Inc.
+    Copyright 2011, Strategic Gains, Inc.
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -12,22 +12,30 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-*/
-package com.strategicgains.restexpress.serialization;
+ */
+package com.strategicgains.restexpress.response;
 
-import com.strategicgains.restexpress.response.RawResponseWrapper;
-import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.domain.JsendResultWrapper;
 
 /**
+ * Wraps the out bound Response body in a JSEND-style object.
+ * 
  * @author toddf
- * @since Jul 18, 2013
+ * @since Feb 10, 2011
  */
-public abstract class AbstractSerializationProvider
-implements SerializationProvider
+public class JsendResponseWrapper
+implements ResponseWrapper
 {
 	@Override
-    public ResponseProcessor newProcessor(String format)
-    {
-		return newProcessor(format, new RawResponseWrapper());
-    }
+	public Object wrap(Response response)
+	{
+		return JsendResultWrapper.fromResponse(response);
+	}
+
+	@Override
+	public boolean addsBodyContent()
+	{
+		return true;
+	}
 }

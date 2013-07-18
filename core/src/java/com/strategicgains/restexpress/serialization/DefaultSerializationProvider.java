@@ -15,33 +15,11 @@
 */
 package com.strategicgains.restexpress.serialization;
 
-import com.strategicgains.restexpress.Format;
-import com.strategicgains.restexpress.exception.NotAcceptableException;
-import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseWrapper;
-import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
-import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
-
 /**
  * @author toddf
- * @since Jul 17, 2013
+ * @since Jul 18, 2013
  */
 public class DefaultSerializationProvider
-extends AbstractSerializationProvider
+implements SerializationProvider
 {
-	@Override
-    public ResponseProcessor newProcessor(String format, ResponseWrapper wrapper)
-    {
-		if (Format.JSON.equalsIgnoreCase(format))
-		{
-			return new ResponseProcessor(new JacksonJsonProcessor(), wrapper);
-		}
-		
-		if (Format.XML.equalsIgnoreCase(format))
-		{
-			return new ResponseProcessor(new XstreamXmlProcessor(), wrapper);
-		}
-		
-		throw new NotAcceptableException(format);
-    }
 }

@@ -25,10 +25,10 @@ public abstract class Format
 {
 	// PRIMARY FORMATS
 
+	public static final String CSS = "css";
 	public static final String HTML = "html";
 	public static final String JAVASCRIPT = "js";
 	public static final String JSON = "json";
-	public static final String TXT = "txt";
 	public static final String XML = "xml";
 
 

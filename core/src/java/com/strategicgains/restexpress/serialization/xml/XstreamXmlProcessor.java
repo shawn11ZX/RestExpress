@@ -19,18 +19,12 @@ package com.strategicgains.restexpress.serialization.xml;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 
-import com.strategicgains.restexpress.ContentType;
-import com.strategicgains.restexpress.common.util.StringUtils;
-import com.strategicgains.restexpress.contenttype.MediaRange;
-import com.strategicgains.restexpress.contenttype.MediaTypeParser;
-import com.strategicgains.restexpress.domain.ResultWrapper;
-import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
+import com.strategicgains.restexpress.domain.JsendResultWrapper;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.SingleValueConverter;
 
@@ -42,13 +36,8 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
  * @since Mar 16, 2010
  */
 public class XstreamXmlProcessor
-implements AliasingSerializationProcessor
+extends XmlSerializationProcessor
 {
-	private static final String SUPPORTED_MEDIA_TYPES = StringUtils.join(",",
-		ContentType.XML,
-		"text/xml; charset=" + ContentType.ENCODING);
-	private static List<MediaRange> SUPPORTED_MEDIA_RANGES = MediaTypeParser.parse(SUPPORTED_MEDIA_TYPES);
-
 	private XStream xstream;
 	private Map<Class<?>, String> aliases = new HashMap<Class<?>, String>();
 	private boolean shouldAutoAlias = true;
@@ -58,7 +47,7 @@ implements AliasingSerializationProcessor
 		this(new XStream());
 		xstream.registerConverter(new XstreamTimestampConverter());
 		xstream.alias("list", Collections.EMPTY_LIST.getClass());
-		xstream.alias("response", ResultWrapper.class);
+		xstream.alias("response", JsendResultWrapper.class);
 	}
 	
 	public XstreamXmlProcessor(XStream xstream)
@@ -135,10 +124,4 @@ implements AliasingSerializationProcessor
 			xstream.alias(name, type);
 		}
 	}
-
-	@Override
-    public List<MediaRange> getSupportedMediaRanges()
-    {
-		return SUPPORTED_MEDIA_RANGES;
-    }
 }

@@ -29,7 +29,7 @@ import com.strategicgains.restexpress.exception.ServiceException;
  * @author toddf
  * @since Jan 11, 2011
  */
-public class ResultWrapper
+public class JsendResultWrapper
 {
 	private static final String STATUS_SUCCESS = "success";
 	private static final String STATUS_ERROR = "error";
@@ -40,7 +40,7 @@ public class ResultWrapper
 	private String message;
 	private Object data;
 
-	public ResultWrapper(int httpResponseCode, String status, String errorMessage, Object data)
+	public JsendResultWrapper(int httpResponseCode, String status, String errorMessage, Object data)
 	{
 		super();
 		this.code = httpResponseCode;
@@ -72,7 +72,7 @@ public class ResultWrapper
 	
 	// SECTION: FACTORY
 	
-	public static ResultWrapper fromResponse(Response response)
+	public static JsendResultWrapper fromResponse(Response response)
 	{
 		if (response.hasException())
 		{
@@ -83,10 +83,10 @@ public class ResultWrapper
 
 			if (ServiceException.isAssignableFrom(exception))
 			{
-				return new ResultWrapper(response.getResponseStatus().getCode(), STATUS_ERROR, message, causeName);
+				return new JsendResultWrapper(response.getResponseStatus().getCode(), STATUS_ERROR, message, causeName);
 			}
 
-			return new ResultWrapper(response.getResponseStatus().getCode(), STATUS_FAIL, message, causeName);
+			return new JsendResultWrapper(response.getResponseStatus().getCode(), STATUS_FAIL, message, causeName);
 		}
 		else
 		{
@@ -94,15 +94,15 @@ public class ResultWrapper
 
 			if (code >= 400 && code < 500)
 			{
-				return new ResultWrapper(response.getResponseStatus().getCode(), STATUS_ERROR, null, response.getBody());
+				return new JsendResultWrapper(response.getResponseStatus().getCode(), STATUS_ERROR, null, response.getBody());
 			}
 
 			if (code >= 500 && code < 600)
 			{
-				return new ResultWrapper(response.getResponseStatus().getCode(), STATUS_FAIL, null, response.getBody());
+				return new JsendResultWrapper(response.getResponseStatus().getCode(), STATUS_FAIL, null, response.getBody());
 			}
 		}
 
-		return new ResultWrapper(response.getResponseStatus().getCode(), STATUS_SUCCESS, null, response.getBody());
+		return new JsendResultWrapper(response.getResponseStatus().getCode(), STATUS_SUCCESS, null, response.getBody());
 	}
 }

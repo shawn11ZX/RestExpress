@@ -102,7 +102,7 @@ public class RestExpress
 	{
 		SERIALIZATION_PROVIDER = factory;
 	}
-	
+
 	public static SerializationProvider getSerializationProvider()
 	{
 		if (SERIALIZATION_PROVIDER == null)
@@ -143,9 +143,6 @@ public class RestExpress
 	{
 		super();
 		setName(DEFAULT_NAME);
-		supportJson(true);
-		supportXml();
-		useSystemOut();
 	}
 
 	public String getBaseUrl()
@@ -225,100 +222,6 @@ public class RestExpress
 		if (format == null || format.trim().isEmpty()) return this;
 
 		routeDefaults.setDefaultFormat(format.trim().toLowerCase());
-		return this;
-	}
-
-	/**
-	 * Tell RestExpress to support JSON in routes, incoming and outgoing. By
-	 * default RestExpress supports JSON and is the default.
-	 * 
-	 * @param isDefault
-	 *            true to make JSON the default format.
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress supportJson(boolean isDefault)
-	{
-		if (!getResponseProcessors().containsKey(Format.JSON))
-		{
-			responseProcessors.put(Format.JSON, getSerializationProvider().newProcessor(Format.JSON));
-		}
-
-		if (isDefault)
-		{
-			setDefaultFormat(Format.JSON);
-		}
-
-		return this;
-	}
-
-	/**
-	 * Tell RestExpress to support JSON in routes, incoming and outgoing. By
-	 * default RestExpress supports JSON and is the default.
-	 * 
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress supportJson()
-	{
-		return supportJson(false);
-	}
-
-	/**
-	 * Tell RestExpress to not support JSON in routes, incoming or outgoing.
-	 * Client must call setDefaultFormat(String) to set the default format to
-	 * something else.
-	 * 
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress noJson()
-	{
-		responseProcessors.remove(Format.JSON);
-		return this;
-	}
-
-	/**
-	 * Tell RestExpress to support XML in routes, incoming and outgoing. By
-	 * default RestExpress supports XML.
-	 * 
-	 * @param isDefault
-	 *            true to make XML the default format.
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress supportXml(boolean isDefault)
-	{
-		if (!getResponseProcessors().containsKey(Format.XML))
-		{
-			getResponseProcessors().put(Format.XML, getSerializationProvider().newProcessor(Format.XML));
-		}
-
-		if (isDefault)
-		{
-			setDefaultFormat(Format.XML);
-		}
-
-		return this;
-	}
-
-	/**
-	 * Tell RestExpress to support XML in routes, incoming and outgoing. By
-	 * default RestExpress supports XML.
-	 * 
-	 * @param isDefault
-	 *            true to make XML the default format.
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress supportXml()
-	{
-		return supportXml(false);
-	}
-
-	/**
-	 * Tell RestExpress to not support XML in routes, incoming or outgoing.
-	 * 
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress noXml()
-	{
-		responseProcessors.remove(Format.XML);
 		return this;
 	}
 

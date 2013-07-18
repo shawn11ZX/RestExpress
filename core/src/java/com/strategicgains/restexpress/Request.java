@@ -59,6 +59,8 @@ public class Request
 	private HttpRequest httpRequest;
 	private HttpVersion httpVersion;
 	private InetSocketAddress remoteAddress;
+	
+	//TODO: need to set this lazily, only if the controller calls getBodyAs()
 	private SerializationProcessor serializationProcessor;
 	private RouteResolver urlRouter;
 	private HttpMethod effectiveHttpMethod;
@@ -199,15 +201,15 @@ public class Request
 		return qsd.getParameters();
 	}
 
-	public SerializationProcessor getSerializationProcessor()
-    {
-    	return serializationProcessor;
-    }
-
-	public void setSerializationProcessor(SerializationProcessor serializationProcessor)
-    {
-    	this.serializationProcessor = serializationProcessor;
-    }
+//	public SerializationProcessor getSerializationProcessor()
+//    {
+//    	return serializationProcessor;
+//    }
+//
+//	public void setSerializationProcessor(SerializationProcessor serializationProcessor)
+//    {
+//    	this.serializationProcessor = serializationProcessor;
+//    }
 
 	public void setBody(ChannelBuffer body)
     {

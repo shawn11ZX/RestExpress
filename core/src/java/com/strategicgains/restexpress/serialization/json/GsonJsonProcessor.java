@@ -19,7 +19,6 @@ package com.strategicgains.restexpress.serialization.json;
 
 import java.io.InputStreamReader;
 import java.util.Date;
-import java.util.List;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
@@ -28,9 +27,6 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.strategicgains.restexpress.ContentType;
-import com.strategicgains.restexpress.contenttype.MediaRange;
-import com.strategicgains.restexpress.contenttype.MediaTypeParser;
-import com.strategicgains.restexpress.serialization.SerializationProcessor;
 import com.strategicgains.restexpress.util.StringUtils;
 import com.strategicgains.util.date.DateAdapterConstants;
 
@@ -43,14 +39,8 @@ import com.strategicgains.util.date.DateAdapterConstants;
  * @since Mar 16, 2010
  */
 public class GsonJsonProcessor
-implements SerializationProcessor
+extends JsonSerializationProcessor
 {
-	private static final String SUPPORTED_MEDIA_TYPES = StringUtils.join(",",
-		ContentType.JSON,
-		"application/javasctript; charset=" + ContentType.ENCODING,
-		"text/javascript; charset=" + ContentType.ENCODING);
-	private static List<MediaRange> SUPPORTED_MEDIA_RANGES = MediaTypeParser.parse(SUPPORTED_MEDIA_TYPES);
-
 	private Gson gson;
 
 	public GsonJsonProcessor()
@@ -92,10 +82,4 @@ implements SerializationProcessor
 
 		return gson.toJson(object);
 	}
-
-	@Override
-    public List<MediaRange> getSupportedMediaRanges()
-    {
-	    return SUPPORTED_MEDIA_RANGES;
-    }
 }

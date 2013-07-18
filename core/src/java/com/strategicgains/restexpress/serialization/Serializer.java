@@ -30,4 +30,5 @@ public interface Serializer
 {
 	public String serialize(Object object);
 	public List<MediaRange> getSupportedMediaRanges();
+	public List<String> getSupportedFormats();
 }

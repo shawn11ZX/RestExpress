@@ -40,7 +40,7 @@ public class ResultWrapperTest
 	{
 		response.setException(new IOException("An IOException was thrown"));
 		response.setResponseCode(1);
-		ResultWrapper w = ResultWrapper.fromResponse(response);
+		JsendResultWrapper w = JsendResultWrapper.fromResponse(response);
 		assertNotNull(w);
 		assertEquals("fail", w.getStatus());
 		assertEquals(1, w.getCode());
@@ -53,7 +53,7 @@ public class ResultWrapperTest
 	{
 		response.setException(new ArrayIndexOutOfBoundsException("An ArrayIndexOutOfBoundsException was thrown"));
 		response.setResponseCode(2);
-		ResultWrapper w = ResultWrapper.fromResponse(response);
+		JsendResultWrapper w = JsendResultWrapper.fromResponse(response);
 		assertNotNull(w);
 		assertEquals("fail", w.getStatus());
 		assertEquals(2, w.getCode());
@@ -66,7 +66,7 @@ public class ResultWrapperTest
 	{
 		response.setException(new ServiceException("A ServiceException was thrown"));
 		response.setResponseCode(3);
-		ResultWrapper w = ResultWrapper.fromResponse(response);
+		JsendResultWrapper w = JsendResultWrapper.fromResponse(response);
 		assertNotNull(w);
 		assertEquals("error", w.getStatus());
 		assertEquals(3, w.getCode());
@@ -79,7 +79,7 @@ public class ResultWrapperTest
 	{
 		response.setResponseCode(100);
 		response.setBody("Success Body");
-		ResultWrapper w = ResultWrapper.fromResponse(response);
+		JsendResultWrapper w = JsendResultWrapper.fromResponse(response);
 		assertNotNull(w);
 		assertEquals("success", w.getStatus());
 		assertEquals(100, w.getCode());
@@ -92,7 +92,7 @@ public class ResultWrapperTest
 	{
 		response.setResponseCode(400);
 		response.setBody("Error Body");
-		ResultWrapper w = ResultWrapper.fromResponse(response);
+		JsendResultWrapper w = JsendResultWrapper.fromResponse(response);
 		assertNotNull(w);
 		assertEquals("error", w.getStatus());
 		assertEquals(400, w.getCode());
@@ -105,7 +105,7 @@ public class ResultWrapperTest
 	{
 		response.setResponseCode(500);
 		response.setBody("Fail Body");
-		ResultWrapper w = ResultWrapper.fromResponse(response);
+		JsendResultWrapper w = JsendResultWrapper.fromResponse(response);
 		assertNotNull(w);
 		assertEquals("fail", w.getStatus());
 		assertEquals(500, w.getCode());
@@ -117,7 +117,7 @@ public class ResultWrapperTest
 	public void shouldHandleSuccess()
 	{
 		response.setBody("Success Body");
-		ResultWrapper w = ResultWrapper.fromResponse(response);
+		JsendResultWrapper w = JsendResultWrapper.fromResponse(response);
 		assertNotNull(w);
 		assertEquals("success", w.getStatus());
 		assertEquals(200, w.getCode());

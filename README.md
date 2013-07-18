@@ -77,11 +77,17 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.9.5 - SNAPSHOT (in branch 'master')
-* Re-added GSON capability from version 0.8.2, making things a little
+Release 0.10.0 - SNAPSHOT (in branch 'master')
+* ** Breaking Change ** Re-added GSON capability from version 0.8.2, making things a little
   more pluggable with RestExpress.setSerializationProvider(SerializationProvider).
   DefaultSerializationProvider is the default. GsonSerializationProvider is also available,
-  but requires adding GSON to your pom file.
+  but requires adding GSON to your pom file.  Must refactor your own custom ResponseProcessor
+  class into a SerializationProvider implementor.
+* ** Breaking Change ** Removed RestExpress.putResponseProcessor(), .supportJson(), .supportXml(),
+  .supportTxt(), .noJson(), .noXml(), noTxt() as this is all implemented in the SerializationProvider.
+* Implemented content-type negotiation using Content-Type header for serialization (e.g. 
+  Request.getBodyAs(type)) and Accept header for deserialization. Implementation still
+  favors .{format}, but uses content-type negotiation if format not supplied.
 
 Release 0.9.4 - 17 Jul 2013
 ---------------------------------------------------------------------------------------------------

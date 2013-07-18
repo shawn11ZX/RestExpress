@@ -15,16 +15,10 @@
 */
 package com.strategicgains.restexpress.serialization;
 
-import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseWrapper;
-
-
 /**
  * @author toddf
- * @since Jul 17, 2013
+ * @since Jul 18, 2013
  */
 public interface SerializationProvider
 {
-	public ResponseProcessor newProcessor(String format);
-	public ResponseProcessor newProcessor(String format, ResponseWrapper wrapper);
 }

@@ -43,7 +43,7 @@ import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.exception.BadRequestException;
-import com.strategicgains.restexpress.response.DefaultResponseWrapper;
+import com.strategicgains.restexpress.response.JsendResponseWrapper;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
@@ -51,8 +51,8 @@ import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
-import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
-import com.strategicgains.restexpress.serialization.SerializationProvider;
+import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
+import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 import com.strategicgains.restexpress.settings.RouteDefaults;
 
 
@@ -73,11 +73,10 @@ public class DefaultRequestHandlerTest
 	public void initialize()
 	throws Exception
 	{
-		SerializationProvider provider = new DefaultSerializationProvider();
 		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.put(Format.WRAPPED_JSON, provider.newProcessor(Format.JSON, new DefaultResponseWrapper()));
-		resolver.put(Format.JSON, provider.newProcessor(Format.JSON, new RawResponseWrapper()));
-		ResponseProcessor xmlProcessor = provider.newProcessor(Format.XML, new DefaultResponseWrapper());
+		resolver.put(Format.WRAPPED_JSON, new ResponseProcessor(new JacksonJsonProcessor(), new JsendResponseWrapper()));
+		resolver.put(Format.JSON, new ResponseProcessor(new JacksonJsonProcessor(), new RawResponseWrapper()));
+		ResponseProcessor xmlProcessor = new ResponseProcessor(new XstreamXmlProcessor(), new JsendResponseWrapper());
 		AliasingSerializationProcessor xmlSerializer = (AliasingSerializationProcessor) xmlProcessor.getSerializer();
 		xmlSerializer.alias("dated", Dated.class);
 		resolver.put(Format.XML, xmlProcessor);
