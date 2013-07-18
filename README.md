@@ -32,7 +32,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
+			<version>0.9.5-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -77,12 +77,11 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.10.0 - SNAPSHOT (in branch 'master')
-* **Breaking Change** Re-added GSON capability from version 0.8.2, making things a little
+Release 0.9.5 - SNAPSHOT (in branch 'master')
+* Re-added GSON capability from version 0.8.2, making things a little
   more pluggable with RestExpress.setSerializationProvider(SerializationProvider).
-  If you're using your own ResponseProcessor class, need to move the factory portion to
-  a SerializationProvider implementor.  DefaultSerializationProvider is the default.
-  GsonSerializationProvider is also available, but requires adding GSON to your pom file.
+  DefaultSerializationProvider is the default. GsonSerializationProvider is also available,
+  but requires adding GSON to your pom file.
 
 Release 0.9.4 - 17 Jul 2013
 ---------------------------------------------------------------------------------------------------
