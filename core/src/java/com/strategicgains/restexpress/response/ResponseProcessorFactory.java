@@ -22,10 +22,10 @@ package com.strategicgains.restexpress.response;
  */
 public interface ResponseProcessorFactory
 {
-	public ResponseProcessor defaultJsonProcessor();
+	public ResponseProcessor newJsonProcessor();
 	public ResponseProcessor newJsonProcessor(ResponseWrapper wrapper);
-	public ResponseProcessor defaultXmlProcessor();
+	public ResponseProcessor newXmlProcessor();
 	public ResponseProcessor newXmlProcessor(ResponseWrapper wrapper);
-	public ResponseProcessor defaultTxtProcessor();
+	public ResponseProcessor newTxtProcessor();
 	public ResponseProcessor newTxtProcessor(ResponseWrapper wrapper);
 }

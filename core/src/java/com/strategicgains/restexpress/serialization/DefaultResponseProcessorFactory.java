@@ -13,11 +13,15 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package com.strategicgains.restexpress.response;
+package com.strategicgains.restexpress.serialization;
 
-import com.strategicgains.restexpress.serialization.json.DefaultJsonProcessor;
+import com.strategicgains.restexpress.response.RawResponseWrapper;
+import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseProcessorFactory;
+import com.strategicgains.restexpress.response.ResponseWrapper;
+import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
 import com.strategicgains.restexpress.serialization.text.DefaultTxtProcessor;
-import com.strategicgains.restexpress.serialization.xml.DefaultXmlProcessor;
+import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 
 /**
  * @author toddf
@@ -27,7 +31,7 @@ public class DefaultResponseProcessorFactory
 implements ResponseProcessorFactory
 {
 	@Override
-	public ResponseProcessor defaultJsonProcessor()
+	public ResponseProcessor newJsonProcessor()
 	{
 		return newJsonProcessor(new RawResponseWrapper());
 	}
@@ -35,11 +39,11 @@ implements ResponseProcessorFactory
 	@Override
 	public ResponseProcessor newJsonProcessor(ResponseWrapper wrapper)
 	{
-		return new ResponseProcessor(new DefaultJsonProcessor(), wrapper);
+		return new ResponseProcessor(new JacksonJsonProcessor(), wrapper);
 	}
 
 	@Override
-	public ResponseProcessor defaultXmlProcessor()
+	public ResponseProcessor newXmlProcessor()
 	{
 		return newXmlProcessor(new RawResponseWrapper());
 	}
@@ -47,11 +51,11 @@ implements ResponseProcessorFactory
 	@Override
 	public ResponseProcessor newXmlProcessor(ResponseWrapper wrapper)
 	{
-		return new ResponseProcessor(new DefaultXmlProcessor(), wrapper);
+		return new ResponseProcessor(new XstreamXmlProcessor(), wrapper);
 	}
 
 	@Override
-    public ResponseProcessor defaultTxtProcessor()
+    public ResponseProcessor newTxtProcessor()
     {
 		return newTxtProcessor(new RawResponseWrapper());
     }

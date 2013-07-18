@@ -13,10 +13,9 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package com.strategicgains.restexpress.serialization.json;
+package com.strategicgains.restexpress.serialization.xml;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +24,7 @@ import java.util.Calendar;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.ContentType;
@@ -34,39 +34,42 @@ import com.strategicgains.restexpress.serialization.KnownObject;
  * @author toddf
  * @since Aug 4, 2011
  */
-public class DefaultJsonProcessorTest
+public class XstreamXmlProcessorTest
 {
-	private static final String JSON = "{\"integer\":2,\"string\":\"another string value\",\"date\":\"1963-12-06T12:30:00.000Z\",\"p\":\"good stuff\"}";
-	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"我能吞下\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
+	private static final String XML = "<KnownObject><integer>2</integer><string>another string value</string><date>1963-12-06T12:30:00.000Z</date></KnownObject>";
 
-	private DefaultJsonProcessor processor = new DefaultJsonProcessor();
+	private XstreamXmlProcessor processor = new XstreamXmlProcessor();
+	
+	@Before
+	public void setup()
+	{
+		processor.alias("KnownObject", KnownObject.class);
+	}
 
 	@Test
 	public void shouldSerializeObject()
 	{
-		String json = processor.serialize(new KnownObject());
-//		System.out.println(json);
-		assertNotNull(json);
-		assertTrue(json.startsWith("{"));
-		assertTrue(json.contains("\"integer\":1"));
-		assertTrue(json.contains("\"string\":\"string value\""));
-		assertTrue(json.contains("\"date\":\"1964-12-17T"));
-		assertTrue(json.contains("\"p\":\"something private"));
-		assertFalse(json.contains("\"q\":"));
-		assertTrue(json.endsWith("}"));
+		String xml = processor.serialize(new KnownObject());
+		assertNotNull(xml);
+//		System.out.println(xml);
+		assertTrue(xml.startsWith("<KnownObject>"));
+		assertTrue(xml.contains("<integer>1</integer>"));
+		assertTrue(xml.contains("<string>string value</string>"));
+		assertTrue(xml.contains("<date>1964-12-17T"));
+		assertTrue(xml.endsWith("</KnownObject>"));
 	}
 
 	@Test
 	public void shouldSerializeNull()
 	{
-		String json = processor.serialize(null);
-		assertEquals("", json);
+		String xml = processor.serialize(null);
+		assertEquals("", xml);
 	}
 
 	@Test
 	public void shouldDeserializeObject()
 	{
-		KnownObject o = processor.deserialize(JSON, KnownObject.class);
+		KnownObject o = processor.deserialize(XML, KnownObject.class);
 		assertNotNull(o);
 		assertTrue(o.getClass().isAssignableFrom(KnownObject.class));
 		assertEquals(2, o.integer);
@@ -76,13 +79,12 @@ public class DefaultJsonProcessorTest
 		assertEquals(11, c.get(Calendar.MONTH));
 		assertEquals(6, c.get(Calendar.DAY_OF_MONTH));
 		assertEquals(1963, c.get(Calendar.YEAR));
-		assertEquals("good stuff", o.getP());
 	}
 
 	@Test
 	public void shouldDeserializeEmptyObject()
 	{
-		KnownObject o = processor.deserialize("{}", KnownObject.class);
+		KnownObject o = processor.deserialize("<KnownObject/>", KnownObject.class);
 		assertNotNull(o);
 		assertTrue(o.getClass().isAssignableFrom(KnownObject.class));
 	}
@@ -104,7 +106,7 @@ public class DefaultJsonProcessorTest
 	@Test
 	public void shouldDeserializeChannelBuffer()
 	{
-		ChannelBuffer buf = ChannelBuffers.copiedBuffer(JSON, ContentType.CHARSET);
+		ChannelBuffer buf = ChannelBuffers.copiedBuffer(XML, ContentType.CHARSET);
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNotNull(o);
 	}
@@ -115,20 +117,5 @@ public class DefaultJsonProcessorTest
 		ChannelBuffer buf = ChannelBuffers.EMPTY_BUFFER;
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNull(o);
-	}
-
-	@Test
-	public void shouldDeserializeUTF8ChannelBuffer()
-	{
-		KnownObject o = processor.deserialize(ChannelBuffers.wrappedBuffer(JSON_UTF8.getBytes(ContentType.CHARSET)), KnownObject.class);
-		assertNotNull(o);
-		assertTrue(o.getClass().isAssignableFrom(KnownObject.class));
-		assertEquals(2, o.integer);
-		assertEquals("我能吞下", o.string);
-		Calendar c = Calendar.getInstance();
-		c.setTime(o.date);
-		assertEquals(11, c.get(Calendar.MONTH));
-		assertEquals(6, c.get(Calendar.DAY_OF_MONTH));
-		assertEquals(1963, c.get(Calendar.YEAR));
 	}
 }

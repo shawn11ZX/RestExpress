@@ -34,13 +34,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Format;
-import com.strategicgains.restexpress.response.DefaultResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
+import com.strategicgains.restexpress.serialization.DefaultResponseProcessorFactory;
 import com.strategicgains.restexpress.settings.RouteDefaults;
 
 
@@ -62,8 +62,8 @@ public class RawWrappedResponseTest
 	{
 		ResponseProcessorFactory factory = new DefaultResponseProcessorFactory();
 		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.put(Format.JSON, factory.defaultJsonProcessor());
-		resolver.put(Format.XML, factory.defaultXmlProcessor());
+		resolver.put(Format.JSON, factory.newJsonProcessor());
+		resolver.put(Format.XML, factory.newXmlProcessor());
 		resolver.setDefaultFormat(Format.JSON);
 		
 		DummyRoutes routes = new DummyRoutes();

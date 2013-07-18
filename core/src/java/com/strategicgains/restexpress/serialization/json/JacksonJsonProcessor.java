@@ -47,24 +47,24 @@ import com.strategicgains.util.date.DateAdapterConstants;
  * @author toddf
  * @since Mar 16, 2010
  */
-public class DefaultJsonProcessor
+public class JacksonJsonProcessor
 implements SerializationProcessor
 {
 	private ObjectMapper mapper;
 
-	public DefaultJsonProcessor()
+	public JacksonJsonProcessor()
 	{
 		super();
 		SimpleModule module = new SimpleModule();
 		initializeModule(module);
 	}
 
-	public DefaultJsonProcessor(SimpleModule module)
+	public JacksonJsonProcessor(SimpleModule module)
 	{
 		initialize(module);
 	}
 
-	public DefaultJsonProcessor(ObjectMapper mapper)
+	public JacksonJsonProcessor(ObjectMapper mapper)
 	{
 		super();
 		this.mapper = mapper;

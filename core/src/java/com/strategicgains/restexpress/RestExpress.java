@@ -41,7 +41,6 @@ import com.strategicgains.restexpress.pipeline.PipelineBuilder;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
 import com.strategicgains.restexpress.plugin.Plugin;
-import com.strategicgains.restexpress.response.DefaultResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseProcessorFactory;
 import com.strategicgains.restexpress.response.ResponseProcessorResolver;
@@ -51,6 +50,7 @@ import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.route.parameterized.ParameterizedRouteBuilder;
 import com.strategicgains.restexpress.route.regex.RegexRouteBuilder;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
+import com.strategicgains.restexpress.serialization.DefaultResponseProcessorFactory;
 import com.strategicgains.restexpress.settings.RouteDefaults;
 import com.strategicgains.restexpress.settings.ServerSettings;
 import com.strategicgains.restexpress.settings.SocketSettings;
@@ -240,7 +240,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.JSON))
 		{
-			responseProcessors.put(Format.JSON, getResponseProcessorFactory().defaultJsonProcessor());
+			responseProcessors.put(Format.JSON, getResponseProcessorFactory().newJsonProcessor());
 		}
 
 		if (isDefault)
@@ -287,7 +287,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.XML))
 		{
-			getResponseProcessors().put(Format.XML, getResponseProcessorFactory().defaultXmlProcessor());
+			getResponseProcessors().put(Format.XML, getResponseProcessorFactory().newXmlProcessor());
 		}
 
 		if (isDefault)
@@ -333,7 +333,7 @@ public class RestExpress
 	{
 		if (!getResponseProcessors().containsKey(Format.TXT))
 		{
-			getResponseProcessors().put(Format.TXT, getResponseProcessorFactory().defaultTxtProcessor());
+			getResponseProcessors().put(Format.TXT, getResponseProcessorFactory().newTxtProcessor());
 		}
 
 		if (isDefault)
