@@ -38,7 +38,7 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.SerializationProcessor;
+import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.url.QueryStringParser;
 
 /**
@@ -59,10 +59,8 @@ public class Request
 	private HttpRequest httpRequest;
 	private HttpVersion httpVersion;
 	private InetSocketAddress remoteAddress;
-	
-	//TODO: need to set this lazily, only if the controller calls getBodyAs()
-	private SerializationProcessor serializationProcessor;
-	private RouteResolver urlRouter;
+	private RouteResolver routeResolver;
+	private SerializationProvider serializationProvider;
 	private HttpMethod effectiveHttpMethod;
 	private Route resolvedRoute;
 	private String correlationId;
@@ -72,21 +70,22 @@ public class Request
 	
 	// SECTION: CONSTRUCTOR
 
-	public Request(HttpRequest request, RouteResolver routes)
+	public Request(HttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
 	{
 		super();
 		this.httpRequest = request;
 		this.httpVersion = request.getProtocolVersion();
 		this.effectiveHttpMethod = request.getMethod();
-		this.urlRouter = routes;
+		this.routeResolver = routeResolver;
+		this.serializationProvider = serializationProvider;
 	    createCorrelationId();
 		parseQueryString(request);
 		determineEffectiveHttpMethod(request);
 	}
 
-	public Request(MessageEvent event, RouteResolver routes)
+	public Request(MessageEvent event, RouteResolver routes, SerializationProvider serializationProvider)
 	{
-		this((HttpRequest) event.getMessage(), routes);
+		this((HttpRequest) event.getMessage(), routes, serializationProvider);
 		this.remoteAddress = (InetSocketAddress) event.getRemoteAddress();
 	}
 
@@ -158,14 +157,7 @@ public class Request
 	 */
 	public <T> T getBodyAs(Class<T> type)
 	{
-		try
-		{
-			return serializationProcessor.deserialize(getBody(), type);
-		}
-		catch(Exception e)
-		{
-			throw new BadRequestException(e);
-		}
+		return serializationProvider.deserialize(this, type);
 	}
 
 	/**
@@ -200,16 +192,6 @@ public class Request
 		QueryStringDecoder qsd = new QueryStringDecoder(getBody().toString(ContentType.CHARSET), ContentType.CHARSET, false);
 		return qsd.getParameters();
 	}
-
-//	public SerializationProcessor getSerializationProcessor()
-//    {
-//    	return serializationProcessor;
-//    }
-//
-//	public void setSerializationProcessor(SerializationProcessor serializationProcessor)
-//    {
-//    	this.serializationProcessor = serializationProcessor;
-//    }
 
 	public void setBody(ChannelBuffer body)
     {
@@ -432,7 +414,7 @@ public class Request
 	 */
 	public String getNamedUrl(HttpMethod method, String resourceName)
 	{
-		Route route = urlRouter.getNamedRoute(resourceName, method);
+		Route route = routeResolver.getNamedRoute(resourceName, method);
 		
 		if (route != null)
 		{

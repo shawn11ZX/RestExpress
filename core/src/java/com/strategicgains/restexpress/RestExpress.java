@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -42,13 +41,11 @@ import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
 import com.strategicgains.restexpress.plugin.Plugin;
 import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.RouteBuilder;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.route.parameterized.ParameterizedRouteBuilder;
 import com.strategicgains.restexpress.route.regex.RegexRouteBuilder;
-import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
 import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
 import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.settings.RouteDefaults;
@@ -92,15 +89,15 @@ public class RestExpress
 	private RouteDeclaration routeDeclarations = new RouteDeclaration();
 	
 	/**
-	 * Change the default behavior for creating ResponseProcessor instances for
-	 * serialization.  Must be called before new RestExpress() server is created.
-	 * If not, default of DefaultResponseProcessorFactory is used, which uses Jackson.
+	 * Change the default behavior for serialization.
+	 * If no SerializationProcessor is set, default of DefaultSerializationProcessor is used,
+	 * which uses Jackson for JSON, XStream for XML.
 	 * 
-	 * @param factory a ResponseProcessorFactory instance.
+	 * @param provider a SerializationProvider instance.
 	 */
-	public static void setSerializationProvider(SerializationProvider factory)
+	public static void setSerializationProvider(SerializationProvider provider)
 	{
-		SERIALIZATION_PROVIDER = factory;
+		SERIALIZATION_PROVIDER = provider;
 	}
 
 	public static SerializationProvider getSerializationProvider()
@@ -540,7 +537,7 @@ public class RestExpress
 
 		// Set up the event pipeline factory.
 		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
-		    createRouteResolver(), createResponseProcessorResolver());
+		    createRouteResolver(), SERIALIZATION_PROVIDER);
 
 		// Add MessageObservers to the request handler here, if desired...
 		requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));
@@ -674,35 +671,6 @@ public class RestExpress
 		{
 			plugin.shutdown(this);
 		}
-	}
-
-	/**
-	 * @return
-	 */
-	private ResponseProcessorResolver createResponseProcessorResolver()
-	{
-		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.setDefaultFormat(getDefaultFormat());
-
-		for (Entry<String, ResponseProcessor> entry : getResponseProcessors().entrySet())
-		{
-			if (entry.getKey().equals(Format.XML))
-			{
-				setXmlAliases((AliasingSerializationProcessor) entry.getValue().getSerializer());
-			}
-
-			resolver.put(entry.getKey(), entry.getValue());
-		}
-
-		return resolver;
-	}
-
-	/**
-	 * @param processor
-	 */
-	private void setXmlAliases(AliasingSerializationProcessor processor)
-	{
-		routeDefaults.setXmlAliases(processor);
 	}
 
 	/**

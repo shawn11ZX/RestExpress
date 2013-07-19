@@ -16,11 +16,7 @@
  */
 package com.strategicgains.restexpress.pipeline;
 
-import static com.strategicgains.restexpress.ContentType.TEXT_PLAIN;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.jboss.netty.channel.ChannelHandler.Sharable;
@@ -32,18 +28,15 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
 import com.strategicgains.restexpress.exception.ExceptionUtils;
 import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.response.HttpResponseWriter;
-import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
+import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.util.HttpSpecification;
-import com.strategicgains.restexpress.util.StringUtils;
 
 /**
  * @author toddf
@@ -56,7 +49,7 @@ extends SimpleChannelUpstreamHandler
 	// SECTION: INSTANCE VARIABLES
 
 	private RouteResolver routeResolver;
-	private ResponseProcessorResolver responseProcessorResolver;
+	private SerializationProvider serializationProvider;
 	private HttpResponseWriter responseWriter;
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
@@ -67,17 +60,17 @@ extends SimpleChannelUpstreamHandler
 
 	// SECTION: CONSTRUCTORS
 
-	public DefaultRequestHandler(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver)
+	public DefaultRequestHandler(RouteResolver routeResolver, SerializationProvider serializationProvider)
 	{
-		this(routeResolver, responseProcessorResolver, new DefaultHttpResponseWriter());
+		this(routeResolver, serializationProvider, new DefaultHttpResponseWriter());
 	}
 
-	public DefaultRequestHandler(RouteResolver routeResolver, ResponseProcessorResolver responseProcessorResolver,
+	public DefaultRequestHandler(RouteResolver routeResolver, SerializationProvider serializationProvider,
 		HttpResponseWriter responseWriter)
 	{
 		super();
 		this.routeResolver = routeResolver;
-		this.responseProcessorResolver = responseProcessorResolver;
+		this.serializationProvider = serializationProvider;
 		setResponseWriter(responseWriter);
 	}
 
@@ -130,7 +123,6 @@ extends SimpleChannelUpstreamHandler
 		{
 			notifyReceived(context);
 			resolveRoute(context);
-			boolean isResponseProcessorResolved = resolveResponseProcessor(context);
 			invokePreprocessors(preprocessors, context.getRequest());
 			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
 
@@ -140,16 +132,10 @@ extends SimpleChannelUpstreamHandler
 			}
 	
 			invokePostprocessors(postprocessors, context.getRequest(), context.getResponse());
-
-			if (!isResponseProcessorResolved && !context.supportsRequestedFormat())
-			{
-				throw new BadRequestException("Requested representation format not supported: " 
-					+ context.getRequest().getFormat() 
-					+ ". Supported formats: " + StringUtils.join(", ", getSupportedFormats(context)));
-			}
-
 			serializeResponse(context);
 			enforceHttpSpecification(context);
+			
+			// TODO: this is a problem if a FinallyProcessor changes the response.  It will only work in 'accidentally' and intermittently.
 			writeResponse(ctx, context);
 			notifySuccess(context);
 		}
@@ -165,22 +151,6 @@ extends SimpleChannelUpstreamHandler
 	}
 
 	/**
-     * @return
-     */
-    private Collection<String> getSupportedFormats(MessageContext context)
-    {
-	    Collection<String> routeFormats = context.getSupportedRouteFormats();
-	    
-	    if (routeFormats != null && !routeFormats.isEmpty())
-	    {
-	    	return routeFormats;
-	    }
-	    
-	    return responseProcessorResolver.getSupportedFormats();
-    }
-
-
-	/**
      * @param context
      */
     private void enforceHttpSpecification(MessageContext context)
@@ -192,7 +162,6 @@ extends SimpleChannelUpstreamHandler
 	throws Exception
 	{
 		MessageContext context = (MessageContext) ctx.getAttachment();
-		resolveResponseProcessor(context);
 		Throwable rootCause = mapServiceException(cause);
 		
 		if (rootCause != null) // was/is a ServiceException
@@ -248,30 +217,6 @@ extends SimpleChannelUpstreamHandler
 		MessageContext context = new MessageContext(request, response);
 		ctx.setAttachment(context);
 		return context;
-	}
-
-	/**
-	 * Resolve the ResponseProcessor based on the requested format (or the default, if none supplied).
-	 *  
-	 * @param context the message context.
-	 * @return true if the ResponseProcessor was resolved.  False if the ResponseProcessor was
-	 *         resolved to the 'default' because it was unresolvable.
-	 */
-	private boolean resolveResponseProcessor(MessageContext context)
-	{
-		boolean isResolved = true;
-		if (context.hasResponseProcessor()) return isResolved;
-
-		ResponseProcessor rp = responseProcessorResolver.resolve(context.getRequest());
-		
-		if (rp == null)
-		{
-			rp = responseProcessorResolver.getDefault();
-			isResolved = false;
-		}
-
-		context.setResponseProcessor(rp);
-		return isResolved;
 	}
 
 	private void resolveRoute(MessageContext context)
@@ -413,7 +358,7 @@ extends SimpleChannelUpstreamHandler
      */
     private Request createRequest(MessageEvent event, ChannelHandlerContext context)
     {
-    	return new Request(event, routeResolver);
+    	return new Request(event, routeResolver, serializationProvider);
     }
 
 	/**
@@ -422,7 +367,7 @@ extends SimpleChannelUpstreamHandler
      */
     private Response createResponse()
     {
-    	return new Response();
+    	return new Response(serializationProvider);
     }
 
     /**
@@ -437,25 +382,6 @@ extends SimpleChannelUpstreamHandler
 	private void serializeResponse(MessageContext context)
 	{
 		Response response = context.getResponse();
-
-		if (shouldSerialize(context))
-		{
-			response.serialize();
-		}
-
-		if (HttpSpecification.isContentTypeAllowed(response))
-		{
-			if (!response.hasHeader(CONTENT_TYPE))
-			{
-				String contentType = (context.getContentType() == null ? TEXT_PLAIN : context.getContentType());
-				response.addHeader(CONTENT_TYPE, contentType);
-			}
-		}
+		response.serialize(context.getRequest());
 	}
-
-    private boolean shouldSerialize(MessageContext context)
-    {
-    	
-        return (context.shouldSerializeResponse() && (responseProcessorResolver != null));
-    }
 }

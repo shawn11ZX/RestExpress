@@ -28,7 +28,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.common.query.QueryRange;
-import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.serialization.SerializationProvider;
 
 /**
  * @author toddf
@@ -47,14 +47,15 @@ public class Response
 	private Map<String, List<String>> headers = new HashMap<String, List<String>>();
 	private boolean isSerialized = true;
 	private Throwable exception = null;
-	private ResponseProcessor responseProcessor;
+	private SerializationProvider serializationProvider;
 	
 	
 	// SECTION: CONSTRUCTORS
 	
-	public Response()
+	public Response(SerializationProvider serializationProvider)
 	{
 		super();
+		this.serializationProvider = serializationProvider;
 	}
 
 
@@ -220,10 +221,11 @@ public class Response
 	 */
 	public void setResponseNoContent()
 	{
-		if (!responseProcessor.getWrapper().addsBodyContent())
-		{
+		// TODO: fix this...
+//		if (!responseProcessor.getWrapper().addsBodyContent())
+//		{
 			setResponseStatus(HttpResponseStatus.NO_CONTENT);
-		}
+//		}
 	}
 	
 	/**
@@ -280,27 +282,12 @@ public class Response
     {
     	this.exception = exception;
     }
-	
-	public ResponseProcessor getResponseProcessor()
-	{
-		return responseProcessor;
-	}
-	
-	public boolean hasResponseProcessor()
-	{
-		return (getResponseProcessor() != null);
-	}
 
-	public void setResponseProcessor(ResponseProcessor responseProcessor)
+	public void serialize(Request request)
 	{
-		this.responseProcessor = responseProcessor;
-	}
-	
-	public void serialize()
-	{
-		if (hasResponseProcessor())
+		if (isSerialized)
 		{
-			setBody(getResponseProcessor().process(this, getContentType()));
+			serializationProvider.serialize(request, this);
 		}
 	}
 }

@@ -15,10 +15,15 @@
 */
 package com.strategicgains.restexpress.serialization;
 
+import com.strategicgains.restexpress.Request;
+import com.strategicgains.restexpress.Response;
+
 /**
  * @author toddf
  * @since Jul 18, 2013
  */
 public interface SerializationProvider
 {
+	public <T> T deserialize(Request request, Class<T> type);
+	public void serialize(Request request, Response response);
 }

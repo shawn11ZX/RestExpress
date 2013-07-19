@@ -15,23 +15,23 @@
 */
 package com.strategicgains.restexpress.serialization;
 
-import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
+import com.strategicgains.restexpress.serialization.json.GsonJsonProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 
 
 /**
- * The default serialization provider that uses Jackson for JSON and XStream for XML serialization/deserialization.
+ * A serialization provider that uses Gson for JSON and XStream for XML serialization/deserialization.
  * 
  * @author toddf
  * @since Jul 18, 2013
  */
-public class DefaultSerializationProvider
+public class GsonSerializationProvider
 extends AbstractSerializationProvider
 {
-	public DefaultSerializationProvider()
+	public GsonSerializationProvider()
     {
 		super();
-		addSerializationProcessor(new JacksonJsonProcessor(), true);
+		addSerializationProcessor(new GsonJsonProcessor(), true);
 		addSerializationProcessor(new XstreamXmlProcessor());
     }
 }

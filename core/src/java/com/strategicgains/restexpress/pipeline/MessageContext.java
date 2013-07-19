@@ -26,7 +26,6 @@ import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.route.Action;
 
 /**
@@ -74,54 +73,16 @@ public class MessageContext
 		getResponse().setIsSerialized(action.shouldSerializeResponse());
 	}
 
-	/**
-	 * @return
-	 */
-	public boolean shouldSerializeResponse()
-	{
-		return getResponse().isSerialized();
-	}
-
-	public void setResponseProcessor(ResponseProcessor processor)
-	{
-		getResponse().setResponseProcessor(processor);
-//		getRequest().setSerializationProcessor(processor.getSerializer());
-	}
-
-	public boolean hasResponseProcessor()
-	{
-		return getResponse().hasResponseProcessor();
-	}
-
-	public ResponseProcessor getResponseProcessor()
-	{
-		return getResponse().getResponseProcessor();
-	}
-
-	public String getContentType()
-	{
-		return getResponse().getContentType();
-	}
-
-	/**
-	 * @return
-	 */
 	public Throwable getException()
 	{
 		return getResponse().getException();
 	}
 
-	/**
-	 * @param rootCause
-	 */
 	public void setException(Throwable throwable)
 	{
 		getResponse().setException(throwable);
 	}
 
-	/**
-	 * @param httpStatus
-	 */
 	public void setHttpStatus(HttpResponseStatus httpStatus)
 	{
 		getResponse().setResponseStatus(httpStatus);
