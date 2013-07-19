@@ -98,7 +98,7 @@ public class MediaRange
 		
 		for (Entry<String, String> entry: parameters.entrySet())
 		{
-			b.append(";");
+			b.append("; ");
 			b.append(entry.getKey());
 			
 			if (entry.getValue() != null)

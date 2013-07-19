@@ -34,14 +34,12 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.response.JsendResponseWrapper;
-import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.AbstractSerializationProvider;
-import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
+import com.strategicgains.restexpress.serialization.NullSerializationProvider;
+import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 import com.strategicgains.restexpress.settings.RouteDefaults;
@@ -63,7 +61,9 @@ public class JsendWrappedResponseTest
 	public void initialize()
 	throws Exception
 	{
-		AbstractSerializationProvider provider = new DefaultSerializationProvider();
+		SerializationProvider provider = new NullSerializationProvider();
+		provider.add(new JacksonJsonProcessor(), new JsendResponseWrapper(), true);
+		provider.add(new XstreamXmlProcessor(), new JsendResponseWrapper());
 		DummyRoutes routes = new DummyRoutes();
 		routes.defineRoutes();
 		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), provider);

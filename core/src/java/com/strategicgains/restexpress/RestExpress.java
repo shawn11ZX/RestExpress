@@ -19,9 +19,7 @@ package com.strategicgains.restexpress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -40,7 +38,6 @@ import com.strategicgains.restexpress.pipeline.PipelineBuilder;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
 import com.strategicgains.restexpress.plugin.Plugin;
-import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.route.RouteBuilder;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
@@ -54,7 +51,6 @@ import com.strategicgains.restexpress.settings.SocketSettings;
 import com.strategicgains.restexpress.util.Bootstraps;
 import com.strategicgains.restexpress.util.Callback;
 import com.strategicgains.restexpress.util.DefaultShutdownHook;
-import com.strategicgains.restexpress.util.Resolver;
 
 /**
  * Primary entry point to create a RestExpress service. All that's required is a
@@ -78,12 +74,10 @@ public class RestExpress
 	private RouteDefaults routeDefaults = new RouteDefaults();
 	private boolean useSystemOut;
 
-	private Map<String, ResponseProcessor> responseProcessors = new HashMap<String, ResponseProcessor>();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
 	private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
-	private Resolver<ResponseProcessor> responseResolver;
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<Plugin> plugins = new ArrayList<Plugin>();
 	private RouteDeclaration routeDeclarations = new RouteDeclaration();
@@ -140,6 +134,7 @@ public class RestExpress
 	{
 		super();
 		setName(DEFAULT_NAME);
+		useSystemOut();
 	}
 
 	public String getBaseUrl()
@@ -184,41 +179,6 @@ public class RestExpress
 	public RestExpress setPort(int port)
 	{
 		serverSettings.setPort(port);
-		return this;
-	}
-
-	public RestExpress putResponseProcessor(String format, ResponseProcessor processor)
-	{
-		responseProcessors.put(format, processor);
-		return this;
-	}
-
-	/* package protected */Map<String, ResponseProcessor> getResponseProcessors()
-	{
-		return responseProcessors;
-	}
-
-	public Resolver<ResponseProcessor> getResponseResolver()
-	{
-		return responseResolver;
-	}
-
-	public RestExpress setResponseResolver(Resolver<ResponseProcessor> responseResolver)
-	{
-		this.responseResolver = responseResolver;
-		return this;
-	}
-
-	public String getDefaultFormat()
-	{
-		return routeDefaults.getDefaultFormat();
-	}
-
-	public RestExpress setDefaultFormat(String format)
-	{
-		if (format == null || format.trim().isEmpty()) return this;
-
-		routeDefaults.setDefaultFormat(format.trim().toLowerCase());
 		return this;
 	}
 
@@ -640,8 +600,9 @@ public class RestExpress
 		ServerMetadata m = new ServerMetadata();
 		m.setName(getName());
 		m.setPort(getPort());
-		m.setDefaultFormat(getDefaultFormat());
-		m.addAllSupportedFormats(getResponseProcessors().keySet());
+		//TODO: create a good substitute for this...
+//		m.setDefaultFormat(getDefaultFormat());
+//		m.addAllSupportedFormats(getResponseProcessors().keySet());
 		m.addAllRoutes(routeDeclarations.getMetadata());
 		return m;
 	}

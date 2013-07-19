@@ -40,9 +40,14 @@ extends AbstractSerializationProcessor
 
 	public JsonSerializationProcessor()
 	{
-		super(Arrays.asList(Format.JSON, Format.WRAPPED_JSON));
+		this(Format.JSON);
 	}
-	
+
+	public JsonSerializationProcessor(String format)
+	{
+		this(Arrays.asList(format));
+	}
+
 	public JsonSerializationProcessor(List<String> supportedFormats)
 	{
 		super(supportedFormats);

@@ -16,7 +16,7 @@
 package com.strategicgains.restexpress.serialization;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +26,7 @@ import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.contenttype.MediaRange;
 import com.strategicgains.restexpress.contenttype.MediaTypeParser;
+import com.strategicgains.restexpress.exception.ConfigurationException;
 import com.strategicgains.restexpress.exception.NotAcceptableException;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseWrapper;
@@ -37,10 +38,11 @@ import com.strategicgains.restexpress.response.ResponseWrapper;
 public class AbstractSerializationProvider
 implements SerializationProvider
 {
-	private Map<String, ResponseProcessor> processorsByFormat = new LinkedHashMap<String, ResponseProcessor>();
-	private Map<String, ResponseProcessor> processorsByMimeType = new LinkedHashMap<String, ResponseProcessor>();
+	private Map<String, ResponseProcessor> processorsByFormat = new HashMap<String, ResponseProcessor>();
+	private Map<String, ResponseProcessor> processorsByMimeType = new HashMap<String, ResponseProcessor>();
 	private List<MediaRange> supportedMediaRanges = new ArrayList<MediaRange>();
 	private ResponseProcessor defaultProcessor;
+	private List<Alias> aliases = new ArrayList<Alias>();
 
 	/**
 	 * Add a SerializationProcessor to this SerializationProvider, along with ResponseWrapper to use
@@ -65,19 +67,28 @@ implements SerializationProvider
 	 */
 	public void add(SerializationProcessor processor, ResponseWrapper wrapper, boolean isDefault)
 	{
-		// TODO: this allows duplicate media ranges.  Fix... throw an exception on duplicates.
-		supportedMediaRanges.addAll(processor.getSupportedMediaRanges());
+		addMediaRanges(processor.getSupportedMediaRanges());
 		ResponseProcessor responseProcessor = new ResponseProcessor(processor, wrapper);
+		assignAliases(responseProcessor);
 
 		for (String format : processor.getSupportedFormats())
 		{
+			if (processorsByFormat.containsKey(format))
+			{
+				throw new ConfigurationException("Duplicate supported format: " + format);
+			}
+
 			processorsByFormat.put(format, responseProcessor);
 		}
 		
 		for (MediaRange mediaRange : processor.getSupportedMediaRanges())
 		{
-			//TODO: put only if not already present.
-			processorsByMimeType.put(mediaRange.asMediaType(), responseProcessor);
+			String mediaType = mediaRange.asMediaType();
+			
+			if (!processorsByMimeType.containsKey(mediaType))
+			{
+				processorsByMimeType.put(mediaRange.asMediaType(), responseProcessor);
+			}
 		}
 		
 		if (isDefault)
@@ -85,6 +96,44 @@ implements SerializationProvider
 			defaultProcessor = responseProcessor;
 		}
 	}
+
+	@Override
+	public void alias(String name, Class<?> type)
+	{
+		Alias a = new Alias(name, type);
+		if (!aliases.contains(a))
+		{
+			aliases.add(a);
+		}
+		
+		assignAlias(a);
+	}
+	
+	@Override
+	public void setDefaultFormat(String format)
+	{
+		ResponseProcessor processor = processorsByFormat.get(format);
+		
+		if (processor == null)
+		{
+			throw new RuntimeException("No serialization processor found for requested response format: " + format);
+		}
+		
+		defaultProcessor = processor;
+	}
+
+	@Override
+    public SerializationProcessor getSerializer(String format)
+    {
+	    ResponseProcessor p = processorsByFormat.get(format);
+	    
+	    if (p != null)
+	    {
+	    	return p.getSerializer();
+	    }
+	    
+	    return null;
+    }
 
 	@Override
 	public <T> T deserialize(Request request, Class<T> type)
@@ -164,4 +213,74 @@ implements SerializationProvider
 			response.addHeader(HttpHeaders.Names.CONTENT_TYPE, bestMatch);
 		}
     }
+
+
+	// SECTION: CONVENIENCE/SUPPORT
+
+	private void addMediaRanges(List<MediaRange> mediaRanges)
+    {
+		if (mediaRanges == null) return;
+		
+		for (MediaRange mediaRange : mediaRanges)
+		{
+			if (!supportedMediaRanges.contains(mediaRange))
+			{
+				supportedMediaRanges.add(mediaRange);
+			}
+		}
+    }
+
+	private void assignAlias(Alias a)
+    {
+		for (ResponseProcessor processor : processorsByFormat.values())
+		{
+			if (Aliasable.class.isAssignableFrom(processor.getClass()))
+			{
+				((Aliasable)processor).alias(a.name, a.type);
+			}
+		}
+    }
+
+	private void assignAliases(ResponseProcessor processor)
+    {
+		if (Aliasable.class.isAssignableFrom(processor.getClass()))
+		{
+			for (Alias a : aliases)
+			{
+				((Aliasable) processor).alias(a.name, a.type);
+			}
+		}
+    }
+
+
+	// SECTION: INNER CLASS
+
+	private class Alias
+	{
+		private String name;
+		private Class<?> type;
+		
+		public Alias(String name, Class<?> type)
+		{
+			super();
+			this.name = name;
+			this.type = type;
+		}
+		
+		@Override
+		public boolean equals(Object that)
+		{
+			return equals((Alias) that);
+		}
+		
+		private boolean equals(Alias that)
+		{
+			if (this.name.equals(that.name) && this.type.equals(that.type))
+			{
+				return true;
+			}
+
+			return false;
+		}
+	}
 }

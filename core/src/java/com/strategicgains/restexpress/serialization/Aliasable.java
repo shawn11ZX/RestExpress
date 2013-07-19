@@ -21,5 +21,5 @@ package com.strategicgains.restexpress.serialization;
  */
 public interface Aliasable
 {
-	public void alias(String string, Class<?> theClass);
+	public void alias(String name, Class<?> theClass);
 }

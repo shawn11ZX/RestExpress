@@ -76,7 +76,7 @@ public class MediaTypeParserTest
 		assertTrue(m2.parameters.isEmpty());
 		
 		MediaRange m3 = r.get(2);
-		assertEquals("text/html;level=1", m3.asMediaType());
+		assertEquals("text/html; level=1", m3.asMediaType());
 		assertEquals(1.0, m3.qvalue, 0.01);
 		assertEquals(1, m3.parameters.size());
 		assertEquals("1", m3.parameters.get("level"));
@@ -105,7 +105,7 @@ public class MediaTypeParserTest
 		assertTrue(m2.parameters.isEmpty());
 		
 		MediaRange m3 = r.get(2);
-		assertEquals("text/html;level=1", m3.asMediaType());
+		assertEquals("text/html; level=1", m3.asMediaType());
 		assertEquals(0.9, m3.qvalue, 0.01);
 		assertEquals(1, m3.parameters.size());
 		assertEquals("1", m3.parameters.get("level"));
@@ -158,7 +158,7 @@ public class MediaTypeParserTest
 	{
 		List<MediaRange> supported = MediaTypeParser.parse("text/*;q=0.3 , text/html;q=0.7, text/html;q=0.9;level=1,text/html;level=2;q=0.4, */*;q=0.5");
 		List<MediaRange> requested = MediaTypeParser.parse("text/*");
-		assertEquals("text/html;level=1", MediaTypeParser.getBestMatch(supported, requested));
+		assertEquals("text/html; level=1", MediaTypeParser.getBestMatch(supported, requested));
 	}
 
 	@Test

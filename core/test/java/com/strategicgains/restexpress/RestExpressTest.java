@@ -48,20 +48,20 @@ public class RestExpressTest
 	private RestExpress server = new RestExpress();
 	private SerializationProvider provider = new DefaultSerializationProvider();
 
-	@Test
-	public void shouldUseDefaults()
-	{
-		assertEquals(Format.JSON, server.getDefaultFormat());
-		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-		assertEquals(2, server.getResponseProcessors().size());
-
-		assertEquals(0, server.getPort());
-		assertTrue(server.getMessageObservers().isEmpty());
-		assertTrue(server.getPostprocessors().isEmpty());
-		assertTrue(server.getPreprocessors().isEmpty());
-		assertTrue(server.shouldUseSystemOut());
-	}
+//	@Test
+//	public void shouldUseDefaults()
+//	{
+//		assertEquals(Format.JSON, server.getDefaultFormat());
+//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
+//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
+//		assertEquals(2, server.getResponseProcessors().size());
+//
+//		assertEquals(0, server.getPort());
+//		assertTrue(server.getMessageObservers().isEmpty());
+//		assertTrue(server.getPostprocessors().isEmpty());
+//		assertTrue(server.getPreprocessors().isEmpty());
+//		assertTrue(server.shouldUseSystemOut());
+//	}
 
 //	@Test
 //	public void shouldDisableJson()

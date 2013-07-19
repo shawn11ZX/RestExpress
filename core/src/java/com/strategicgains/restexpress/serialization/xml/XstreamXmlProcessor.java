@@ -17,6 +17,7 @@
 
 package com.strategicgains.restexpress.serialization.xml;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.Map;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 
+import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.domain.JsendResultWrapper;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.SingleValueConverter;
@@ -44,15 +46,20 @@ extends XmlSerializationProcessor
 	
 	public XstreamXmlProcessor()
 	{
-		this(new XStream());
+		this(Format.XML);
+	}
+
+	public XstreamXmlProcessor(String format)
+	{
+		this(new XStream(), format);
 		xstream.registerConverter(new XstreamTimestampConverter());
-		xstream.alias("list", Collections.EMPTY_LIST.getClass());
+		xstream.alias("list", ArrayList.class);
 		xstream.alias("response", JsendResultWrapper.class);
 	}
-	
-	public XstreamXmlProcessor(XStream xstream)
+
+	public XstreamXmlProcessor(XStream xstream, String format)
 	{
-		super();
+		super(format);
 		this.xstream = xstream;
 		shouldAutoAlias = false;
 	}

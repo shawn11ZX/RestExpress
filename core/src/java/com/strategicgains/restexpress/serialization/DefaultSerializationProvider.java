@@ -15,7 +15,7 @@
 */
 package com.strategicgains.restexpress.serialization;
 
-import com.strategicgains.restexpress.response.JsendResponseWrapper;
+import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 
@@ -32,7 +32,7 @@ extends AbstractSerializationProvider
 	public DefaultSerializationProvider()
     {
 		super();
-		add(new JacksonJsonProcessor(), new JsendResponseWrapper(), true);
-		add(new XstreamXmlProcessor(), new JsendResponseWrapper());
+		add(new JacksonJsonProcessor(), new RawResponseWrapper(), true);
+		add(new XstreamXmlProcessor(), new RawResponseWrapper());
     }
 }

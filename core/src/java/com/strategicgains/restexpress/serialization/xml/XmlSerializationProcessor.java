@@ -41,9 +41,14 @@ implements AliasingSerializationProcessor
 
 	public XmlSerializationProcessor()
 	{
-		super(Arrays.asList(Format.XML, Format.WRAPPED_XML));
+		this(Arrays.asList(Format.XML));
 	}
 	
+	public XmlSerializationProcessor(String format)
+	{
+		this(Arrays.asList(format));
+	}
+
 	public XmlSerializationProcessor(List<String> supportedFormats)
 	{
 		super(supportedFormats);

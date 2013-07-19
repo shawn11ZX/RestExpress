@@ -15,21 +15,19 @@
 */
 package com.strategicgains.restexpress.serialization;
 
-import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.response.ResponseWrapper;
+
 
 /**
+ * The default serialization provider that uses Jackson for JSON and XStream for XML serialization/deserialization.
+ * 
  * @author toddf
  * @since Jul 18, 2013
  */
-public interface SerializationProvider
-extends Aliasable
+public class NullSerializationProvider
+extends AbstractSerializationProvider
 {
-	public void add(SerializationProcessor processor, ResponseWrapper wrapper);
-	public void add(SerializationProcessor processor, ResponseWrapper wrapper, boolean isDefault);
-	public <T> T deserialize(Request request, Class<T> type);
-	public void serialize(Request request, Response response);
-	public void setDefaultFormat(String format);
-	public SerializationProcessor getSerializer(String format);
+	public NullSerializationProvider()
+    {
+		super();
+    }
 }

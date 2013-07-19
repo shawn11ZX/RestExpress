@@ -45,12 +45,11 @@ import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.response.JsendResponseWrapper;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
-import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
+import com.strategicgains.restexpress.serialization.NullSerializationProvider;
+import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 import com.strategicgains.restexpress.settings.RouteDefaults;
@@ -73,18 +72,17 @@ public class DefaultRequestHandlerTest
 	public void initialize()
 	throws Exception
 	{
-		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
-		resolver.put(Format.WRAPPED_JSON, new ResponseProcessor(new JacksonJsonProcessor(), new JsendResponseWrapper()));
-		resolver.put(Format.JSON, new ResponseProcessor(new JacksonJsonProcessor(), new RawResponseWrapper()));
-		ResponseProcessor xmlProcessor = new ResponseProcessor(new XstreamXmlProcessor(), new JsendResponseWrapper());
-		AliasingSerializationProcessor xmlSerializer = (AliasingSerializationProcessor) xmlProcessor.getSerializer();
-		xmlSerializer.alias("dated", Dated.class);
-		resolver.put(Format.XML, xmlProcessor);
-		resolver.setDefaultFormat(Format.WRAPPED_JSON);
+		SerializationProvider provider = new NullSerializationProvider();
+		provider.add(new JacksonJsonProcessor(Format.JSON), new RawResponseWrapper());
+		provider.add(new JacksonJsonProcessor(Format.WRAPPED_JSON), new JsendResponseWrapper());
+		provider.add(new XstreamXmlProcessor(Format.XML), new RawResponseWrapper());
+		provider.add(new XstreamXmlProcessor(Format.WRAPPED_XML), new JsendResponseWrapper());
+		provider.alias("dated", Dated.class);
+		provider.setDefaultFormat(Format.WRAPPED_JSON);
 		
 		DummyRoutes routes = new DummyRoutes();
 		routes.defineRoutes();
-		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), resolver);
+		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), provider);
 		observer = new DummyObserver();
 		messageHandler.addMessageObserver(observer);
 		responseBody = new StringBuffer();

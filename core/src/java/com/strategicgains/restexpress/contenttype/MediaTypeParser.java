@@ -39,6 +39,8 @@ public class MediaTypeParser
 	 */
 	public static List<MediaRange> parse(String mediaType)
 	{
+		if (mediaType == null) return Collections.emptyList();
+
 		String[] segments = mediaType.split("\\s*,\\s*");
 		List<MediaRange> items = new ArrayList<MediaRange>();
 

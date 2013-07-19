@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.strategicgains.restexpress.ContentType;
+import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.serialization.DeserializationException;
 import com.strategicgains.restexpress.serialization.SerializationException;
 import com.strategicgains.util.date.DateAdapterConstants;
@@ -53,7 +54,12 @@ extends JsonSerializationProcessor
 
 	public JacksonJsonProcessor()
 	{
-		super();
+		this(Format.JSON);
+	}
+
+	public JacksonJsonProcessor(String format)
+	{
+		super(format);
 		SimpleModule module = new SimpleModule();
 		initializeModule(module);
 	}
