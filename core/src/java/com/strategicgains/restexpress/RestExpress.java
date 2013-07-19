@@ -816,7 +816,7 @@ public class RestExpress
 
 		for (Entry<String, ResponseProcessor> entry : getResponseProcessors().entrySet())
 		{
-			if (entry.getKey().equals(Format.XML))
+			if (entry.getValue().getSerializer().getResultingContentType().equals(ContentType.XML))
 			{
 				setXmlAliases((AliasingSerializationProcessor) entry.getValue().getSerializer());
 			}
