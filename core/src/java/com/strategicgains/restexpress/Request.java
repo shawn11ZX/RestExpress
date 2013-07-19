@@ -70,6 +70,11 @@ public class Request
 	
 	// SECTION: CONSTRUCTOR
 
+	public Request(HttpRequest request, RouteResolver routeResolver)
+	{
+		this(request, routeResolver, null);
+	}
+
 	public Request(HttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
 	{
 		super();

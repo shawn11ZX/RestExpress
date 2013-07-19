@@ -15,7 +15,11 @@
 */
 package com.strategicgains.restexpress.response;
 
+import java.util.List;
+
+import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.contenttype.MediaRange;
 import com.strategicgains.restexpress.serialization.SerializationProcessor;
 
 /**
@@ -43,11 +47,20 @@ public class ResponseProcessor
 	{
 		return wrapper;
 	}
+	
+	public List<MediaRange> getSupportedMediaRanges()
+	{
+		return serializer.getSupportedMediaRanges();
+	}
+	
+	public <T> T deserialize(Request request, Class<T> type)
+	{
+		return serializer.deserialize(request.getBody(), type);
+	}
 
-	public String process(Response response, String mediaType)
+	public String serialize(Response response)
 	{
 		Object wrapped = wrapper.wrap(response);
-		response.setContentType(mediaType);
 		
 		if (wrapped != null)
 		{

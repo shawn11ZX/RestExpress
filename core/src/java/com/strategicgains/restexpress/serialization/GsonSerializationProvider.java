@@ -15,6 +15,7 @@
 */
 package com.strategicgains.restexpress.serialization;
 
+import com.strategicgains.restexpress.response.JsendResponseWrapper;
 import com.strategicgains.restexpress.serialization.json.GsonJsonProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 
@@ -31,7 +32,7 @@ extends AbstractSerializationProvider
 	public GsonSerializationProvider()
     {
 		super();
-		addSerializationProcessor(new GsonJsonProcessor(), true);
-		addSerializationProcessor(new XstreamXmlProcessor());
+		add(new GsonJsonProcessor(), new JsendResponseWrapper(), true);
+		add(new XstreamXmlProcessor(), new JsendResponseWrapper());
     }
 }

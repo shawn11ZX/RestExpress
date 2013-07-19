@@ -16,7 +16,7 @@
 package com.strategicgains.restexpress.serialization;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +27,8 @@ import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.contenttype.MediaRange;
 import com.strategicgains.restexpress.contenttype.MediaTypeParser;
 import com.strategicgains.restexpress.exception.NotAcceptableException;
+import com.strategicgains.restexpress.response.ResponseProcessor;
+import com.strategicgains.restexpress.response.ResponseWrapper;
 
 /**
  * @author toddf
@@ -35,40 +37,59 @@ import com.strategicgains.restexpress.exception.NotAcceptableException;
 public class AbstractSerializationProvider
 implements SerializationProvider
 {
-	private Map<String, SerializationProcessor> processorsByFormat = new HashMap<String, SerializationProcessor>();
-	private Map<String, SerializationProcessor> processorsByMimeType = new HashMap<String, SerializationProcessor>();
+	private Map<String, ResponseProcessor> processorsByFormat = new LinkedHashMap<String, ResponseProcessor>();
+	private Map<String, ResponseProcessor> processorsByMimeType = new LinkedHashMap<String, ResponseProcessor>();
 	private List<MediaRange> supportedMediaRanges = new ArrayList<MediaRange>();
-	private SerializationProcessor defaultProcessor;
+	private ResponseProcessor defaultProcessor;
 
-	public void addSerializationProcessor(SerializationProcessor processor)
+	/**
+	 * Add a SerializationProcessor to this SerializationProvider, along with ResponseWrapper to use
+	 * to alter/format responses.
+	 * 
+	 * @param processor
+	 * @param wrapper
+	 */
+	public void add(SerializationProcessor processor, ResponseWrapper wrapper)
 	{
-		addSerializationProcessor(processor, false);
+		add(processor, wrapper, false);
 	}
 
-	public void addSerializationProcessor(SerializationProcessor processor, boolean isDefault)
+	/**
+	 * Add a SerializationProcessor to this SerializationProvider, along with ResponseWrapper to use
+	 * to alter/format responses.  If isDefault is true, this SerializationProcessor is used when
+	 * Content-Type negotiation fails or format is not specified in the URL.
+	 * 
+	 * @param processor
+	 * @param wrapper
+	 * @param isDefault
+	 */
+	public void add(SerializationProcessor processor, ResponseWrapper wrapper, boolean isDefault)
 	{
+		// TODO: this allows duplicate media ranges.  Fix... throw an exception on duplicates.
 		supportedMediaRanges.addAll(processor.getSupportedMediaRanges());
+		ResponseProcessor responseProcessor = new ResponseProcessor(processor, wrapper);
 
 		for (String format : processor.getSupportedFormats())
 		{
-			processorsByFormat.put(format, processor);
+			processorsByFormat.put(format, responseProcessor);
 		}
 		
 		for (MediaRange mediaRange : processor.getSupportedMediaRanges())
 		{
-			processorsByMimeType.put(mediaRange.asMediaType(), processor);
+			//TODO: put only if not already present.
+			processorsByMimeType.put(mediaRange.asMediaType(), responseProcessor);
 		}
 		
 		if (isDefault)
 		{
-			defaultProcessor = processor;
+			defaultProcessor = responseProcessor;
 		}
 	}
 
 	@Override
 	public <T> T deserialize(Request request, Class<T> type)
 	{
-		SerializationProcessor processor = null;
+		ResponseProcessor processor = null;
 	    String format = request.getFormat();
 
 		if (format != null)
@@ -97,14 +118,14 @@ implements SerializationProvider
 			processor = defaultProcessor;
 		}
 
-		return processor.deserialize(request.getBody(), type);
+		return processor.deserialize(request, type);
 	}
 
 	@Override
     public void serialize(Request request, Response response)
     {
 		String bestMatch = null;
-		SerializationProcessor processor = null;
+		ResponseProcessor processor = null;
 		String format = request.getFormat();
 
 		if (format != null)
@@ -136,8 +157,8 @@ implements SerializationProvider
 			bestMatch = processor.getSupportedMediaRanges().get(0).asMediaType();
 		}
 
-		response.setBody(processor.serialize(response.getBody()));
-		
+		response.setBody(processor.serialize(response));
+
 		if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
 		{
 			response.addHeader(HttpHeaders.Names.CONTENT_TYPE, bestMatch);

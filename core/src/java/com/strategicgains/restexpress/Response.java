@@ -51,7 +51,12 @@ public class Response
 	
 	
 	// SECTION: CONSTRUCTORS
-	
+
+	public Response()
+	{
+		this(null);
+	}
+
 	public Response(SerializationProvider serializationProvider)
 	{
 		super();

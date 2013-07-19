@@ -36,10 +36,11 @@ import org.junit.Test;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
 import com.strategicgains.restexpress.response.ResponseProcessor;
-import com.strategicgains.restexpress.response.ResponseProcessorResolver;
 import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
+import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
+import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 import com.strategicgains.restexpress.settings.RouteDefaults;
@@ -61,7 +62,7 @@ public class RawWrappedResponseTest
 	public void initialize()
 	throws Exception
 	{
-		ResponseProcessorResolver resolver = new ResponseProcessorResolver();
+		SerializationProvider resolver = new DefaultSerializationProvider();
 		resolver.put(Format.JSON, new ResponseProcessor(new JacksonJsonProcessor(), new RawResponseWrapper()));
 		resolver.put(Format.XML, new ResponseProcessor(new XstreamXmlProcessor(), new RawResponseWrapper()));
 		resolver.setDefaultFormat(Format.JSON);
