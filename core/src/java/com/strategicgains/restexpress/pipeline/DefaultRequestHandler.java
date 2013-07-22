@@ -384,10 +384,16 @@ extends SimpleChannelUpstreamHandler
 	private void serializeResponse(MessageContext context, boolean force)
 	{
 		Response response = context.getResponse();
-		response.serialize(context.getRequest(), force);
 
 		if (HttpSpecification.isContentTypeAllowed(response))
 		{
+			String serialized = response.serialize(context.getRequest(), force);
+
+			if (serialized != null)
+			{
+				response.setBody(serialized);
+			}
+
 			if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
 			{
 				response.setContentType(ContentType.TEXT_PLAIN);

@@ -297,11 +297,13 @@ public class Response
     	this.exception = exception;
     }
 
-	public void serialize(Request request, boolean force)
+	public String serialize(Request request, boolean force)
 	{
 		if (isSerialized)
 		{
-			serializationProvider.serialize(request, this, force);
+			return serializationProvider.serialize(request, this, force);
 		}
+		
+		return null;
 	}
 }

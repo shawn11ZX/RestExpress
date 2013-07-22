@@ -178,7 +178,7 @@ implements SerializationProvider
 	}
 
 	@Override
-    public void serialize(Request request, Response response, boolean shouldForce)
+    public String serialize(Request request, Response response, boolean shouldForce)
     {
 		String bestMatch = null;
 		ResponseProcessor processor = null;
@@ -221,12 +221,12 @@ implements SerializationProvider
 			bestMatch = processor.getSupportedMediaRanges().get(0).asMediaType();
 		}
 
-		response.setBody(processor.serialize(response));
-
 		if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
 		{
 			response.setContentType(bestMatch);
 		}
+
+		return processor.serialize(response);
     }
 
 
@@ -249,9 +249,9 @@ implements SerializationProvider
     {
 		for (ResponseProcessor processor : processorsByFormat.values())
 		{
-			if (Aliasable.class.isAssignableFrom(processor.getClass()))
+			if (Aliasable.class.isAssignableFrom(processor.getSerializer().getClass()))
 			{
-				((Aliasable)processor).alias(a.name, a.type);
+				((Aliasable)processor.getSerializer()).alias(a.name, a.type);
 			}
 		}
     }

@@ -75,8 +75,7 @@ public class DefaultRequestHandlerTest
 		SerializationProvider provider = new NullSerializationProvider();
 		provider.add(new JacksonJsonProcessor(Format.JSON), new RawResponseWrapper());
 		provider.add(new JacksonJsonProcessor(Format.WRAPPED_JSON), new JsendResponseWrapper());
-		provider.add(new XstreamXmlProcessor(Format.XML), new RawResponseWrapper());
-		provider.add(new XstreamXmlProcessor(Format.WRAPPED_XML), new JsendResponseWrapper());
+		provider.add(new XstreamXmlProcessor(Format.XML), new JsendResponseWrapper());
 		provider.alias("dated", Dated.class);
 		provider.setDefaultFormat(Format.WRAPPED_JSON);
 		

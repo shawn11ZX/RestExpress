@@ -30,5 +30,5 @@ extends Aliasable
 	public void add(SerializationProcessor processor, ResponseWrapper wrapper, boolean isDefault);
 	public void setDefaultFormat(String format);
 	public <T> T deserialize(Request request, Class<T> type);
-    public void serialize(Request request, Response response, boolean shouldForce);
+    public String serialize(Request request, Response response, boolean shouldForce);
 }
