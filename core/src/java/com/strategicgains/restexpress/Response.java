@@ -42,7 +42,6 @@ public class Response
 	// SECTION: INSTANCE VARIABLES
 
 	private HttpResponseStatus responseCode = OK;
-	private String contentType = null;
 	private Object body;
 	private Map<String, List<String>> headers = new HashMap<String, List<String>>();
 	private boolean isSerialized = true;
@@ -245,12 +244,22 @@ public class Response
 
 	public String getContentType()
     {
-    	return contentType;
+		return getHeader(HttpHeaders.Names.CONTENT_TYPE);
     }
 
 	public void setContentType(String contentType)
     {
-    	this.contentType = contentType;
+		List<String> list = headers.get(HttpHeaders.Names.CONTENT_TYPE);
+
+		if (list != null && !list.isEmpty())
+		{
+			list.clear();
+			list.add(contentType);
+		}
+		else if (list == null)
+		{
+			addHeader(HttpHeaders.Names.CONTENT_TYPE, contentType);
+		}
     }
 
 	public boolean isSerialized()
@@ -288,11 +297,11 @@ public class Response
     	this.exception = exception;
     }
 
-	public void serialize(Request request)
+	public void serialize(Request request, boolean force)
 	{
 		if (isSerialized)
 		{
-			serializationProvider.serialize(request, this);
+			serializationProvider.serialize(request, this, force);
 		}
 	}
 }

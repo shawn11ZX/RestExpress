@@ -24,8 +24,10 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
+import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
@@ -132,7 +134,7 @@ extends SimpleChannelUpstreamHandler
 			}
 	
 			invokePostprocessors(postprocessors, context.getRequest(), context.getResponse());
-			serializeResponse(context);
+			serializeResponse(context, false);
 			enforceHttpSpecification(context);
 			
 			// TODO: this is a problem if a FinallyProcessor changes the response.  It will only work in 'accidentally' and intermittently.
@@ -181,7 +183,7 @@ extends SimpleChannelUpstreamHandler
 
 		context.setException(rootCause);
 		notifyException(context);
-		serializeResponse(context);
+		serializeResponse(context, true);
 		writeResponse(ctx, context);
 	}
 
@@ -379,9 +381,17 @@ extends SimpleChannelUpstreamHandler
     	getResponseWriter().write(ctx, context.getRequest(), context.getResponse());
     }
 
-	private void serializeResponse(MessageContext context)
+	private void serializeResponse(MessageContext context, boolean force)
 	{
 		Response response = context.getResponse();
-		response.serialize(context.getRequest());
+		response.serialize(context.getRequest(), force);
+
+		if (HttpSpecification.isContentTypeAllowed(response))
+		{
+			if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
+			{
+				response.setContentType(ContentType.TEXT_PLAIN);
+			}
+		}
 	}
 }

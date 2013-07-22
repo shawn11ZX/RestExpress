@@ -28,8 +28,7 @@ extends Aliasable
 {
 	public void add(SerializationProcessor processor, ResponseWrapper wrapper);
 	public void add(SerializationProcessor processor, ResponseWrapper wrapper, boolean isDefault);
-	public <T> T deserialize(Request request, Class<T> type);
-	public void serialize(Request request, Response response);
 	public void setDefaultFormat(String format);
-	public SerializationProcessor getSerializer(String format);
+	public <T> T deserialize(Request request, Class<T> type);
+    public void serialize(Request request, Response response, boolean shouldForce);
 }

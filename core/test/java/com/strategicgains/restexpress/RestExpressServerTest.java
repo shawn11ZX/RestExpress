@@ -26,8 +26,8 @@ import org.junit.Test;
 import com.strategicgains.restexpress.domain.JsendResultWrapper;
 import com.strategicgains.restexpress.pipeline.SimpleConsoleLogMessageObserver;
 import com.strategicgains.restexpress.response.JsendResponseWrapper;
+import com.strategicgains.restexpress.serialization.AbstractSerializationProvider;
 import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
-import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
 
@@ -55,7 +55,7 @@ public class RestExpressServerTest
 	private static final String LITTLE_OS_URL = SERVER_HOST + LITTLE_OS_PATH;
 
 	private RestExpress server = new RestExpress();
-	SerializationProvider serializer = new DefaultSerializationProvider();
+	AbstractSerializationProvider serializer = new DefaultSerializationProvider();
 	private HttpClient http = new DefaultHttpClient();
 
 	@Before
@@ -352,7 +352,7 @@ public class RestExpressServerTest
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
-		assertEquals("\"Requested representation format not supported: xyz. Supported formats: json, wjson, wxml, xml\"", EntityUtils.toString(entity));
+		assertEquals("\"Requested representation format not supported: xyz. Supported formats: json, wxml, wjson, xml\"", EntityUtils.toString(entity));
 		request.releaseConnection();
 	}
 

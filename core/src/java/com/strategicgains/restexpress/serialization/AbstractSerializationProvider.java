@@ -26,10 +26,12 @@ import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.contenttype.MediaRange;
 import com.strategicgains.restexpress.contenttype.MediaTypeParser;
+import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.exception.ConfigurationException;
 import com.strategicgains.restexpress.exception.NotAcceptableException;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseWrapper;
+import com.strategicgains.restexpress.util.StringUtils;
 
 /**
  * @author toddf
@@ -39,7 +41,7 @@ public class AbstractSerializationProvider
 implements SerializationProvider
 {
 	private Map<String, ResponseProcessor> processorsByFormat = new HashMap<String, ResponseProcessor>();
-	private Map<String, ResponseProcessor> processorsByMimeType = new HashMap<String, ResponseProcessor>();
+	private Map<String, ResponseProcessor> processorsByMediaType = new HashMap<String, ResponseProcessor>();
 	private List<MediaRange> supportedMediaRanges = new ArrayList<MediaRange>();
 	private ResponseProcessor defaultProcessor;
 	private List<Alias> aliases = new ArrayList<Alias>();
@@ -85,9 +87,9 @@ implements SerializationProvider
 		{
 			String mediaType = mediaRange.asMediaType();
 			
-			if (!processorsByMimeType.containsKey(mediaType))
+			if (!processorsByMediaType.containsKey(mediaType))
 			{
-				processorsByMimeType.put(mediaRange.asMediaType(), responseProcessor);
+				processorsByMediaType.put(mediaRange.asMediaType(), responseProcessor);
 			}
 		}
 		
@@ -108,7 +110,7 @@ implements SerializationProvider
 		
 		assignAlias(a);
 	}
-	
+
 	@Override
 	public void setDefaultFormat(String format)
 	{
@@ -121,19 +123,24 @@ implements SerializationProvider
 		
 		defaultProcessor = processor;
 	}
-
-	@Override
-    public SerializationProcessor getSerializer(String format)
-    {
-	    ResponseProcessor p = processorsByFormat.get(format);
-	    
-	    if (p != null)
-	    {
-	    	return p.getSerializer();
-	    }
-	    
-	    return null;
-    }
+	
+	/**
+	 * Provided for testing so that UTs can specify and format and compare the resolver-based results.
+	 * 
+	 * @param format
+	 * @return
+	 */
+	public SerializationProcessor getSerializer(String format)
+	{
+		ResponseProcessor p = processorsByFormat.get(format);
+		
+		if (p != null)
+		{
+			return p.getSerializer();
+		}
+		
+		return null;
+	}
 
 	@Override
 	public <T> T deserialize(Request request, Class<T> type)
@@ -158,7 +165,7 @@ implements SerializationProvider
 	
 			if (bestMatch != null)
 			{
-				processor = processorsByMimeType.get(bestMatch);
+				processor = processorsByMediaType.get(bestMatch);
 			}
 		}
 		
@@ -171,22 +178,30 @@ implements SerializationProvider
 	}
 
 	@Override
-    public void serialize(Request request, Response response)
+    public void serialize(Request request, Response response, boolean shouldForce)
     {
 		String bestMatch = null;
 		ResponseProcessor processor = null;
 		String format = request.getFormat();
 
+		if (format == null && response.hasException())
+		{
+			format = parseFormatFromUrl(request.getUrl());
+		}
+
 		if (format != null)
 		{
 			processor = processorsByFormat.get(format);
 
-			if (processor == null)
+			if (processor != null)
 			{
-				throw new NotAcceptableException(format);
+				bestMatch = processor.getSupportedMediaRanges().get(0).asMediaType();
 			}
-			
-			bestMatch = processor.getSupportedMediaRanges().get(0).asMediaType();
+			else if (!shouldForce)
+			{
+				throw new BadRequestException("Requested representation format not supported: " + format 
+					+ ". Supported formats: " + StringUtils.join(", ", processorsByFormat.keySet()));
+			}
 		}
 
 		if (processor == null)
@@ -196,7 +211,7 @@ implements SerializationProvider
 	
 			if (bestMatch != null)
 			{
-				processor = processorsByMimeType.get(bestMatch);
+				processor = processorsByMediaType.get(bestMatch);
 			}
 		}
 		
@@ -210,7 +225,7 @@ implements SerializationProvider
 
 		if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
 		{
-			response.addHeader(HttpHeaders.Names.CONTENT_TYPE, bestMatch);
+			response.setContentType(bestMatch);
 		}
     }
 
@@ -250,6 +265,14 @@ implements SerializationProvider
 				((Aliasable) processor).alias(a.name, a.type);
 			}
 		}
+    }
+
+	private String parseFormatFromUrl(String url)
+    {
+		int queryDelimiterIndex = url.indexOf('?');
+		String path = (queryDelimiterIndex > 0 ? url.substring(0, queryDelimiterIndex) : url);
+    	int formatDelimiterIndex = path.lastIndexOf('.');
+    	return (formatDelimiterIndex > 0 ? path.substring(formatDelimiterIndex + 1) : null);
     }
 
 

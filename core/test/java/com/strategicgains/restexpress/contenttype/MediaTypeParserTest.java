@@ -111,7 +111,7 @@ public class MediaTypeParserTest
 		assertEquals("1", m3.parameters.get("level"));
 		
 		MediaRange m4 = r.get(3);
-		assertEquals("text/html;level=2", m4.asMediaType());
+		assertEquals("text/html; level=2", m4.asMediaType());
 		assertEquals(0.4, m4.qvalue, 0.01);
 		assertEquals("2", m4.parameters.get("level"));
 		
