@@ -28,7 +28,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.common.query.QueryRange;
-import com.strategicgains.restexpress.serialization.SerializationProvider;
+import com.strategicgains.restexpress.serialization.SerializationSettings;
 
 /**
  * @author toddf
@@ -46,20 +46,13 @@ public class Response
 	private Map<String, List<String>> headers = new HashMap<String, List<String>>();
 	private boolean isSerialized = true;
 	private Throwable exception = null;
-	private SerializationProvider serializationProvider;
-	
+	private SerializationSettings serializationSettings;
 	
 	// SECTION: CONSTRUCTORS
 
 	public Response()
 	{
-		this(null);
-	}
-
-	public Response(SerializationProvider serializationProvider)
-	{
 		super();
-		this.serializationProvider = serializationProvider;
 	}
 
 
@@ -296,14 +289,19 @@ public class Response
     {
     	this.exception = exception;
     }
-
-	public String serialize(Request request, boolean force)
+	
+	public void setSerializationSettings(SerializationSettings settings)
 	{
-		if (isSerialized)
-		{
-			return serializationProvider.serialize(request, this, force);
-		}
-		
-		return null;
+		this.serializationSettings = settings;
+	}
+	
+	public boolean hasSerializationSettings()
+	{
+		return (serializationSettings != null);
+	}
+	
+	public SerializationSettings getSerializationSettings()
+	{
+		return serializationSettings;
 	}
 }

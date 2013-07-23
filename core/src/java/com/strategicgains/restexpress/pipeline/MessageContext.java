@@ -27,6 +27,7 @@ import com.strategicgains.restexpress.Parameters;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.route.Action;
+import com.strategicgains.restexpress.serialization.SerializationSettings;
 
 /**
  * @author toddf
@@ -138,5 +139,10 @@ public class MessageContext
 	            request.addHeader(entry.getKey(), entry.getValue());
             }
 		}
+    }
+
+	public void setSerializationSettings(SerializationSettings settings)
+    {
+		response.setSerializationSettings(settings);
     }
 }

@@ -2,11 +2,13 @@ package com.strategicgains.restexpress;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -23,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.strategicgains.restexpress.common.query.QueryRange;
 import com.strategicgains.restexpress.domain.JsendResultWrapper;
 import com.strategicgains.restexpress.pipeline.SimpleConsoleLogMessageObserver;
 import com.strategicgains.restexpress.response.JsendResponseWrapper;
@@ -436,8 +439,29 @@ public class RestExpressServerTest
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		Header range = response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE);
+		assertNotNull(range);
+		assertEquals("items 0-2/3", range.getValue());
 		LittleO[] result = serializer.getSerializer(Format.JSON).deserialize(EntityUtils.toString(entity), LittleO[].class);
 		verifyList(result);
+		request.releaseConnection();
+	}
+
+	@Test
+	public void shouldNotContainContentRangeHeaderOnInvalidAcceptHeader()
+	throws Exception
+	{
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(LITTLE_OS_URL);
+		request.addHeader(HttpHeaders.Names.ACCEPT, "no-good/no-good");
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.NOT_ACCEPTABLE.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		assertNull(response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE));
+		assertEquals("\"Supported Media Types: application/json; charset=UTF-8, application/javasctript; charset=UTF-8, text/javascript; charset=UTF-8, application/xml; charset=UTF-8, text/xml; charset=UTF-8\"", EntityUtils.toString(entity));
 		request.releaseConnection();
 	}
 
@@ -474,6 +498,9 @@ public class RestExpressServerTest
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		Header range = response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE);
+		assertNotNull(range);
+		assertEquals("items 0-2/3", range.getValue());
 		String result = EntityUtils.toString(entity);
 		assertTrue(result.contains("\"code\":200"));
 		assertTrue(result.contains("\"status\":\"success\""));
@@ -512,6 +539,9 @@ public class RestExpressServerTest
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
+		Header range = response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE);
+		assertNotNull(range);
+		assertEquals("items 0-2/3", range.getValue());
 		String entityString = EntityUtils.toString(entity);
 		List<LittleO> o = serializer.getSerializer(Format.XML).deserialize(entityString, ArrayList.class);
 		verifyList(o.toArray(new LittleO[0]));
@@ -550,6 +580,9 @@ public class RestExpressServerTest
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
+		Header range = response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE);
+		assertNotNull(range);
+		assertEquals("items 0-2/3", range.getValue());
 		String entityString = EntityUtils.toString(entity);
 		JsendResultWrapper o = serializer.getSerializer(Format.WRAPPED_XML).deserialize(entityString, JsendResultWrapper.class);
 		verifyList(((ArrayList<LittleO>)o.getData()).toArray(new LittleO[0]));
@@ -623,6 +656,8 @@ public class RestExpressServerTest
 		
 		public List<LittleO> readAll(Request request, Response response)
 		{
+			QueryRange range = new QueryRange(0, 3);
+			response.addRangeHeader(range, 3);
 			List<LittleO> l = new ArrayList<LittleO>();
 			l.add(newLittleO(1));
 			l.add(newLittleO(2));

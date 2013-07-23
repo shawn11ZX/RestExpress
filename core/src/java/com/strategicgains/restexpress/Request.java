@@ -162,7 +162,7 @@ public class Request
 	 */
 	public <T> T getBodyAs(Class<T> type)
 	{
-		return serializationProvider.deserialize(this, type);
+		return serializationProvider.resolveRequest(this).deserialize(this, type);
 	}
 
 	/**

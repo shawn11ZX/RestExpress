@@ -37,6 +37,7 @@ import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.response.HttpResponseWriter;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
+import com.strategicgains.restexpress.serialization.SerializationSettings;
 import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.util.HttpSpecification;
 
@@ -125,6 +126,7 @@ extends SimpleChannelUpstreamHandler
 		{
 			notifyReceived(context);
 			resolveRoute(context);
+			resolveResponseProcessor(context);
 			invokePreprocessors(preprocessors, context.getRequest());
 			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
 
@@ -151,6 +153,12 @@ extends SimpleChannelUpstreamHandler
 			notifyComplete(context);
 		}
 	}
+
+	private void resolveResponseProcessor(MessageContext context)
+    {
+		SerializationSettings s = serializationProvider.resolveResponse(context.getRequest(), context.getResponse(), false);
+		context.setSerializationSettings(s);
+    }
 
 	/**
      * @param context
@@ -369,7 +377,7 @@ extends SimpleChannelUpstreamHandler
      */
     private Response createResponse()
     {
-    	return new Response(serializationProvider);
+    	return new Response();
     }
 
     /**
@@ -387,11 +395,33 @@ extends SimpleChannelUpstreamHandler
 
 		if (HttpSpecification.isContentTypeAllowed(response))
 		{
-			String serialized = response.serialize(context.getRequest(), force);
+			SerializationSettings settings = null;
 
-			if (serialized != null)
+			if (response.hasSerializationSettings())
 			{
-				response.setBody(serialized);
+				settings = response.getSerializationSettings();
+			}
+			else if (force)
+			{
+				settings = serializationProvider.resolveResponse(context.getRequest(), response, force);
+			}
+
+			if (settings != null)
+			{
+				if (response.isSerialized())
+				{
+					String serialized = settings.serialize(response);
+					
+					if (serialized != null)
+					{
+						response.setBody(serialized);
+	
+						if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
+						{
+							response.setContentType(settings.getMediaType());
+						}
+					}
+				}
 			}
 
 			if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))

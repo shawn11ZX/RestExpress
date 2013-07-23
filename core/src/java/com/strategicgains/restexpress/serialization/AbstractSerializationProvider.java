@@ -37,7 +37,7 @@ import com.strategicgains.restexpress.util.StringUtils;
  * @author toddf
  * @since Jul 18, 2013
  */
-public class AbstractSerializationProvider
+public abstract class AbstractSerializationProvider
 implements SerializationProvider
 {
 	private Map<String, ResponseProcessor> processorsByFormat = new HashMap<String, ResponseProcessor>();
@@ -143,7 +143,7 @@ implements SerializationProvider
 	}
 
 	@Override
-	public <T> T deserialize(Request request, Class<T> type)
+	public SerializationSettings resolveRequest(Request request)
 	{
 		ResponseProcessor processor = null;
 	    String format = request.getFormat();
@@ -174,17 +174,17 @@ implements SerializationProvider
 			processor = defaultProcessor;
 		}
 
-		return processor.deserialize(request, type);
+		return new SerializationSettings(request.getHeader(HttpHeaders.Names.CONTENT_TYPE), processor);
 	}
 
 	@Override
-    public String serialize(Request request, Response response, boolean shouldForce)
+    public SerializationSettings resolveResponse(Request request, Response response, boolean shouldForce)
     {
 		String bestMatch = null;
 		ResponseProcessor processor = null;
 		String format = request.getFormat();
 
-		if (format == null && response.hasException())
+		if (exceptionOccurredBeforeRouteResolution(format, response))
 		{
 			format = parseFormatFromUrl(request.getUrl());
 		}
@@ -224,13 +224,8 @@ implements SerializationProvider
 			processor = defaultProcessor;
 			bestMatch = processor.getSupportedMediaRanges().get(0).asMediaType();
 		}
-
-		if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
-		{
-			response.setContentType(bestMatch);
-		}
-
-		return processor.serialize(response);
+		
+		return new SerializationSettings(bestMatch, processor);
     }
 
 
@@ -269,6 +264,11 @@ implements SerializationProvider
 				((Aliasable) processor).alias(a.name, a.type);
 			}
 		}
+    }
+
+	private boolean exceptionOccurredBeforeRouteResolution(String format, Response response)
+    {
+	    return format == null && response.hasException();
     }
 
 	private String parseFormatFromUrl(String url)
