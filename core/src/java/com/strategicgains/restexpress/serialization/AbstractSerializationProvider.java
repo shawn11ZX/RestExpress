@@ -213,6 +213,10 @@ implements SerializationProvider
 			{
 				processor = processorsByMediaType.get(bestMatch);
 			}
+			else if (!shouldForce && !requestedMediaRanges.isEmpty())
+			{
+				throw new NotAcceptableException("Supported Media Types: " + StringUtils.join(", ", supportedMediaRanges));
+			}
 		}
 		
 		if (processor == null)

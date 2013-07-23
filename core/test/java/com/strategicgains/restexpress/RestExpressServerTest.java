@@ -223,6 +223,40 @@ public class RestExpressServerTest
 	}
 
 	@Test
+	public void shouldReturnXmlUsingAccept()
+	throws Exception
+	{
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(URL1_PLAIN);
+		request.addHeader(HttpHeaders.Names.ACCEPT, "application/xml");
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.XML, entity.getContentType().getValue());
+		assertEquals("<string>read</string>", EntityUtils.toString(entity));
+		request.releaseConnection();
+	}
+
+	@Test
+	public void shouldFavorFormatOverAcceptHeader()
+	throws Exception
+	{
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(URL1_XML);
+		request.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.XML, entity.getContentType().getValue());
+		assertEquals("<string>read</string>", EntityUtils.toString(entity));
+		request.releaseConnection();
+	}
+
+	@Test
 	public void shouldReturnJsonUsingFormat()
 	throws Exception
 	{
@@ -353,6 +387,23 @@ public class RestExpressServerTest
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
 		assertEquals("\"Requested representation format not supported: xyz. Supported formats: json, wxml, wjson, xml\"", EntityUtils.toString(entity));
+		request.releaseConnection();
+	}
+
+	@Test
+	public void shouldFailOnInvalidAccept()
+	throws Exception
+	{
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(URL1_PLAIN);
+		request.addHeader(HttpHeaders.Names.ACCEPT, "application/nogood");
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.NOT_ACCEPTABLE.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		assertEquals("\"Supported Media Types: application/json; charset=UTF-8, application/javasctript; charset=UTF-8, text/javascript; charset=UTF-8, application/xml; charset=UTF-8, text/xml; charset=UTF-8\"", EntityUtils.toString(entity));
 		request.releaseConnection();
 	}
 
