@@ -47,7 +47,7 @@ public class RestExpressServerTest
 	private static final String URL_PATH4 = "/4/restexpress/allen/test/33";
 	private static final String LITTLE_O_PATH = "/littleos/1";
 	private static final String LITTLE_OS_PATH = "/littleos";
-	private static final int SERVER_PORT = 8888;
+	private static final int SERVER_PORT = 8800;
 	private static final String SERVER_HOST = "http://localhost:" + SERVER_PORT;
 	private static final String URL1_PLAIN = SERVER_HOST + URL_PATH1;
 	private static final String URL1_JSON = SERVER_HOST + URL_PATH1 + ".json";
@@ -543,7 +543,8 @@ public class RestExpressServerTest
 		assertNotNull(range);
 		assertEquals("items 0-2/3", range.getValue());
 		String entityString = EntityUtils.toString(entity);
-		List<LittleO> o = serializer.getSerializer(Format.XML).deserialize(entityString, ArrayList.class);
+		@SuppressWarnings("unchecked")
+        List<LittleO> o = serializer.getSerializer(Format.XML).deserialize(entityString, ArrayList.class);
 		verifyList(o.toArray(new LittleO[0]));
 		request.releaseConnection();
 	}
@@ -568,7 +569,7 @@ public class RestExpressServerTest
 		request.releaseConnection();
 	}
 
-	@Test
+    @Test
 	public void shouldSerializeListAsWrappedXml()
 	throws Exception
 	{

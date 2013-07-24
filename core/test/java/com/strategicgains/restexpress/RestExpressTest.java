@@ -17,7 +17,6 @@ package com.strategicgains.restexpress;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -31,9 +30,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.Test;
 
-import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
-import com.strategicgains.restexpress.serialization.SerializationProvider;
-
 
 /**
  * @author toddf
@@ -42,11 +38,10 @@ import com.strategicgains.restexpress.serialization.SerializationProvider;
 public class RestExpressTest
 {
 	private static final String TEST_PATH = "/restexpress/test1";
-	private static final int TEST_PORT = 8888;
+	private static final int TEST_PORT = 8900;
 	private static final String TEST_URL = "http://localhost:" + TEST_PORT + TEST_PATH;
 
 	private RestExpress server = new RestExpress();
-	private SerializationProvider provider = new DefaultSerializationProvider();
 
 //	@Test
 //	public void shouldUseDefaults()
