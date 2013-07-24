@@ -38,7 +38,7 @@ import org.junit.Test;
 public class RestExpressTest
 {
 	private static final String TEST_PATH = "/restexpress/test1";
-	private static final int TEST_PORT = 8900;
+	private static final int TEST_PORT = 8901;
 	private static final String TEST_URL = "http://localhost:" + TEST_PORT + TEST_PATH;
 
 	private RestExpress server = new RestExpress();
