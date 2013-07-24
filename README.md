@@ -24,7 +24,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.2</version>
+			<version>0.9.4</version>
 		</dependency>
 ```
 Development:
@@ -32,7 +32,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.3-SNAPSHOT</version>
+			<version>0.9.5-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -77,8 +77,39 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.9.3 - SNAPSHOT (in branch 'master')
+Release 0.10.0 - SNAPSHOT (in branch 'master')
+* ** Breaking Change ** Re-added GSON capability from version 0.8.2, making things a little
+  more pluggable with RestExpress.setSerializationProvider(SerializationProvider).
+  DefaultSerializationProvider is the default. GsonSerializationProvider is also available,
+  but requires adding GSON to your pom file.  Must refactor your own custom ResponseProcessor
+  class into a SerializationProvider implementor.
+* ** Breaking Change ** Removed RestExpress.putResponseProcessor(), .supportJson(), .supportXml(),
+  .supportTxt(), .noJson(), .noXml(), noTxt() as this is all implemented in the SerializationProvider.
+* Implemented content-type negotiation using Content-Type header for serialization (e.g. 
+  Request.getBodyAs(type)) and Accept header for deserialization. Implementation still
+  favors .{format}, but uses content-type negotiation if format not supplied.
+
+Release 0.9.4 - 17 Jul 2013
+---------------------------------------------------------------------------------------------------
+* Fixed issue for plugins that are dependent on RouteMetadata. Fixed issue with routes
+  that depend on GET, PUT, POST, DELETE as the default--wasn't generating metadata
+  correctly for that corner case.
+* Fixed issue with RouteBuilder metadata generation where it wouldn't include the defaults if none set on route.
+* Updated javadoc for getFullPattern() and getPattern().
+* Changed Route.getBaseUrl() to perform null check to avoid getting 'null' string in value.
+* Combined RestExpress-Common as a sub-module and moved core RestExpress functionality
+  to the 'core' sub-module.
+
+Release 0.9.3 - 14 Jun 2013
+---------------------------------------------------------------------------------------------------
 * Fixed issue with setter getting called in deserialization instead of Jackson deserializer.
+* Removed LogLevel enumeration due to lack of use.
+* Fixed issue #61 - Large Chunked Request Causes Errors.  Added HttpChunkAggregator to the
+  pipeline.
+* Added RestExpress.setMaxContentSize(int) to allow limiting of total content length of requests
+  even if chunked.  Default max content size is 25K.
+* Added RestExpress.iterateRouteBuilders(Callback<RouteBuilder> callback) to facilitate
+  plugins, etc. augmenting or extracting information from the declared routes.
 
 Release 0.9.2 - 27 Mar 2013
 ---------------------------------------------------------------------------------------------------
