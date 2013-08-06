@@ -20,9 +20,9 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.common.exception.ConfigurationException;
 import com.strategicgains.restexpress.domain.metadata.RouteMetadata;
 import com.strategicgains.restexpress.domain.metadata.UriMetadata;
-import com.strategicgains.restexpress.exception.ConfigurationException;
 import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**

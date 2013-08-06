@@ -24,10 +24,10 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.common.exception.ConfigurationException;
 import com.strategicgains.restexpress.contenttype.MediaRange;
 import com.strategicgains.restexpress.contenttype.MediaTypeParser;
 import com.strategicgains.restexpress.exception.BadRequestException;
-import com.strategicgains.restexpress.exception.ConfigurationException;
 import com.strategicgains.restexpress.exception.NotAcceptableException;
 import com.strategicgains.restexpress.response.ResponseProcessor;
 import com.strategicgains.restexpress.response.ResponseWrapper;

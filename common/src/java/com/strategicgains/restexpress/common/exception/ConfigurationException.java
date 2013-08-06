@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.strategicgains.restexpress.exception;
+package com.strategicgains.restexpress.common.exception;
 
 
 /**
@@ -23,7 +23,7 @@ package com.strategicgains.restexpress.exception;
  * @since Nov 20, 2009
  */
 public class ConfigurationException
-extends ServiceException
+extends RuntimeException
 {
     private static final long serialVersionUID = -4891898485346985591L;
 
