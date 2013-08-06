@@ -271,39 +271,6 @@ public class Request
 	}
 
 	/**
-	 * Gets the named header from the request.
-	 * Returns null if the header is not present.
-	 * <p/>
-	 * NOTE: All headers and query-string parameters are URL decoded before
-	 *       being put on the Request as headers.
-	 * 
-	 * @param name
-	 * @return the requested header, or null if 'name' doesn't exist as a header.
-	 * @deprecated Use getHeader() instead as all headers are URL decoded.
-	 */
-	public String getRawHeader(String name)
-	{
-		return getHeader(name);
-	}
-	
-	/**
-	 * Gets the named header from the request.
-	 * Throws BadRequestException(message) if the header is not present.
-	 * 
-	 * NOTE: All headers and query-string parameters are URL decoded before
-	 *       being put on the Request as headers.
-	 * 
-	 * @param name
-	 * @return the requested header
-	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
-	 * @deprecated Use getHeader() instead as all headers are URL decoded.
-	 */
-	public String getRawHeader(String name, String message)
-	{
-		return getHeader(name, message);
-	}
-
-	/**
 	* Returns all header names in the request
 	* 
 	* @return Set of all header names
@@ -311,38 +278,6 @@ public class Request
 	public Set<String> getHeaderNames()
 	{
 		return httpRequest.getHeaderNames();
-	}
-
-	/**
-	 * Gets the named header from the request.
-	 * Returns null if the header is not present.
-	 * <p/>
-	 * NOTE: All headers and query-string parameters are URL decoded before
-	 *       being put on the Request as headers.
-	 * 
-	 * @param name
-	 * @return the requested header, or null if 'name' doesn't exist as a header.
-	 * @deprecated Use getHeader() instead as all headers are URL decoded.
-	 */
-	public String getUrlDecodedHeader(String name)
-	{
-		return getHeader(name);
-	}
-	
-	/**
-	 * Gets the named header from the request.
-	 * Throws BadRequestException(message) if the header is not present.
-	 * <p/>
-	 * NOTE: All headers and query-string parameters are URL decoded before
-	 *       being put on the Request as headers.
-	 *       
-	 * @return the requested header
-	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
-	 * @deprecated Use getHeader() instead as all headers are URL decoded.
-	 */
-	public String getUrlDecodedHeader(String name, String message)
-	{
-		return getHeader(name, message);
 	}
 	
 	public void addHeader(String name, String value)
@@ -489,8 +424,8 @@ public class Request
 	
 	/**
 	 * Checks the value of the given header against the given value.
-	 * Ignores case and attempts to URLDecode the header.  If the header
-	 * value or given value is null or has a trimmed length of zero, returns false.
+	 * Ignores case.  If the header value or given value is null or
+	 * has a trimmed length of zero, returns false.
 	 * 
 	 * @param name the name of a header to check.
 	 * @param value the expected value.
@@ -498,7 +433,7 @@ public class Request
 	 */
 	public boolean isHeaderEqual(String name, String value)
 	{
-		String header = getUrlDecodedHeader(name);
+		String header = getHeader(name);
 
 		if (header == null || header.trim().length() == 0 || value == null || value.trim().length() == 0)
 			return false;
