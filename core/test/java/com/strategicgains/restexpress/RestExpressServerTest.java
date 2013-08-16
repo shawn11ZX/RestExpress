@@ -276,6 +276,22 @@ public class RestExpressServerTest
 	}
 
 	@Test
+	public void shouldReturnErrorOnCapitalizedFormat()
+	throws Exception
+	{
+		server.bind(SERVER_PORT);
+
+		HttpGet request = new HttpGet(URL1_PLAIN + ".JSON");
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.BAD_REQUEST.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		assertEquals("\"Requested representation format not supported: JSON. Supported formats: json, wxml, wjson, xml\"", EntityUtils.toString(entity));
+		request.releaseConnection();
+	}
+
+	@Test
 	public void shouldReturnWrappedJsonUsingFormat()
 	throws Exception
 	{
