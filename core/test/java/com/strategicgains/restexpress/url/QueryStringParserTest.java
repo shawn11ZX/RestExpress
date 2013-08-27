@@ -15,13 +15,14 @@
  */
 package com.strategicgains.restexpress.url;
 
+import io.netty.handler.codec.http.QueryStringDecoder;
+
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -121,7 +122,7 @@ public class QueryStringParserTest
 			buf.append('&');
 		}
 		Assert.assertEquals(1024, new QueryStringDecoder(buf.toString())
-		    .getParameters().size());
+		    .parameters().size());
 	}
 
 	@Test

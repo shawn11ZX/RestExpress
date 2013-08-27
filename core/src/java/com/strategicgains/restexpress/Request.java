@@ -17,6 +17,14 @@
 
 package com.strategicgains.restexpress;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.QueryStringDecoder;
+
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.util.Collection;
@@ -26,14 +34,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.route.Route;
@@ -56,7 +56,7 @@ public class Request
 
 	// SECTION: INSTANCE VARIABLES
 
-	private HttpRequest httpRequest;
+	private FullHttpRequest httpRequest;
 	private HttpVersion httpVersion;
 	private InetSocketAddress remoteAddress;
 	private RouteResolver routeResolver;
@@ -70,12 +70,12 @@ public class Request
 	
 	// SECTION: CONSTRUCTOR
 
-	public Request(HttpRequest request, RouteResolver routeResolver)
+	public Request(FullHttpRequest request, RouteResolver routeResolver)
 	{
 		this(request, routeResolver, null);
 	}
 
-	public Request(HttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
+	public Request(FullHttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
 	{
 		super();
 		this.httpRequest = request;
@@ -88,10 +88,10 @@ public class Request
 		determineEffectiveHttpMethod(request);
 	}
 
-	public Request(MessageEvent event, RouteResolver routes, SerializationProvider serializationProvider)
+	public Request(InetSocketAddress remoteAddress, FullHttpRequest request, RouteResolver routes, SerializationProvider serializationProvider)
 	{
-		this((HttpRequest) event.getMessage(), routes, serializationProvider);
-		this.remoteAddress = (InetSocketAddress) event.getRemoteAddress();
+		this(request, routes, serializationProvider);
+		this.remoteAddress = remoteAddress;
 	}
 
 
@@ -148,9 +148,9 @@ public class Request
 		return getEffectiveHttpMethod().equals(HttpMethod.PUT);
 	}
 
-	public ChannelBuffer getBody()
+	public ByteBuf getBody()
     {
-		return httpRequest.getContent();
+		return httpRequest.content();
     }
 
 	/**
@@ -195,17 +195,17 @@ public class Request
 	public Map<String, List<String>> getBodyFromUrlFormEncoded()
 	{
 		QueryStringDecoder qsd = new QueryStringDecoder(getBody().toString(ContentType.CHARSET), ContentType.CHARSET, false);
-		return qsd.getParameters();
+		return qsd.parameters();
 	}
 
-	public void setBody(ChannelBuffer body)
+	public void setBody(ByteBuf body)
     {
-		httpRequest.setContent(body);
+		httpRequest.content().setBytes(0, body);
     }
 
 	public void clearHeaders()
 	{
-		httpRequest.clearHeaders();
+		httpRequest.headers().clear();
 	}
 
 	/**
@@ -223,7 +223,7 @@ public class Request
 	 */
 	public String getHeader(String name)
 	{
-		return httpRequest.getHeader(name);
+		return httpRequest.headers().get(name);
 	}
 
 	/**
@@ -240,7 +240,7 @@ public class Request
 	 */
 	public List<String> getHeaders(String name)
 	{
-		return httpRequest.getHeaders(name);
+		return httpRequest.headers().getAll(name);
 	}
 	
 	/**
@@ -277,12 +277,12 @@ public class Request
 	*/
 	public Set<String> getHeaderNames()
 	{
-		return httpRequest.getHeaderNames();
+		return httpRequest.headers().names();
 	}
 	
 	public void addHeader(String name, String value)
     {
-		httpRequest.addHeader(name, value);
+		httpRequest.headers().add(name, value);
     }
 	
 	public void addAllHeaders(Collection<Entry<String, String>> headers)
@@ -374,10 +374,10 @@ public class Request
 		return HttpHeaders.isKeepAlive(httpRequest);
 	}
 
-	public boolean isChunked()
-	{
-		return httpRequest.isChunked();
-	}
+//	public boolean isChunked()
+//	{
+//		return httpRequest.isChunked();
+//	}
 	
 	/**
 	 * Get the value of the {format} header in the request.
@@ -527,7 +527,7 @@ public class Request
 	
 	public boolean isHttpVersion1_0()
 	{
-		return ((httpVersion.getMajorVersion() == 1) && (httpVersion.getMinorVersion() == 0));
+		return ((httpVersion.majorVersion() == 1) && (httpVersion.minorVersion() == 0));
 	}
 	
 	public InetSocketAddress getRemoteAddress()
@@ -562,11 +562,11 @@ public class Request
 			{
 				try
                 {
-	                request.addHeader(entry.getKey(), URLDecoder.decode(value, ContentType.ENCODING));
+	                request.headers().add(entry.getKey(), URLDecoder.decode(value, ContentType.ENCODING));
                 }
                 catch (Exception e)
                 {
-	                request.addHeader(entry.getKey(), value);
+	                request.headers().add(entry.getKey(), value);
                 }
 			}
 		}
@@ -583,7 +583,7 @@ public class Request
 	{
 		if (!HttpMethod.POST.equals(request.getMethod())) return;
 
-		String methodString = request.getHeader(Parameters.Query.METHOD_TUNNEL);
+		String methodString = request.headers().get(Parameters.Query.METHOD_TUNNEL);
 
 		if ("PUT".equalsIgnoreCase(methodString) || "DELETE".equalsIgnoreCase(methodString))
 		{

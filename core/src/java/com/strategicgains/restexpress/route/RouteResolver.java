@@ -15,9 +15,9 @@
 */
 package com.strategicgains.restexpress.route;
 
-import java.util.List;
+import io.netty.handler.codec.http.HttpMethod;
 
-import org.jboss.netty.handler.codec.http.HttpMethod;
+import java.util.List;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.exception.MethodNotAllowedException;

@@ -15,12 +15,12 @@
  */
 package com.strategicgains.restexpress.pipeline;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
+
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
-
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.Parameters;

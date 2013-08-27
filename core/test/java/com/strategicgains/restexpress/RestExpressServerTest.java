@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +21,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.strategicgains.restexpress.common.query.QueryRange;
 import com.strategicgains.restexpress.domain.JsendResultWrapper;
 import com.strategicgains.restexpress.pipeline.SimpleConsoleLogMessageObserver;
+import com.strategicgains.restexpress.query.QueryRange;
 import com.strategicgains.restexpress.response.JsendResponseWrapper;
 import com.strategicgains.restexpress.serialization.AbstractSerializationProvider;
 import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
@@ -102,7 +102,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -118,7 +118,7 @@ public class RestExpressServerTest
 		
 		HttpPut request = new HttpPut(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -134,7 +134,7 @@ public class RestExpressServerTest
 		
 		HttpPost request = new HttpPost(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.CREATED.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.CREATED.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -150,7 +150,7 @@ public class RestExpressServerTest
 		
 		HttpDelete request = new HttpDelete(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -166,7 +166,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(URL4_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -182,7 +182,7 @@ public class RestExpressServerTest
 		
 		HttpDelete request = new HttpDelete(URL3_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -201,7 +201,7 @@ public class RestExpressServerTest
 		
 		HttpDelete request = new HttpDelete(SERVER_HOST + "/x/y/z.json");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.NOT_FOUND.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.NOT_FOUND.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -217,7 +217,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(URL1_XML);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
@@ -234,7 +234,7 @@ public class RestExpressServerTest
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
@@ -251,7 +251,7 @@ public class RestExpressServerTest
 		HttpGet request = new HttpGet(URL1_XML);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
@@ -267,7 +267,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(URL1_JSON);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -283,7 +283,7 @@ public class RestExpressServerTest
 
 		HttpGet request = new HttpGet(URL1_PLAIN + ".JSON");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.BAD_REQUEST.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -299,7 +299,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(URL1_PLAIN + ".wjson");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -320,7 +320,7 @@ public class RestExpressServerTest
 
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -340,7 +340,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(URL1_PLAIN + ".wxml");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
@@ -362,7 +362,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
@@ -385,7 +385,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(SERVER_HOST + "/unserialized");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.TEXT_PLAIN, entity.getContentType().getValue());
@@ -401,7 +401,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(URL1_PLAIN + ".xyz");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.BAD_REQUEST.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -418,7 +418,7 @@ public class RestExpressServerTest
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/nogood");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.NOT_ACCEPTABLE.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.NOT_ACCEPTABLE.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -434,7 +434,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".json");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -451,7 +451,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".json");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -472,7 +472,7 @@ public class RestExpressServerTest
 		HttpGet request = new HttpGet(LITTLE_OS_URL);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "no-good/no-good");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.NOT_ACCEPTABLE.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.NOT_ACCEPTABLE.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -489,7 +489,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".wjson");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -510,7 +510,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".wjson");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
@@ -534,7 +534,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
@@ -551,7 +551,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
@@ -573,7 +573,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".wxml");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());
@@ -593,7 +593,7 @@ public class RestExpressServerTest
 		
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".wxml");
 		HttpResponse response = (HttpResponse) http.execute(request);
-		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.XML, entity.getContentType().getValue());

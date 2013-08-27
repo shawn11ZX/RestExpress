@@ -20,15 +20,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.common.query.QueryRange;
 import com.strategicgains.restexpress.exception.BadRequestException;
+import com.strategicgains.restexpress.query.QueryRange;
 
 /**
  * A factory for RestExpress-Common QueryRange instances, parsing them from a Request.
  * 
  * @author toddf
  * @since Apr 11, 2011
- * @see com.strategicgains.restexpress.common.query.QueryRange
+ * @see com.strategicgains.restexpress.query.QueryRange
  */
 public abstract class QueryRanges
 {

@@ -17,20 +17,17 @@ package com.strategicgains.restexpress.query;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.common.query.OrderCallback;
-import com.strategicgains.restexpress.common.query.OrderComponent;
-import com.strategicgains.restexpress.common.query.QueryOrder;
 
 /**
  * @author toddf
@@ -41,8 +38,8 @@ public class QueryOrdersTest
 	@Test
 	public void shouldParseSortHeader()
 	{
-		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "-name|description|-createdAt");
+		FullHttpRequest httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.headers().add("sort", "-name|description|-createdAt");
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request);
 		assertTrue(o.isSorted());

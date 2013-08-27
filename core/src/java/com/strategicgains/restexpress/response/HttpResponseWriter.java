@@ -3,7 +3,7 @@
  */
 package com.strategicgains.restexpress.response;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelHandlerContext;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;

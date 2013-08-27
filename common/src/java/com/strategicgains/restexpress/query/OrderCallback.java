@@ -14,36 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.restexpress.common.query;
+package com.strategicgains.restexpress.query;
 
 /**
+ * Called by QueryOrder.iterate() at query construction time to modify the persistence query
+ * (or other query) to impose a sort order on the results returned.
+ * 
  * @author toddf
  * @since May 25, 2011
  */
-public class OrderComponent
+public interface OrderCallback
 {
-	private boolean isDescending;
-	private String fieldName;
-	
-	public OrderComponent(String fieldName, boolean isDescending)
-	{
-		super();
-		this.isDescending = isDescending;
-		this.fieldName = fieldName;
-	}
-	
-	public boolean isAscending()
-	{
-		return !isDescending;
-	}
-	
-	public boolean isDescending()
-	{
-		return isDescending;
-	}
-	
-	public String getFieldName()
-	{
-		return fieldName;
-	}
+	void orderBy(OrderComponent component);
 }

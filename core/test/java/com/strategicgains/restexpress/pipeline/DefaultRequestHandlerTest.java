@@ -17,24 +17,24 @@ package com.strategicgains.restexpress.pipeline;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 
-import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.UpstreamMessageEvent;
-import org.jboss.netty.channel.local.DefaultLocalServerChannelFactory;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,17 +42,14 @@ import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.response.JsendResponseWrapper;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
-import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
-import com.strategicgains.restexpress.route.RouteDeclaration;
-import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.NullSerializationProvider;
 import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
-import com.strategicgains.restexpress.settings.RouteDefaults;
 
 
 /**
@@ -61,12 +58,12 @@ import com.strategicgains.restexpress.settings.RouteDefaults;
  */
 public class DefaultRequestHandlerTest
 {
-	private DefaultRequestHandler messageHandler;
+	private static final int SERVER_PORT = 4444;
+	private RestExpress server = new RestExpress();
+	private HttpClient http = new DefaultHttpClient();
 	private DummyObserver observer;
-	private Channel channel;
-    private ChannelPipeline pl;
-    private StringBuffer responseBody;
-    private Map<String, List<String>> responseHeaders;
+	private StringBuffer responseBody;
+	private Map<String, List<String>> responseHeaders;
 	
 	@Before
 	public void initialize()
@@ -78,26 +75,27 @@ public class DefaultRequestHandlerTest
 		provider.add(new XstreamXmlProcessor(Format.XML), new JsendResponseWrapper());
 		provider.alias("dated", Dated.class);
 		provider.setDefaultFormat(Format.WRAPPED_JSON);
+		RestExpress.setSerializationProvider(provider);
 		
 		DummyRoutes routes = new DummyRoutes();
-		routes.defineRoutes();
-		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), provider);
+		routes.defineRoutes(server);
 		observer = new DummyObserver();
-		messageHandler.addMessageObserver(observer);
+		server.addMessageObserver(observer);
 		responseBody = new StringBuffer();
 		responseHeaders = new HashMap<String, List<String>>();
-		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(responseHeaders, responseBody));
-		PipelineBuilder pf = new PipelineBuilder()
-			.addRequestHandler(messageHandler);
-	    pl = pf.getPipeline();
-	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();
-	    channel = channelFactory.newChannel(pl);
+	}
+
+	@After
+	public void shutdown()
+	{
+		server.shutdown();
 	}
 
 	@Test
 	public void shouldReturnTextPlainContentTypeByDefault()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/unserializedDefault");
 		assertEquals(0, observer.getExceptionCount());
 		assertEquals(1, observer.getReceivedCount());
@@ -115,6 +113,7 @@ public class DefaultRequestHandlerTest
 	public void shouldAllowSettingOfContentType()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/unserialized");
 		assertEquals(0, observer.getExceptionCount());
 		assertEquals(1, observer.getReceivedCount());
@@ -132,6 +131,7 @@ public class DefaultRequestHandlerTest
 	public void shouldAllowSettingOfContentTypeViaHeader()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/unserializedToo");
 		assertEquals(0, observer.getExceptionCount());
 		assertEquals(1, observer.getReceivedCount());
@@ -148,6 +148,7 @@ public class DefaultRequestHandlerTest
 	public void shouldAllowSettingOfArbitraryBody()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/setBodyAction.html");
 		assertEquals(0, observer.getExceptionCount());
 		assertEquals(1, observer.getReceivedCount());
@@ -164,6 +165,7 @@ public class DefaultRequestHandlerTest
 	public void shouldNotifyObserverOnSuccess()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/foo");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -177,6 +179,7 @@ public class DefaultRequestHandlerTest
 	public void shouldUrlDecodeUrlParameters()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/foo/Todd%7CFredrich%2Bwas%20here.json");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -190,6 +193,7 @@ public class DefaultRequestHandlerTest
 	public void shouldNotifyObserverOnError()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/bar");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -203,6 +207,7 @@ public class DefaultRequestHandlerTest
 	public void shouldHandleNonDecodableValueInQueryString()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/bar?value=%target");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -216,6 +221,7 @@ public class DefaultRequestHandlerTest
 	public void shouldHandleUrlDecodeErrorInFormat()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/foo.%target");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -230,6 +236,7 @@ public class DefaultRequestHandlerTest
 	public void shouldShouldThrowExceptionForErrorInFormat()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/foo.unsupported");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -243,6 +250,7 @@ public class DefaultRequestHandlerTest
 	public void shouldHandleInvalidDecodeInQueryString()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/foo?value=%target");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -256,6 +264,7 @@ public class DefaultRequestHandlerTest
 	public void shouldHandleUrlDecodeErrorInUrl()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/%bar");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -268,7 +277,8 @@ public class DefaultRequestHandlerTest
 	@Test
 	public void shouldParseTimepointJson()
 	{
-		sendGetEvent("/date.wjson", "{\"at\":\"2010-12-17T120000Z\"}");
+		server.bind(SERVER_PORT);
+		sendPostEvent("/date.wjson", "{\"at\":\"2010-12-17T120000Z\"}");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -280,7 +290,8 @@ public class DefaultRequestHandlerTest
 	@Test
 	public void shouldParseTimepointJsonUsingQueryString()
 	{
-		sendGetEvent("/date?format=wjson", "{\"at\":\"2010-12-17T120000Z\"}");
+		server.bind(SERVER_PORT);
+		sendPostEvent("/date?format=wjson", "{\"at\":\"2010-12-17T120000Z\"}");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -292,7 +303,8 @@ public class DefaultRequestHandlerTest
 	@Test
 	public void shouldParseTimepointXml()
 	{
-		sendGetEvent("/date.xml", "<com.strategicgains.restexpress.pipeline.Dated><at>2010-12-17T120000Z</at></com.strategicgains.restexpress.pipeline.Dated>");
+		server.bind(SERVER_PORT);
+		sendPostEvent("/date.xml", "<com.strategicgains.restexpress.pipeline.Dated><at>2010-12-17T120000Z</at></com.strategicgains.restexpress.pipeline.Dated>");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -309,7 +321,8 @@ public class DefaultRequestHandlerTest
 	@Test
 	public void shouldParseTimepointXmlUsingQueryString()
 	{
-		sendGetEvent("/date?format=xml", "<dated><at>2010-12-17T120000Z</at></dated>");
+		server.bind(SERVER_PORT);
+		sendPostEvent("/date?format=xml", "<dated><at>2010-12-17T120000Z</at></dated>");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -326,6 +339,7 @@ public class DefaultRequestHandlerTest
 	@Test
 	public void shouldThrowExceptionOnInvalidUrl()
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/xyzt.xml");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -342,6 +356,7 @@ public class DefaultRequestHandlerTest
 	@Test
 	public void shouldThrowExceptionOnInvalidUrlWithXmlFormatQueryString()
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/xyzt?format=xml");
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
@@ -361,9 +376,10 @@ public class DefaultRequestHandlerTest
 		NoopPostprocessor p1 = new NoopPostprocessor();
 		NoopPostprocessor p2 = new NoopPostprocessor();
 		NoopPostprocessor p3 = new NoopPostprocessor();
-		messageHandler.addFinallyProcessor(p1);
-		messageHandler.addFinallyProcessor(p2);
-		messageHandler.addFinallyProcessor(p3);
+		server.addFinallyProcessor(p1);
+		server.addFinallyProcessor(p2);
+		server.addFinallyProcessor(p3);
+		server.bind(SERVER_PORT);
 		sendGetEvent("/foo");
 		assertEquals(1, p1.getCallCount());
 		assertEquals(1, p2.getCallCount());
@@ -376,9 +392,10 @@ public class DefaultRequestHandlerTest
 		NoopPostprocessor p1 = new NoopPostprocessor();
 		NoopPostprocessor p2 = new NoopPostprocessor();
 		NoopPostprocessor p3 = new NoopPostprocessor();
-		messageHandler.addFinallyProcessor(p1);
-		messageHandler.addFinallyProcessor(p2);
-		messageHandler.addFinallyProcessor(p3);
+		server.addFinallyProcessor(p1);
+		server.addFinallyProcessor(p2);
+		server.addFinallyProcessor(p3);
+		server.bind(SERVER_PORT);
 		sendGetEvent("/xyzt.html");
 		assertEquals(1, p1.getCallCount());
 		assertEquals(1, p2.getCallCount());
@@ -391,9 +408,10 @@ public class DefaultRequestHandlerTest
 		NoopPostprocessor p1 = new ExceptionPostprocessor();
 		NoopPostprocessor p2 = new ExceptionPostprocessor();
 		NoopPostprocessor p3 = new ExceptionPostprocessor();
-		messageHandler.addFinallyProcessor(p1);
-		messageHandler.addFinallyProcessor(p2);
-		messageHandler.addFinallyProcessor(p3);
+		server.addFinallyProcessor(p1);
+		server.addFinallyProcessor(p2);
+		server.addFinallyProcessor(p3);
+		server.bind(SERVER_PORT);
 		sendGetEvent("/foo");
 		assertEquals(1, p1.getCallCount());
 		assertEquals(1, p2.getCallCount());
@@ -404,6 +422,7 @@ public class DefaultRequestHandlerTest
 	public void shouldSetJSONContentType()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/serializedString.json?returnValue=raw string");
 		assertEquals(0, observer.getExceptionCount());
 		assertEquals(1, observer.getReceivedCount());
@@ -420,6 +439,7 @@ public class DefaultRequestHandlerTest
 	public void shouldSetJSONContentTypeOnNullReturn()
 	throws Exception
 	{
+		server.bind(SERVER_PORT);
 		sendGetEvent("/serializedString.json");
 		assertEquals(0, observer.getExceptionCount());
 		assertEquals(1, observer.getReceivedCount());
@@ -434,70 +454,89 @@ public class DefaultRequestHandlerTest
 
 	private void sendGetEvent(String path)
     {
+		HttpGet request = new HttpGet("http://localhost:" + SERVER_PORT + path);
+		
 		try
 		{
-		    pl.sendUpstream(new UpstreamMessageEvent(
-		    	channel,
-		    	new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path),
-		    	new InetSocketAddress(1)));
+			HttpResponse response = (HttpResponse) http.execute(request);
+			HttpEntity entity = response.getEntity();
+			responseBody.append(EntityUtils.toString(entity));
+			
+			for (Header header : response.getAllHeaders())
+			{
+				List<String> headers = responseHeaders.get(header.getName());
+				
+				if (headers == null)
+				{
+					headers = new ArrayList<String>();
+					responseHeaders.put(header.getName(), headers);
+				}
+				
+				headers.add(header.getValue());
+			}
 		}
-		catch(Throwable t)
+		catch(Exception e)
 		{
-			System.out.println(t.getMessage());
+			e.printStackTrace();
+		}
+		finally
+		{
+			request.releaseConnection();
 		}
     }
 
-	private void sendGetEvent(String path, String body)
+	private void sendPostEvent(String path, String body)
     {
+		HttpPost request = new HttpPost("http://localhost:" + SERVER_PORT + path);
+		
 		try
 		{
-			HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path);
-			request.setContent(ChannelBuffers.copiedBuffer(body, Charset.defaultCharset()));
-	
-		    pl.sendUpstream(new UpstreamMessageEvent(
-		    	channel,
-		    	request,
-		    	new InetSocketAddress(1)));
+			request.setEntity(new StringEntity(body));
+			HttpResponse response = (HttpResponse) http.execute(request);
+			HttpEntity entity = response.getEntity();
+			responseBody.append(EntityUtils.toString(entity));
 		}
-		catch(Throwable t)
+		catch(Exception e)
 		{
-			System.out.println(t.getMessage());
+			e.printStackTrace();
+		}
+		finally
+		{
+			request.releaseConnection();
 		}
     }
 	
 	public class DummyRoutes
-	extends RouteDeclaration
 	{
 		private Object controller = new FooBarController();
-		private RouteDefaults defaults = new RouteDefaults();
 
-        public void defineRoutes()
+        public void defineRoutes(RestExpress server)
         {
-        	uri("/foo.{format}", controller, defaults)
+        	server.uri("/foo.{format}", controller)
         		.action("fooAction", HttpMethod.GET);
 
-        	uri("/foo/{userPhrase}.{format}", controller, defaults)
+        	server.uri("/foo/{userPhrase}.{format}", controller)
     			.action("verifyUrlDecodedParameters", HttpMethod.GET);
 
-        	uri("/bar.{format}", controller, defaults)
+        	server.uri("/bar.{format}", controller)
         		.action("barAction", HttpMethod.GET);
 
-        	uri("/date.{format}", controller, defaults)
-    			.action("dateAction", HttpMethod.GET);
+        	server.uri("/date.{format}", controller)
+    			.action("dateAction", HttpMethod.POST);
 
-        	uri("/unserializedDefault", controller, defaults)
+        	server.uri("/unserializedDefault", controller)
         		.action("unserializedDefault", HttpMethod.GET);
 
-        	uri("/unserialized", controller, defaults)
+        	server.uri("/unserialized", controller)
         		.action("unserializedAction", HttpMethod.GET);
 
-        	uri("/unserializedToo", controller, defaults)
+        	server.uri("/unserializedToo", controller)
         		.action("contentHeaderAction", HttpMethod.GET);
 
-        	uri("/serializedString.{format}", controller, defaults)
+        	server.uri("/serializedString.{format}", controller)
     		.action("serializedStringAction", HttpMethod.GET);
 
-        	uri("/setBodyAction.html", controller, defaults)
+        	server.uri("/setBodyAction.html", controller)
         		.action("setBodyAction", HttpMethod.GET)
         		.format(Format.HTML);
         }

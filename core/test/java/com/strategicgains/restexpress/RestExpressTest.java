@@ -137,13 +137,6 @@ public class RestExpressTest
 //	}
 	
 	@Test
-	public void shouldNotUseSystemOut()
-	{
-		server.noSystemOut();
-		assertFalse(server.shouldUseSystemOut());
-	}
-	
-	@Test
 	public void shouldCallDefaultMethods()
 	throws ClientProtocolException, IOException
 	{

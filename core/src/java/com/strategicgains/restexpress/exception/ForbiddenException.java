@@ -15,7 +15,7 @@
 */
 package com.strategicgains.restexpress.exception;
 
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
  * @author toddf

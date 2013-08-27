@@ -21,7 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-import com.strategicgains.restexpress.common.exception.ConfigurationException;
+import com.strategicgains.restexpress.exception.ConfigurationException;
 
 /**
  * @author kevwil

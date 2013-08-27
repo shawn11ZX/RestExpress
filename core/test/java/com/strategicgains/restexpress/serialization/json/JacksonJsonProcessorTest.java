@@ -20,11 +20,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.util.Calendar;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.ContentType;
@@ -38,7 +38,7 @@ import com.strategicgains.restexpress.serialization.SerializationProcessor;
 public class JacksonJsonProcessorTest
 {
 	private static final String JSON = "{\"integer\":2,\"string\":\"another string value\",\"date\":\"1963-12-06T12:30:00.000Z\",\"p\":\"good stuff\"}";
-	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"我能吞下\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
+	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"������������\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
 
 	private SerializationProcessor processor = new JacksonJsonProcessor();
 
@@ -105,7 +105,7 @@ public class JacksonJsonProcessorTest
 	@Test
 	public void shouldDeserializeChannelBuffer()
 	{
-		ChannelBuffer buf = ChannelBuffers.copiedBuffer(JSON, ContentType.CHARSET);
+		ByteBuf buf = Unpooled.copiedBuffer(JSON, ContentType.CHARSET);
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNotNull(o);
 	}
@@ -113,7 +113,7 @@ public class JacksonJsonProcessorTest
 	@Test
 	public void shouldDeserializeEmptyChannelBuffer()
 	{
-		ChannelBuffer buf = ChannelBuffers.EMPTY_BUFFER;
+		ByteBuf buf = Unpooled.EMPTY_BUFFER;
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNull(o);
 	}
@@ -121,11 +121,11 @@ public class JacksonJsonProcessorTest
 	@Test
 	public void shouldDeserializeUTF8ChannelBuffer()
 	{
-		KnownObject o = processor.deserialize(ChannelBuffers.wrappedBuffer(JSON_UTF8.getBytes(ContentType.CHARSET)), KnownObject.class);
+		KnownObject o = processor.deserialize(Unpooled.wrappedBuffer(JSON_UTF8.getBytes(ContentType.CHARSET)), KnownObject.class);
 		assertNotNull(o);
 		assertTrue(o.getClass().isAssignableFrom(KnownObject.class));
 		assertEquals(2, o.integer);
-		assertEquals("我能吞下", o.string);
+		assertEquals("������������", o.string);
 		Calendar c = Calendar.getInstance();
 		c.setTime(o.date);
 		assertEquals(11, c.get(Calendar.MONTH));

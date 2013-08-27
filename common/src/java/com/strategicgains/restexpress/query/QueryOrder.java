@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.strategicgains.restexpress.common.query;
+package com.strategicgains.restexpress.query;
 
 import java.util.ArrayList;
 import java.util.List;

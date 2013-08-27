@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.strategicgains.restexpress.util.StringUtils;
+
 /**
  * @author toddf
  * @since Oct 7, 2011

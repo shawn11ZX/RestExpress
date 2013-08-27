@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, Strategic Gains, Inc.
+ * Copyright 2011, Strategic Gains, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,45 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.strategicgains.restexpress.common.exception;
-
+package com.strategicgains.restexpress.query;
 
 /**
  * @author toddf
- * @since Nov 20, 2009
+ * @since May 25, 2011
  */
-public class ConfigurationException
-extends RuntimeException
+public class OrderComponent
 {
-    private static final long serialVersionUID = -4891898485346985591L;
-
-	public ConfigurationException()
+	private boolean isDescending;
+	private String fieldName;
+	
+	public OrderComponent(String fieldName, boolean isDescending)
 	{
+		super();
+		this.isDescending = isDescending;
+		this.fieldName = fieldName;
 	}
-
-	/**
-	 * @param message
-	 */
-	public ConfigurationException(String message)
+	
+	public boolean isAscending()
 	{
-		super(message);
+		return !isDescending;
 	}
-
-	/**
-	 * @param cause
-	 */
-	public ConfigurationException(Throwable cause)
+	
+	public boolean isDescending()
 	{
-		super(cause);
+		return isDescending;
 	}
-
-	/**
-	 * @param message
-	 * @param cause
-	 */
-	public ConfigurationException(String message, Throwable cause)
+	
+	public String getFieldName()
 	{
-		super(message, cause);
+		return fieldName;
 	}
 }

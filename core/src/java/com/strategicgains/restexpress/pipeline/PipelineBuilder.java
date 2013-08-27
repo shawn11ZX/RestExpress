@@ -3,20 +3,19 @@
  */
 package com.strategicgains.restexpress.pipeline;
 
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpContentCompressor;
+import io.netty.handler.codec.http.HttpContentDecompressor;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.stream.ChunkedWriteHandler;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.jboss.netty.channel.ChannelHandler;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
-import org.jboss.netty.handler.codec.http.HttpContentCompressor;
-import org.jboss.netty.handler.codec.http.HttpContentDecompressor;
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
-import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
-import org.jboss.netty.handler.execution.ExecutionHandler;
-import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 /**
  * Provides a tiny DSL to define the pipeline features.
@@ -25,7 +24,7 @@ import org.jboss.netty.handler.stream.ChunkedWriteHandler;
  * @since Aug 27, 2010
  */
 public class PipelineBuilder
-implements ChannelPipelineFactory
+extends ChannelInitializer<SocketChannel>
 {
 	// SECTION: CONSTANTS
 
@@ -35,7 +34,6 @@ implements ChannelPipelineFactory
 	// SECTION: INSTANCE VARIABLES
 
 	private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
-	private ExecutionHandler executionHandler = null;
 	private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
 
 	
@@ -48,12 +46,6 @@ implements ChannelPipelineFactory
 
 	
 	// SECTION: BUILDER METHODS
-	
-	public PipelineBuilder setExecutionHandler(ExecutionHandler handler)
-	{
-		this.executionHandler = handler;
-		return this;
-	}
 
 	public PipelineBuilder addRequestHandler(ChannelHandler handler)
 	{
@@ -84,28 +76,21 @@ implements ChannelPipelineFactory
 	// SECTION: CHANNEL PIPELINE FACTORY
 
 	@Override
-	public ChannelPipeline getPipeline()
+	public void initChannel(SocketChannel ch)
 	throws Exception
 	{
-		ChannelPipeline pipeline = Channels.pipeline();
+		ChannelPipeline pipeline = ch.pipeline();
 
 		pipeline.addLast("decoder", new HttpRequestDecoder());
-		pipeline.addLast("aggregator", new HttpChunkAggregator(maxContentLength));
+		pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
 		pipeline.addLast("encoder", new HttpResponseEncoder());
 		pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
 		pipeline.addLast("inflater", new HttpContentDecompressor());
 		pipeline.addLast("deflater", new HttpContentCompressor());
 
-		if (executionHandler != null)
-		{
-			pipeline.addLast("executionHandler", executionHandler);
-		}
-
 		for (ChannelHandler handler : requestHandlers)
 		{
 			pipeline.addLast(handler.getClass().getSimpleName(), handler);
 		}
-
-		return pipeline;
 	}
 }

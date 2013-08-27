@@ -16,16 +16,17 @@
  */
 package com.strategicgains.restexpress.pipeline;
 
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.jboss.netty.channel.ChannelHandler.Sharable;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.Request;
@@ -37,8 +38,8 @@ import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.response.HttpResponseWriter;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.SerializationSettings;
 import com.strategicgains.restexpress.serialization.SerializationProvider;
+import com.strategicgains.restexpress.serialization.SerializationSettings;
 import com.strategicgains.restexpress.util.HttpSpecification;
 
 /**
@@ -47,8 +48,10 @@ import com.strategicgains.restexpress.util.HttpSpecification;
  */
 @Sharable
 public class DefaultRequestHandler
-extends SimpleChannelUpstreamHandler
+extends SimpleChannelInboundHandler<FullHttpRequest>
 {
+	private static final AttributeKey<MessageContext> CONTEXT_KEY = new AttributeKey<MessageContext>("context");
+
 	// SECTION: INSTANCE VARIABLES
 
 	private RouteResolver routeResolver;
@@ -117,7 +120,7 @@ extends SimpleChannelUpstreamHandler
 	// SECTION: SIMPLE-CHANNEL-UPSTREAM-HANDLER
 
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event)
+	public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest event)
 	throws Exception
 	{
 		MessageContext context = createInitialContext(ctx, event);
@@ -149,6 +152,7 @@ extends SimpleChannelUpstreamHandler
 		}
 		finally
 		{
+			// TODO: this is a problem if a FinallyProcessor changes the response.  It will only work in 'accidentally' and intermittently.
 			invokeFinallyProcessors(finallyProcessors, context.getRequest(), context.getResponse());
 			notifyComplete(context);
 		}
@@ -171,8 +175,8 @@ extends SimpleChannelUpstreamHandler
 	private void handleRestExpressException(ChannelHandlerContext ctx, Throwable cause)
 	throws Exception
 	{
-		MessageContext context = (MessageContext) ctx.getAttachment();
 		Throwable rootCause = mapServiceException(cause);
+		MessageContext context = ctx.attr(CONTEXT_KEY).get();
 		
 		if (rootCause != null) // was/is a ServiceException
 		{
@@ -196,16 +200,16 @@ extends SimpleChannelUpstreamHandler
 	}
 
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent event)
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable)
 	throws Exception
 	{
 		try
 		{
-			MessageContext messageContext = (MessageContext) ctx.getAttachment();
+			MessageContext messageContext = ctx.attr(CONTEXT_KEY).get();
 			
 			if (messageContext != null)
 			{
-				messageContext.setException(event.getCause());
+				messageContext.setException(throwable);
 				notifyException(messageContext);
 			}
 		}
@@ -216,16 +220,19 @@ extends SimpleChannelUpstreamHandler
 		}
 		finally
 		{
-			event.getChannel().close();
+			ctx.channel().close();
 		}
 	}
 
-	private MessageContext createInitialContext(ChannelHandlerContext ctx, MessageEvent event)
+	private MessageContext createInitialContext(ChannelHandlerContext ctx, FullHttpRequest httpRequest)
 	{
-		Request request = createRequest(event, ctx);
+		// TODO: get remoteAddress into the Request
+		ctx.channel().remoteAddress();
+		Request request = createRequest(httpRequest, ctx);
 		Response response = createResponse();
 		MessageContext context = new MessageContext(request, response);
-		ctx.setAttachment(context);
+		Attribute<MessageContext> attr = ctx.attr(CONTEXT_KEY);
+		attr.set(context);
 		return context;
 	}
 
@@ -366,9 +373,9 @@ extends SimpleChannelUpstreamHandler
      * @param request
      * @return
      */
-    private Request createRequest(MessageEvent event, ChannelHandlerContext context)
+    private Request createRequest(FullHttpRequest httpRequest, ChannelHandlerContext context)
     {
-    	return new Request(event, routeResolver, serializationProvider);
+    	return new Request(httpRequest, routeResolver, serializationProvider);
     }
 
 	/**

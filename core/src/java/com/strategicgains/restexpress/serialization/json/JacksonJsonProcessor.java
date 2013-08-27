@@ -17,13 +17,13 @@
 
 package com.strategicgains.restexpress.serialization.json;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -145,12 +145,12 @@ extends JsonSerializationProcessor
 	}
 
 	@Override
-	public <T> T deserialize(ChannelBuffer buffer, Class<T> type)
+	public <T> T deserialize(ByteBuf buffer, Class<T> type)
 	{
 		try
 		{
 			
-			return (buffer == null || buffer.readableBytes() == 0 ? null : mapper.readValue(new InputStreamReader(new ChannelBufferInputStream(buffer), ContentType.CHARSET), type));
+			return (buffer == null || buffer.readableBytes() == 0 ? null : mapper.readValue(new InputStreamReader(new ByteBufInputStream(buffer), ContentType.CHARSET), type));
 		}
 		catch (JsonProcessingException e)
 		{

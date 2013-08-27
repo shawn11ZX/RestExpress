@@ -22,9 +22,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import com.strategicgains.restexpress.common.query.OrderCallback;
-import com.strategicgains.restexpress.common.query.OrderComponent;
-import com.strategicgains.restexpress.common.query.QueryOrder;
+import com.strategicgains.restexpress.query.OrderCallback;
+import com.strategicgains.restexpress.query.OrderComponent;
+import com.strategicgains.restexpress.query.QueryOrder;
 
 /**
  * @author toddf

@@ -17,14 +17,14 @@
 package com.strategicgains.restexpress.query;
 
 import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.common.query.QueryOrder;
+import com.strategicgains.restexpress.query.QueryOrder;
 
 /**
  * A factory for RestExpress-Common QueryOrder instances, parsing them from a Request.
  * 
  * @author toddf
  * @since Apr 12, 2011
- * @see com.strategicgains.restexpress.common.query.QueryOrder
+ * @see com.strategicgains.restexpress.query.QueryOrder
  */
 public abstract class QueryOrders
 {

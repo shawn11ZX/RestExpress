@@ -19,16 +19,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
 
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,8 +45,8 @@ public class RequestTest
 	@Before
 	public void initialize()
 	{
-		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?param1=bar&param2=blah&yada");
-		httpRequest.addHeader("Host", "testing-host");
+		FullHttpRequest httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?param1=bar&param2=blah&yada");
+		httpRequest.headers().add("Host", "testing-host");
 		request = new Request(httpRequest, null, null);
 	}
 
@@ -89,7 +89,7 @@ public class RequestTest
 	@Test
 	public void shouldHandleNoQueryString()
 	{
-		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo"), null);
+		Request r = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo"), null);
 		Map<String, String> m = r.getQueryStringMap();
 		assertNull(m);
 	}
@@ -97,7 +97,7 @@ public class RequestTest
 	@Test
 	public void shouldHandleNullQueryString()
 	{
-		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?"), null);
+		Request r = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?"), null);
 		Map<String, String> m = r.getQueryStringMap();
 		assertNull(m);
 	}
@@ -105,7 +105,7 @@ public class RequestTest
 	@Test
 	public void shouldHandleGoofyQueryString()
 	{
-		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo??&"), null);
+		Request r = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo??&"), null);
 		Map<String, String> m = r.getQueryStringMap();
 		assertNotNull(m);
 		assertEquals("", m.get("?"));
@@ -114,7 +114,7 @@ public class RequestTest
 	@Test
 	public void shouldHandleUrlEncodedQueryString()
 	{
-		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?assertion=assertion%7CfitnesseIdm40%40ecollege.com%7C2013-03-14T18%3A02%3A08%2B00%3A00%7C2f6f1b0fa8ecce7d092c1c45cc44e4c7"), null);
+		Request r = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?assertion=assertion%7CfitnesseIdm40%40ecollege.com%7C2013-03-14T18%3A02%3A08%2B00%3A00%7C2f6f1b0fa8ecce7d092c1c45cc44e4c7"), null);
 		assertEquals("assertion|fitnesseIdm40@ecollege.com|2013-03-14T18:02:08+00:00|2f6f1b0fa8ecce7d092c1c45cc44e4c7", r.getHeader("assertion"));
 	}
 
@@ -123,7 +123,7 @@ public class RequestTest
 	{
 		String key = "invalidUrlDecode";
 		String value = "%invalid";
-		Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?" + key + "=" + value), null);
+		Request r = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo?" + key + "=" + value), null);
 		assertEquals(value, r.getHeader(key));
 	}
 
@@ -179,7 +179,7 @@ public class RequestTest
 	@Test
 	public void shouldBePostRequest()
 	{
-		Request postRequest = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo"), null);
+		Request postRequest = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo"), null);
 		assertEquals(HttpMethod.POST, postRequest.getHttpMethod());
 		assertEquals(HttpMethod.POST, postRequest.getEffectiveHttpMethod());
 	}
@@ -187,7 +187,7 @@ public class RequestTest
 	@Test
 	public void shouldBePutRequest()
 	{
-		Request putRequest = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, "/foo"), null);
+		Request putRequest = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, "/foo"), null);
 		assertEquals(HttpMethod.PUT, putRequest.getHttpMethod());
 		assertEquals(HttpMethod.PUT, putRequest.getEffectiveHttpMethod());
 	}
@@ -195,7 +195,7 @@ public class RequestTest
 	@Test
 	public void shouldBeDeleteRequest()
 	{
-		Request deleteRequest = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, "/foo"), null);
+		Request deleteRequest = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, "/foo"), null);
 		assertEquals(HttpMethod.DELETE, deleteRequest.getHttpMethod());
 		assertEquals(HttpMethod.DELETE, deleteRequest.getEffectiveHttpMethod());
 	}
@@ -203,7 +203,7 @@ public class RequestTest
 	@Test
 	public void shouldBeEffectivePutRequest()
 	{
-		Request putRequest = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=pUt"), null);
+		Request putRequest = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=pUt"), null);
 		assertEquals(HttpMethod.POST, putRequest.getHttpMethod());
 		assertEquals(HttpMethod.PUT, putRequest.getEffectiveHttpMethod());
 	}
@@ -211,7 +211,7 @@ public class RequestTest
 	@Test
 	public void shouldBeEffectiveDeleteRequest()
 	{
-		Request deleteRequest = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=DeLeTe"), null);
+		Request deleteRequest = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=DeLeTe"), null);
 		assertEquals(HttpMethod.POST, deleteRequest.getHttpMethod());
 		assertEquals(HttpMethod.DELETE, deleteRequest.getEffectiveHttpMethod());
 	}
@@ -219,7 +219,7 @@ public class RequestTest
 	@Test
 	public void shouldBeEffectivePostRequest()
 	{
-		Request deleteRequest = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=xyzt"), null);
+		Request deleteRequest = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=xyzt"), null);
 		assertEquals(HttpMethod.POST, deleteRequest.getHttpMethod());
 		assertEquals(HttpMethod.POST, deleteRequest.getEffectiveHttpMethod());
 	}
@@ -228,11 +228,11 @@ public class RequestTest
 	public void shouldParseUrlFormEncodedBody()
 	throws Exception
 	{
-		DefaultHttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=xyzt");
 		String formValue1 = "http://login.berlin.ecollege-labs.com/google-service/google/sso/callback/google.JSON?successUrl=http%3A%2F%2Fdashboard.berlin.ecollege-labs.com%2Ftransfer.html&failureUrl=http%3A%2F%2Flogin.berlin.ecollege-labs.com&domain=GOOGLE_NON_MARKET_PLACE_DOMAIN";
 		String formValue2 = "https://www.google.com/accounts/o8/id?id=AItOawkHDpeMEfe_xM14z_ge7UATYOSg_QlPeDg";
 		String formValue3 = "https://www.google.com/accounts/o8/id?id=AItOawkHDpeMEfe_xM14z_ge7UATYOSg_QlPeDg";
-		httpRequest.setContent(ChannelBuffers.wrappedBuffer(("openid.return_to=" + URLEncoder.encode(formValue1, ContentType.ENCODING)
+		FullHttpRequest httpRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/foo?_method=xyzt",
+			Unpooled.wrappedBuffer(("openid.return_to=" + URLEncoder.encode(formValue1, ContentType.ENCODING)
 			+ "&openid.identity=" + URLEncoder.encode(formValue2, ContentType.ENCODING)
 			+ "&openid.claimed_id=" + URLEncoder.encode(formValue3, ContentType.ENCODING)).getBytes()));
 		Request formPost = new Request(httpRequest, null);

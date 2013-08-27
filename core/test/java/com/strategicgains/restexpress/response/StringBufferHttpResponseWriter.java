@@ -15,11 +15,11 @@
 */
 package com.strategicgains.restexpress.response;
 
+import io.netty.channel.ChannelHandlerContext;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import org.jboss.netty.channel.ChannelHandlerContext;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;

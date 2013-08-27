@@ -20,11 +20,11 @@ import java.util.List;
 
 import com.strategicgains.restexpress.ContentType;
 import com.strategicgains.restexpress.Format;
-import com.strategicgains.restexpress.common.util.StringUtils;
 import com.strategicgains.restexpress.contenttype.MediaRange;
 import com.strategicgains.restexpress.contenttype.MediaTypeParser;
 import com.strategicgains.restexpress.serialization.AbstractSerializationProcessor;
 import com.strategicgains.restexpress.serialization.AliasingSerializationProcessor;
+import com.strategicgains.restexpress.util.StringUtils;
 
 /**
  * @author toddf

@@ -15,9 +15,9 @@
  */
 package com.strategicgains.restexpress.preprocessor;
 
-import javax.xml.bind.DatatypeConverter;
+import io.netty.handler.codec.http.HttpHeaders;
 
-import org.jboss.netty.handler.codec.http.HttpHeaders;
+import javax.xml.bind.DatatypeConverter;
 
 import com.strategicgains.restexpress.Flags;
 import com.strategicgains.restexpress.Request;

@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.pipeline.MessageObserver;
 
 /**
  * Provides simple System.out.println() details about basic timing.

@@ -15,7 +15,7 @@
 */
 package com.strategicgains.restexpress.serialization;
 
-import org.jboss.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;

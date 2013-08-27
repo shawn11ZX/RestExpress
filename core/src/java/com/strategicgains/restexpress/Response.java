@@ -16,7 +16,8 @@
  */
 package com.strategicgains.restexpress;
 
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,10 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-
-import com.strategicgains.restexpress.common.query.QueryRange;
+import com.strategicgains.restexpress.query.QueryRange;
 import com.strategicgains.restexpress.serialization.SerializationSettings;
 
 /**
@@ -41,7 +39,7 @@ public class Response
 	
 	// SECTION: INSTANCE VARIABLES
 
-	private HttpResponseStatus responseCode = OK;
+	private HttpResponseStatus responseCode = HttpResponseStatus.OK;
 	private Object body;
 	private Map<String, List<String>> headers = new HashMap<String, List<String>>();
 	private boolean isSerialized = true;

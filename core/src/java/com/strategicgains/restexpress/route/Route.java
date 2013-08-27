@@ -15,6 +15,8 @@
  */
 package com.strategicgains.restexpress.route;
 
+import io.netty.handler.codec.http.HttpMethod;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,8 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;

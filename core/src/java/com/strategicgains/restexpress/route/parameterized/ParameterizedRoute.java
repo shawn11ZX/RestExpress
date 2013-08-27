@@ -15,12 +15,12 @@
 */
 package com.strategicgains.restexpress.route.parameterized;
 
+import io.netty.handler.codec.http.HttpMethod;
+
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.strategicgains.restexpress.route.Route;
 import com.strategicgains.restexpress.url.UrlMatch;

@@ -2,8 +2,8 @@ package com.strategicgains.restexpress.route;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import io.netty.handler.codec.http.HttpMethod;
 
-import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.Request;

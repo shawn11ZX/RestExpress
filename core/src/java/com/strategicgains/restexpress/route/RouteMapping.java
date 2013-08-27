@@ -15,14 +15,14 @@
  */
 package com.strategicgains.restexpress.route;
 
+import io.netty.handler.codec.http.HttpMethod;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.jboss.netty.handler.codec.http.HttpMethod;
 
 import com.strategicgains.restexpress.url.UrlMatch;
 

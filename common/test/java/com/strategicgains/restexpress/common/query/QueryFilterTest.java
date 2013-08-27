@@ -21,10 +21,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.strategicgains.restexpress.common.query.FilterCallback;
-import com.strategicgains.restexpress.common.query.FilterComponent;
-import com.strategicgains.restexpress.common.query.FilterOperator;
-import com.strategicgains.restexpress.common.query.QueryFilter;
+import com.strategicgains.restexpress.query.FilterCallback;
+import com.strategicgains.restexpress.query.FilterComponent;
+import com.strategicgains.restexpress.query.FilterOperator;
+import com.strategicgains.restexpress.query.QueryFilter;
 
 /**
  * @author toddf

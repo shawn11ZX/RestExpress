@@ -5,10 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import io.netty.handler.codec.http.HttpMethod;
 
 import java.util.List;
 
-import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

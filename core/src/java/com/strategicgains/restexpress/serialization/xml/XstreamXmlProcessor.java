@@ -17,13 +17,12 @@
 
 package com.strategicgains.restexpress.serialization.xml;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
 
 import com.strategicgains.restexpress.Format;
 import com.strategicgains.restexpress.domain.JsendResultWrapper;
@@ -110,11 +109,11 @@ extends XmlSerializationProcessor
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T deserialize(ChannelBuffer xml, Class<T> type)
+	public <T> T deserialize(ByteBuf xml, Class<T> type)
 	{
-		if (!xml.readable()) return null;
+		if (!xml.isReadable()) return null;
 
-		return (T) xstream.fromXML(new ChannelBufferInputStream(xml));
+		return (T) xstream.fromXML(new ByteBufInputStream(xml));
 	}
 
 	private void addAliasIfNecessary(Class<?> type)

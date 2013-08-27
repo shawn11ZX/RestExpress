@@ -17,44 +17,42 @@
 
 package com.strategicgains.restexpress.exception;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
  * @author toddf
  * @since Nov 20, 2009
  */
-public class BadRequestException
-extends ServiceException
+public class ConfigurationException
+extends RuntimeException
 {
-    private static final long serialVersionUID = 1322585725650252682L;
+    private static final long serialVersionUID = -4891898485346985591L;
 
-	public BadRequestException()
+	public ConfigurationException()
 	{
-		super(HttpResponseStatus.BAD_REQUEST);
 	}
 
 	/**
 	 * @param message
 	 */
-	public BadRequestException(String message)
+	public ConfigurationException(String message)
 	{
-		super(HttpResponseStatus.BAD_REQUEST, message);
+		super(message);
 	}
 
 	/**
 	 * @param cause
 	 */
-	public BadRequestException(Throwable cause)
+	public ConfigurationException(Throwable cause)
 	{
-		super(HttpResponseStatus.BAD_REQUEST, cause);
+		super(cause);
 	}
 
 	/**
 	 * @param message
 	 * @param cause
 	 */
-	public BadRequestException(String message, Throwable cause)
+	public ConfigurationException(String message, Throwable cause)
 	{
-		super(HttpResponseStatus.BAD_REQUEST, message, cause);
+		super(message, cause);
 	}
 }

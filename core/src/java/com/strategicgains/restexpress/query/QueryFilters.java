@@ -20,16 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.strategicgains.restexpress.Request;
-import com.strategicgains.restexpress.common.query.FilterComponent;
-import com.strategicgains.restexpress.common.query.FilterOperator;
-import com.strategicgains.restexpress.common.query.QueryFilter;
+import com.strategicgains.restexpress.query.FilterComponent;
+import com.strategicgains.restexpress.query.FilterOperator;
+import com.strategicgains.restexpress.query.QueryFilter;
 
 /**
  * A factory for RestExpress-Common QueryFilter instance, parsing from a Request.
  * 
  * @author toddf
  * @since Apr 12, 2011
- * @see com.strategicgains.restexpress.common.query.QueryFilter
+ * @see com.strategicgains.restexpress.query.QueryFilter
  */
 public abstract class QueryFilters
 {

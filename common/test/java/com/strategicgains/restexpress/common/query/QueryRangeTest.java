@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import com.strategicgains.restexpress.common.query.QueryRange;
+import com.strategicgains.restexpress.query.QueryRange;
 
 /**
  * @author toddf

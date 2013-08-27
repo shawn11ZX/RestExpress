@@ -16,29 +16,30 @@
 package com.strategicgains.restexpress.pipeline;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import io.netty.handler.codec.http.HttpMethod;
 
-import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
+import java.io.UnsupportedEncodingException;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.UpstreamMessageEvent;
-import org.jboss.netty.channel.local.DefaultLocalServerChannelFactory;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.strategicgains.restexpress.response.StringBufferHttpResponseWriter;
+import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.route.RouteDeclaration;
-import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.DefaultSerializationProvider;
 import com.strategicgains.restexpress.serialization.SerializationProvider;
-import com.strategicgains.restexpress.settings.RouteDefaults;
 
 
 /**
@@ -47,33 +48,26 @@ import com.strategicgains.restexpress.settings.RouteDefaults;
  */
 public class RawWrappedResponseTest
 {
-	private DefaultRequestHandler messageHandler;
+	private RestExpress server = new RestExpress();
+	private HttpClient http = new DefaultHttpClient();
 	private WrappedResponseObserver observer;
-	private Channel channel;
-    private ChannelPipeline pl;
     private StringBuffer httpResponse;
 	
 	@Before
 	public void initialize()
 	throws Exception
 	{
-		SerializationProvider resolver = new DefaultSerializationProvider();
-//		resolver.put(Format.JSON, new ResponseProcessor(new JacksonJsonProcessor(), new RawResponseWrapper()));
-//		resolver.put(Format.XML, new ResponseProcessor(new XstreamXmlProcessor(), new RawResponseWrapper()));
-//		resolver.setDefaultFormat(Format.JSON);
+		SerializationProvider provider = new DefaultSerializationProvider();
+//		provider.put(Format.JSON, new ResponseProcessor(new JacksonJsonProcessor(), new RawResponseWrapper()));
+//		resproviderolver.put(Format.XML, new ResponseProcessor(new XstreamXmlProcessor(), new RawResponseWrapper()));
+//		provider.setDefaultFormat(Format.JSON);
+		
+		RestExpress.setSerializationProvider(provider);
 		
 		DummyRoutes routes = new DummyRoutes();
-		routes.defineRoutes();
-		messageHandler = new DefaultRequestHandler(new RouteResolver(routes.createRouteMapping(new RouteDefaults())), resolver);
+		routes.defineRoutes(server);
 		observer = new WrappedResponseObserver();
-		messageHandler.addMessageObserver(observer);
-		httpResponse = new StringBuffer();
-		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(httpResponse));
-		PipelineBuilder pf = new PipelineBuilder()
-			.addRequestHandler(messageHandler);
-	    pl = pf.getPipeline();
-	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();
-	    channel = channelFactory.newChannel(pl);
+		server.addMessageObserver(observer);
 	}
 
 	@Test
@@ -449,49 +443,89 @@ public class RawWrappedResponseTest
 
 	private void sendEvent(HttpMethod method, String path, String body)
     {
-		HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, path);
+		HttpRequestBase request = null;
 		
-		if (body != null)
+		if (HttpMethod.GET.equals(method))
 		{
-			request.setContent(ChannelBuffers.copiedBuffer(body, Charset.defaultCharset()));
+			request = new HttpGet(path);
+		}
+		else if (HttpMethod.DELETE.equals(method))
+		{
+			request = new HttpDelete(path);
+		}
+		else if (HttpMethod.PUT.equals(method))
+		{
+			request = new HttpPut(path);
+		}
+		else if (HttpMethod.POST.equals(method))
+		{
+			request = new HttpPost(path);
 		}
 
-	    pl.sendUpstream(new UpstreamMessageEvent(
-	    	channel,
-	    	request,
-	    	new InetSocketAddress(1)));
+		if (body != null)
+		{
+			if (HttpMethod.POST.equals(method) || HttpMethod.PUT.equals(method))
+			{
+				try
+                {
+	                ((HttpEntityEnclosingRequestBase) request).setEntity(new StringEntity(body));
+                }
+                catch (UnsupportedEncodingException e)
+                {
+	                e.printStackTrace();
+                }
+			}
+			else
+			{
+				fail("Only POST and PUT support request bodies.");
+			}
+		}
+		
+		try
+		{
+			HttpResponse response = (HttpResponse) http.execute(request);
+			HttpEntity entity = response.getEntity();
+			httpResponse.append(EntityUtils.toString(entity));
+		}
+		catch(Exception e)
+		{
+			fail(e.getMessage());
+		}
+		finally
+		{
+			request.releaseConnection();
+		}
     }
 	
 	public class DummyRoutes
 	extends RouteDeclaration
 	{
 		private Object controller = new WrappedResponseController();
-		private RouteDefaults defaults = new RouteDefaults();
 
-        public void defineRoutes()
+        public void defineRoutes(RestExpress server)
         {
-        	uri("/normal_get.{format}", controller, defaults)
+        	server.uri("/normal_get.{format}", controller)
         		.action("normalGetAction", HttpMethod.GET);
 
-        	uri("/normal_put.{format}", controller, defaults)
-    		.action("normalPutAction", HttpMethod.PUT);
+        	server.uri("/normal_put.{format}", controller)
+    			.action("normalPutAction", HttpMethod.PUT);
 
-        	uri("/normal_post.{format}", controller, defaults)
-    		.action("normalPostAction", HttpMethod.POST);
+        	server.uri("/normal_post.{format}", controller)
+    			.action("normalPostAction", HttpMethod.POST);
 
-        	uri("/normal_delete.{format}", controller, defaults)
-    		.action("normalDeleteAction", HttpMethod.DELETE);
+        	server.uri("/normal_delete.{format}", controller)
+    			.action("normalDeleteAction", HttpMethod.DELETE);
 
-        	uri("/no_content_delete.{format}", controller, defaults)
-    		.action("noContentDeleteAction", HttpMethod.DELETE);
+        	server.uri("/no_content_delete.{format}", controller)
+    			.action("noContentDeleteAction", HttpMethod.DELETE);
 
-        	uri("/no_content_with_body_delete.{format}", controller, defaults)
-    		.action("noContentWithBodyDeleteAction", HttpMethod.DELETE);
+        	server.uri("/no_content_with_body_delete.{format}", controller)
+    			.action("noContentWithBodyDeleteAction", HttpMethod.DELETE);
 
-        	uri("/not_found.{format}", controller, defaults)
+        	server.uri("/not_found.{format}", controller)
         		.action("notFoundAction", HttpMethod.GET);
 
-        	uri("/null_pointer.{format}", controller, defaults)
+        	server.uri("/null_pointer.{format}", controller)
         		.action("nullPointerAction", HttpMethod.GET);
         }
 	}

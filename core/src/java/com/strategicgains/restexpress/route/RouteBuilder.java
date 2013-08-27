@@ -1,11 +1,13 @@
 package com.strategicgains.restexpress.route;
 
-import static org.jboss.netty.handler.codec.http.HttpMethod.DELETE;
-import static org.jboss.netty.handler.codec.http.HttpMethod.GET;
-import static org.jboss.netty.handler.codec.http.HttpMethod.HEAD;
-import static org.jboss.netty.handler.codec.http.HttpMethod.OPTIONS;
-import static org.jboss.netty.handler.codec.http.HttpMethod.POST;
-import static org.jboss.netty.handler.codec.http.HttpMethod.PUT;
+import static io.netty.handler.codec.http.HttpMethod.GET;
+import static io.netty.handler.codec.http.HttpMethod.POST;
+import static io.netty.handler.codec.http.HttpMethod.PUT;
+import static io.netty.handler.codec.http.HttpMethod.DELETE;
+import static io.netty.handler.codec.http.HttpMethod.HEAD;
+import static io.netty.handler.codec.http.HttpMethod.OPTIONS;
+
+import io.netty.handler.codec.http.HttpMethod;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -16,13 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.netty.handler.codec.http.HttpMethod;
-
 import com.strategicgains.restexpress.Request;
 import com.strategicgains.restexpress.Response;
-import com.strategicgains.restexpress.common.exception.ConfigurationException;
 import com.strategicgains.restexpress.domain.metadata.RouteMetadata;
 import com.strategicgains.restexpress.domain.metadata.UriMetadata;
+import com.strategicgains.restexpress.exception.ConfigurationException;
 import com.strategicgains.restexpress.settings.RouteDefaults;
 
 /**
@@ -293,7 +293,7 @@ public abstract class RouteBuilder
 		for (Route route : routes)
 		{
 			uriMeta.addAllParameters(route.getUrlParameters());
-			metadata.addMethod(route.getMethod().getName());
+			metadata.addMethod(route.getMethod().name());
 		}
 
 		metadata.setUri(uriMeta);

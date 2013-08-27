@@ -16,18 +16,17 @@
  */
 package com.strategicgains.restexpress;
 
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.ChannelGroupFuture;
-import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.handler.execution.ExecutionHandler;
-import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 
 import com.strategicgains.restexpress.domain.metadata.ServerMetadata;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
@@ -48,21 +47,19 @@ import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.settings.RouteDefaults;
 import com.strategicgains.restexpress.settings.ServerSettings;
 import com.strategicgains.restexpress.settings.SocketSettings;
-import com.strategicgains.restexpress.util.Bootstraps;
 import com.strategicgains.restexpress.util.Callback;
 import com.strategicgains.restexpress.util.DefaultShutdownHook;
 
 /**
- * Primary entry point to create a RestExpress service. All that's required is a
- * RouteDeclaration. By default: port is 8081, serialization format is JSON,
+ * Primary entry point to create a RestExpress service. By default: port is 8081, serialization format is JSON,
  * supported formats are JSON and XML.
+ * </p>
+ * Simply define a URL by calling uri(String, Object).
  * 
  * @author toddf
  */
 public class RestExpress
 {
-	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress");
-
 	public static final String DEFAULT_NAME = "RestExpress";
 	public static final int DEFAULT_PORT = 8081;
 
@@ -72,7 +69,9 @@ public class RestExpress
 	private SocketSettings socketSettings = new SocketSettings();
 	private ServerSettings serverSettings = new ServerSettings();
 	private RouteDefaults routeDefaults = new RouteDefaults();
-	private boolean useSystemOut;
+	private EventLoopGroup bossGroup;
+	private EventLoopGroup workerGroup;
+
 
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
@@ -134,7 +133,6 @@ public class RestExpress
 	{
 		super();
 		setName(DEFAULT_NAME);
-		useSystemOut();
 	}
 
 	public String getBaseUrl()
@@ -273,29 +271,6 @@ public class RestExpress
 	public List<Postprocessor> getFinallyProcessors()
 	{
 		return Collections.unmodifiableList(finallyProcessors);
-	}
-
-	public boolean shouldUseSystemOut()
-	{
-		return useSystemOut;
-	}
-
-	public RestExpress setUseSystemOut(boolean useSystemOut)
-	{
-		this.useSystemOut = useSystemOut;
-		return this;
-	}
-
-	public RestExpress useSystemOut()
-	{
-		setUseSystemOut(true);
-		return this;
-	}
-
-	public RestExpress noSystemOut()
-	{
-		setUseSystemOut(false);
-		return this;
 	}
 
 	public boolean useTcpNoDelay()
@@ -486,14 +461,27 @@ public class RestExpress
 		setPort(port);
 
 		// Configure the server.
-		if (getIoThreadCount() == 0)
+		if (getIoThreadCount() > 0)
 		{
-			bootstrap = Bootstraps.createServerNioBootstrap();
+			bossGroup = new NioEventLoopGroup(getIoThreadCount());
 		}
 		else
 		{
-			bootstrap = Bootstraps.createServerNioBootstrap(getIoThreadCount());
+			bossGroup = new NioEventLoopGroup();
 		}
+
+		if (getExecutorThreadCount() > 0)
+		{
+			workerGroup = new NioEventLoopGroup(getExecutorThreadCount());
+		}
+		else
+		{
+			workerGroup = new NioEventLoopGroup();
+		}
+
+		bootstrap = new ServerBootstrap()
+			.group(bossGroup, workerGroup)
+			.channel(NioServerSocketChannel.class);
 
 		// Set up the event pipeline factory.
 		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
@@ -512,37 +500,25 @@ public class RestExpress
 		PipelineBuilder pf = new PipelineBuilder()
 		    .addRequestHandler(requestHandler)
 		    .setMaxContentLength(serverSettings.getMaxContentSize());
-
-		if (getExecutorThreadCount() > 0)
-		{
-			ExecutionHandler executionHandler = new ExecutionHandler(
-	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
-			pf.setExecutionHandler(executionHandler);
-		}
-
-		bootstrap.setPipelineFactory(pf);
+		
+		bootstrap.childHandler(pf);
 		setBootstrapOptions();
 
 		// Bind and start to accept incoming connections.
-		if (shouldUseSystemOut())
-		{
-			System.out.println("Starting " + getName() + " Server on port " + port);
-		}
-
-		Channel channel = bootstrap.bind(new InetSocketAddress(port));
-		allChannels.add(channel);
+//		System.out.println(getName() + " server listening on port " + port);
+		Channel channel = bootstrap.bind(new InetSocketAddress(port)).channel();
 		bindPlugins();
 		return channel;
 	}
 
 	private void setBootstrapOptions()
 	{
-		bootstrap.setOption("child.tcpNoDelay", useTcpNoDelay());
-		bootstrap.setOption("child.keepAlive", serverSettings.isKeepAlive());
-		bootstrap.setOption("reuseAddress", shouldReuseAddress());
-		bootstrap.setOption("child.soLinger", getSoLinger());
-		bootstrap.setOption("connectTimeoutMillis", getConnectTimeoutMillis());
-		bootstrap.setOption("receiveBufferSize", getReceiveBufferSize());
+		bootstrap.option(ChannelOption.TCP_NODELAY, useTcpNoDelay());
+		bootstrap.option(ChannelOption.SO_KEEPALIVE, serverSettings.isKeepAlive());
+		bootstrap.option(ChannelOption.SO_REUSEADDR, shouldReuseAddress());
+		bootstrap.option(ChannelOption.SO_LINGER, getSoLinger());
+		bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeoutMillis());
+		bootstrap.option(ChannelOption.SO_RCVBUF, getReceiveBufferSize());
 	}
 
 	/**
@@ -578,10 +554,10 @@ public class RestExpress
 	 */
 	public void shutdown()
 	{
-		ChannelGroupFuture future = allChannels.close();
-		future.awaitUninterruptibly();
+		// TODO: do we need to close the channel acquired from bind()?
+		bossGroup.shutdownGracefully().awaitUninterruptibly();
+		workerGroup.shutdownGracefully().awaitUninterruptibly();
 		shutdownPlugins();
-		bootstrap.getFactory().releaseExternalResources();
 	}
 
 	/**
