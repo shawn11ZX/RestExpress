@@ -25,7 +25,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,7 +58,7 @@ public class Request
 
 	private FullHttpRequest httpRequest;
 	private HttpVersion httpVersion;
-	private InetSocketAddress remoteAddress;
+	private SocketAddress remoteAddress;
 	private RouteResolver routeResolver;
 	private SerializationProvider serializationProvider;
 	private HttpMethod effectiveHttpMethod;
@@ -88,10 +88,10 @@ public class Request
 		determineEffectiveHttpMethod(request);
 	}
 
-	public Request(InetSocketAddress remoteAddress, FullHttpRequest request, RouteResolver routes, SerializationProvider serializationProvider)
+	public Request(SocketAddress socketAddress, FullHttpRequest request, RouteResolver routes, SerializationProvider serializationProvider)
 	{
 		this(request, routes, serializationProvider);
-		this.remoteAddress = remoteAddress;
+		this.remoteAddress = socketAddress;
 	}
 
 
@@ -530,7 +530,7 @@ public class Request
 		return ((httpVersion.majorVersion() == 1) && (httpVersion.minorVersion() == 0));
 	}
 	
-	public InetSocketAddress getRemoteAddress()
+	public SocketAddress getRemoteAddress()
 	{
 		return remoteAddress;
 	}

@@ -21,6 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
@@ -48,7 +49,7 @@ import com.strategicgains.restexpress.util.HttpSpecification;
  */
 @Sharable
 public class DefaultRequestHandler
-extends SimpleChannelInboundHandler<FullHttpRequest>
+extends SimpleChannelInboundHandler<Object>
 {
 	private static final AttributeKey<MessageContext> CONTEXT_KEY = new AttributeKey<MessageContext>("context");
 
@@ -74,7 +75,7 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
 	public DefaultRequestHandler(RouteResolver routeResolver, SerializationProvider serializationProvider,
 		HttpResponseWriter responseWriter)
 	{
-		super();
+		super(true);
 		this.routeResolver = routeResolver;
 		this.serializationProvider = serializationProvider;
 		setResponseWriter(responseWriter);
@@ -120,9 +121,18 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
 	// SECTION: SIMPLE-CHANNEL-UPSTREAM-HANDLER
 
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest event)
+	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception
+	{
+		ctx.flush();
+	}
+
+	@Override
+	public void channelRead0(ChannelHandlerContext ctx, Object msg)
 	throws Exception
 	{
+		if (!(msg instanceof HttpRequest)) return;
+
+		FullHttpRequest event = (FullHttpRequest) msg;
 		MessageContext context = createInitialContext(ctx, event);
 
 		try
@@ -141,7 +151,7 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
 			invokePostprocessors(postprocessors, context.getRequest(), context.getResponse());
 			serializeResponse(context, false);
 			enforceHttpSpecification(context);
-			
+
 			// TODO: this is a problem if a FinallyProcessor changes the response.  It will only work in 'accidentally' and intermittently.
 			writeResponse(ctx, context);
 			notifySuccess(context);
@@ -375,7 +385,7 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
      */
     private Request createRequest(FullHttpRequest httpRequest, ChannelHandlerContext context)
     {
-    	return new Request(httpRequest, routeResolver, serializationProvider);
+    	return new Request(context.channel().remoteAddress(), httpRequest, routeResolver, serializationProvider);
     }
 
 	/**

@@ -14,16 +14,13 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Provides a tiny DSL to define the pipeline features.
  * 
  * @author toddf
  * @since Aug 27, 2010
  */
-public class PipelineBuilder
+public class PipelineInitializer
 extends ChannelInitializer<SocketChannel>
 {
 	// SECTION: CONSTANTS
@@ -33,13 +30,13 @@ extends ChannelInitializer<SocketChannel>
 
 	// SECTION: INSTANCE VARIABLES
 
-	private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
+	private ChannelHandler requestHandler;
 	private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
 
 	
 	// SECTION: CONSTRUCTORS
 
-	public PipelineBuilder()
+	public PipelineInitializer()
 	{
 		super();
 	}
@@ -47,13 +44,9 @@ extends ChannelInitializer<SocketChannel>
 	
 	// SECTION: BUILDER METHODS
 
-	public PipelineBuilder addRequestHandler(ChannelHandler handler)
+	public PipelineInitializer setRequestHandler(ChannelHandler handler)
 	{
-		if (!requestHandlers.contains(handler))
-		{
-			requestHandlers.add(handler);
-		}
-
+		requestHandler = handler;
 		return this;
 	}
 	
@@ -66,7 +59,7 @@ extends ChannelInitializer<SocketChannel>
 	 * @param value
 	 * @return this PipelineBuilder for method chaining.
 	 */
-	public PipelineBuilder setMaxContentLength(int value)
+	public PipelineInitializer setMaxContentLength(int value)
 	{
 		this.maxContentLength = value;
 		return this;
@@ -85,12 +78,8 @@ extends ChannelInitializer<SocketChannel>
 		pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
 		pipeline.addLast("encoder", new HttpResponseEncoder());
 		pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
-		pipeline.addLast("inflater", new HttpContentDecompressor());
-		pipeline.addLast("deflater", new HttpContentCompressor());
-
-		for (ChannelHandler handler : requestHandlers)
-		{
-			pipeline.addLast(handler.getClass().getSimpleName(), handler);
-		}
+//		pipeline.addLast("inflater", new HttpContentDecompressor());
+//		pipeline.addLast("deflater", new HttpContentCompressor());
+		pipeline.addLast(requestHandler.getClass().getSimpleName(), requestHandler);
 	}
 }

@@ -33,7 +33,7 @@ import com.strategicgains.restexpress.exception.ExceptionMapping;
 import com.strategicgains.restexpress.exception.ServiceException;
 import com.strategicgains.restexpress.pipeline.DefaultRequestHandler;
 import com.strategicgains.restexpress.pipeline.MessageObserver;
-import com.strategicgains.restexpress.pipeline.PipelineBuilder;
+import com.strategicgains.restexpress.pipeline.PipelineInitializer;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
 import com.strategicgains.restexpress.plugin.Plugin;
@@ -489,7 +489,6 @@ public class RestExpress
 
 		// Add MessageObservers to the request handler here, if desired...
 		requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));
-
 		requestHandler.setExceptionMap(exceptionMap);
 
 		// Add pre/post processors to the request handler here...
@@ -497,8 +496,8 @@ public class RestExpress
 		addPostprocessors(requestHandler);
 		addFinallyProcessors(requestHandler);
 
-		PipelineBuilder pf = new PipelineBuilder()
-		    .addRequestHandler(requestHandler)
+		PipelineInitializer pf = new PipelineInitializer()
+		    .setRequestHandler(requestHandler)
 		    .setMaxContentLength(serverSettings.getMaxContentSize());
 		
 		bootstrap.childHandler(pf);
