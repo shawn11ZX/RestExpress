@@ -236,8 +236,6 @@ extends SimpleChannelInboundHandler<Object>
 
 	private MessageContext createInitialContext(ChannelHandlerContext ctx, FullHttpRequest httpRequest)
 	{
-		// TODO: get remoteAddress into the Request
-		ctx.channel().remoteAddress();
 		Request request = createRequest(httpRequest, ctx);
 		Response response = createResponse();
 		MessageContext context = new MessageContext(request, response);

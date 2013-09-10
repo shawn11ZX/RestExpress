@@ -78,6 +78,8 @@ extends ChannelInitializer<SocketChannel>
 		pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
 		pipeline.addLast("encoder", new HttpResponseEncoder());
 		pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
+		
+		// TODO: fix GZIP handling in the pipeline
 //		pipeline.addLast("inflater", new HttpContentDecompressor());
 //		pipeline.addLast("deflater", new HttpContentCompressor());
 		pipeline.addLast(requestHandler.getClass().getSimpleName(), requestHandler);

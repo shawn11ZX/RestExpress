@@ -69,6 +69,7 @@ public class RestExpress
 	private SocketSettings socketSettings = new SocketSettings();
 	private ServerSettings serverSettings = new ServerSettings();
 	private RouteDefaults routeDefaults = new RouteDefaults();
+	private Channel channel;
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
 
@@ -504,8 +505,7 @@ public class RestExpress
 		setBootstrapOptions();
 
 		// Bind and start to accept incoming connections.
-//		System.out.println(getName() + " server listening on port " + port);
-		Channel channel = bootstrap.bind(new InetSocketAddress(port)).channel();
+		channel = bootstrap.bind(new InetSocketAddress(port)).channel();
 		bindPlugins();
 		return channel;
 	}
@@ -553,9 +553,9 @@ public class RestExpress
 	 */
 	public void shutdown()
 	{
-		// TODO: do we need to close the channel acquired from bind()?
-		bossGroup.shutdownGracefully().awaitUninterruptibly();
-		workerGroup.shutdownGracefully().awaitUninterruptibly();
+		channel.closeFuture(); //.syncUninterruptibly();
+		bossGroup.shutdownGracefully(); //.awaitUninterruptibly();
+		workerGroup.shutdownGracefully(); //.awaitUninterruptibly();
 		shutdownPlugins();
 	}
 
