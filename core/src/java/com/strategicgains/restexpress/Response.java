@@ -220,7 +220,7 @@ public class Response
 	 */
 	public void setResponseNoContent()
 	{
-		if (!responseProcessor.getWrapper().addsBodyContent())
+		if (!responseProcessor.getWrapper().addsBodyContent(this))
 		{
 			setResponseStatus(HttpResponseStatus.NO_CONTENT);
 		}

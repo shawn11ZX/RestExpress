@@ -20,6 +20,7 @@ package com.strategicgains.restexpress.exception;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
@@ -35,6 +36,7 @@ extends RuntimeException
 	private static final long serialVersionUID = 1810995969641082808L;
 	private static final HttpResponseStatus STATUS = HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
+	private UUID id;
 	private HttpResponseStatus httpStatus;
 	private Map<String, String> headers;
 
@@ -43,12 +45,12 @@ extends RuntimeException
 
 	public ServiceException()
 	{
-		this(STATUS);
+		this((String) null);
 	}
 
 	public ServiceException(HttpResponseStatus status)
 	{
-		setHttpStatus(status);
+		this(status, (String) null);
 	}
 
 	/**
@@ -93,8 +95,7 @@ extends RuntimeException
 	 * @param message
 	 * @param cause
 	 */
-	public ServiceException(HttpResponseStatus status, String message,
-	    Throwable cause)
+	public ServiceException(HttpResponseStatus status, String message, Throwable cause)
 	{
 		super(message, cause);
 		setHttpStatus(status);
@@ -107,7 +108,22 @@ extends RuntimeException
 	{
 		return httpStatus;
 	}
-	
+
+	public UUID getId()
+	{
+		return id;
+	}
+
+	@Override
+	public String toString()
+	{
+		return String.format("%s(%s): %s, %s", 
+			getClass().getSimpleName(),
+			getId().toString(),
+			getHttpStatus().toString(),
+			getLocalizedMessage());
+	}
+
 	/**
 	 * Adds headers, etc. to the reponse, if required for the exception.
 	 */

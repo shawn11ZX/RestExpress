@@ -34,7 +34,7 @@ implements ResponseWrapper
 	}
 
 	@Override
-	public boolean addsBodyContent()
+	public boolean addsBodyContent(Response response)
 	{
 		return true;
 	}
