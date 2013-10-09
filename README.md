@@ -89,6 +89,11 @@ Release 0.10.0 - SNAPSHOT (in branch 'master')
   Request.getBodyAs(type)) and Accept header for deserialization. Implementation still
   favors .{format}, but uses content-type negotiation if format not supplied.
 
+Release 0.9.4.1 - SNAPSHOT (in branch '0.9.4.1-ErrorJSONResponse')
+----------------------------------------------------------------------------------------------------
+* Added ErrorResultWrapper and ErrorResult to facilitate only wrapping error responses vs.
+  not wrapping or JSEND-style always-wrapped responses.
+
 Release 0.9.4 - 17 Jul 2013
 ---------------------------------------------------------------------------------------------------
 * Fixed issue for plugins that are dependent on RouteMetadata. Fixed issue with routes

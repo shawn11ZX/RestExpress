@@ -1,5 +1,5 @@
 /*
-    Copyright 2011, Strategic Gains, Inc.
+    Copyright 2013, Strategic Gains, Inc.
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -12,36 +12,45 @@
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
- */
+*/
 package com.strategicgains.restexpress.response;
 
 import com.strategicgains.restexpress.Response;
+import com.strategicgains.restexpress.domain.ErrorResult;
 
 /**
- * Leaves the response alone, returning it without wrapping it at all, unless
- * there is an exception. If there is an exception, the exception is wrapped in
- * a serializable Error instance.
- * 
  * @author toddf
- * @since Feb 10, 2011
+ * @since Oct 8, 2013
  */
-public class RawResponseWrapper
+public class ErrorResponseWrapper
 implements ResponseWrapper
 {
 	@Override
 	public Object wrap(Response response)
 	{
-		if (!response.hasException())
+		if (addsBodyContent(response))
 		{
-			return response.getBody();
+			return ErrorResult.fromResponse(response);
 		}
-
-		return response.getException().getMessage();
+		
+		return response.getBody();
 	}
 
 	@Override
 	public boolean addsBodyContent(Response response)
 	{
+		if (response.hasException())
+		{
+			return true;
+		}
+
+		int code = response.getResponseStatus().getCode();
+
+		if (code >= 400 && code < 600)
+		{
+			return true;
+		}
+		
 		return false;
 	}
 }
