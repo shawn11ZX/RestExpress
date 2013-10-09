@@ -29,7 +29,7 @@ import com.strategicgains.restexpress.exception.ServiceException;
  */
 public class ErrorResult
 {
-	private UUID errorId;
+	private String errorId;
 	private int httpStatus;
 	private String message;
 	private String errorType;
@@ -37,7 +37,7 @@ public class ErrorResult
 	public ErrorResult(UUID errorId, int httpResponseCode, String errorMessage, String errorType)
 	{
 		super();
-		this.errorId = errorId;
+		this.errorId = (errorId == null ? null : errorId.toString());
 		this.httpStatus = httpResponseCode;
 		this.message = errorMessage;
 		this.errorType = errorType;
@@ -53,7 +53,7 @@ public class ErrorResult
 		return message;
 	}
 
-	public UUID getErrorId()
+	public String getErrorId()
 	{
 		return errorId;
 	}
