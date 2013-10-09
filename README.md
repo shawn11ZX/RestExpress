@@ -79,7 +79,7 @@ Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.9.5 - SNAPSHOT (in branch 'master')
 
-Release 0.9.4.1 - SNAPSHOT (in branch '0.9.4-ErrorJSONResponse')
+Release 0.9.4.1 - SNAPSHOT (in branch '0.9.4.1-ErrorJSONResponse')
 ----------------------------------------------------------------------------------------------------
 * Added ErrorResultWrapper and ErrorResult to facilitate only wrapping error responses vs.
   not wrapping or JSEND-style always-wrapped responses.

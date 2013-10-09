@@ -64,7 +64,7 @@ extends RuntimeException
 	public ServiceException(HttpResponseStatus status, String message)
 	{
 		super(message);
-		setHttpStatus(status);
+		initialize(status);
 	}
 
 	/**
@@ -78,7 +78,7 @@ extends RuntimeException
 	public ServiceException(HttpResponseStatus status, Throwable cause)
 	{
 		super(cause);
-		setHttpStatus(status);
+		initialize(status);
 	}
 
 	/**
@@ -98,7 +98,7 @@ extends RuntimeException
 	public ServiceException(HttpResponseStatus status, String message, Throwable cause)
 	{
 		super(message, cause);
-		setHttpStatus(status);
+		initialize(status);
 	}
 
 	
@@ -117,7 +117,7 @@ extends RuntimeException
 	@Override
 	public String toString()
 	{
-		return String.format("%s(%s): %s, %s", 
+		return String.format("%s (%s): %s, %s", 
 			getClass().getSimpleName(),
 			getId().toString(),
 			getHttpStatus().toString(),
@@ -161,9 +161,20 @@ extends RuntimeException
 	
 	// SECTION: MUTATORS - PRIVATE
 
+	private void initialize(HttpResponseStatus status)
+    {
+	    setHttpStatus(status);
+		initializeId();
+    }
+
 	private void setHttpStatus(HttpResponseStatus status)
 	{
 		this.httpStatus = status;
+	}
+	
+	private void initializeId()
+	{
+		this.id = UUID.randomUUID();
 	}
 
 	
