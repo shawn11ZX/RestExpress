@@ -24,7 +24,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.4</version>
+			<version>0.9.4.2</version>
 		</dependency>
 ```
 Development:
@@ -89,7 +89,7 @@ Release 0.10.0 - SNAPSHOT (in branch 'master')
   Request.getBodyAs(type)) and Accept header for deserialization. Implementation still
   favors .{format}, but uses content-type negotiation if format not supplied.
 
-Release 0.9.4.1 - SNAPSHOT (in branch '0.9.4.1-ErrorJSONResponse')
+Release 0.9.4.2 - 16 Oct 2013
 ----------------------------------------------------------------------------------------------------
 * Added ErrorResultWrapper and ErrorResult to facilitate only wrapping error responses vs.
   not wrapping or JSEND-style always-wrapped responses.
