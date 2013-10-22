@@ -1,5 +1,7 @@
 [![Build Status](https://buildhive.cloudbees.com/job/RestExpress/job/RestExpress/badge/icon)](https://buildhive.cloudbees.com/job/RestExpress/job/RestExpress/)
 
+[![Stories in Ready](https://badge.waffle.io/RestExpress/RestExpress.png)](http://waffle.io/RestExpress/RestExpress)
+
 RestExpress is a thin wrapper on the JBOSS Netty HTTP stack to provide a simple and easy way to
 create RESTful services in Java that support massive Internet Scale and performance.
 
