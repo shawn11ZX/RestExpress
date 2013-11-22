@@ -34,7 +34,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.5-SNAPSHOT</version>
+			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -90,6 +90,7 @@ Release 0.10.0 - SNAPSHOT (in branch 'master')
 * Implemented content-type negotiation using Content-Type header for serialization (e.g. 
   Request.getBodyAs(type)) and Accept header for deserialization. Implementation still
   favors .{format}, but uses content-type negotiation if format not supplied.
+* Upgraded Netty to 3.8.0 Final
 
 Release 0.9.4.2 - 16 Oct 2013
 ----------------------------------------------------------------------------------------------------
