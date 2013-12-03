@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<name>RestExpress</name>
-	<description>Internet Scale and Performance RESTful Services in Java</description>
+	<description>Internet scale, high-performance RESTful Services in Java</description>
 	<url>https://github.com/RestExpress/RestExpress</url>
 	<groupId>com.strategicgains</groupId>
 	<artifactId>RestExpress</artifactId>
@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
-			<version>4.0.8.Final</version>
+			<version>4.0.13.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>

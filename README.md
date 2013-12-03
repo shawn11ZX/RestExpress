@@ -1,5 +1,7 @@
 [![Build Status](https://buildhive.cloudbees.com/job/RestExpress/job/RestExpress/badge/icon)](https://buildhive.cloudbees.com/job/RestExpress/job/RestExpress/)
 
+[![Stories in Ready](https://badge.waffle.io/RestExpress/RestExpress.png?label=Ready)](http://waffle.io/RestExpress/RestExpress)
+
 RestExpress is a thin wrapper on the JBOSS Netty HTTP stack to provide a simple and easy way to
 create RESTful services in Java that support massive Internet Scale and performance.
 
@@ -24,7 +26,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.4</version>
+			<version>0.9.4.2</version>
 		</dependency>
 ```
 Development:
@@ -32,7 +34,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.5-SNAPSHOT</version>
+			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -88,6 +90,12 @@ Release 0.10.0 - SNAPSHOT (in branch 'master')
 * Implemented content-type negotiation using Content-Type header for serialization (e.g. 
   Request.getBodyAs(type)) and Accept header for deserialization. Implementation still
   favors .{format}, but uses content-type negotiation if format not supplied.
+* Upgraded Netty to 3.8.0 Final
+
+Release 0.9.4.2 - 16 Oct 2013
+----------------------------------------------------------------------------------------------------
+* Added ErrorResultWrapper and ErrorResult to facilitate only wrapping error responses vs.
+  not wrapping or JSEND-style always-wrapped responses.
 
 Release 0.9.4 - 17 Jul 2013
 ---------------------------------------------------------------------------------------------------

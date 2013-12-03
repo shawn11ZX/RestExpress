@@ -217,7 +217,7 @@ public class Response
 	public void setResponseNoContent()
 	{
 		// TODO: fix this...
-//		if (!responseProcessor.getWrapper().addsBodyContent())
+//		if (!responseProcessor.getWrapper().addsBodyContent(this))
 //		{
 			setResponseStatus(HttpResponseStatus.NO_CONTENT);
 //		}

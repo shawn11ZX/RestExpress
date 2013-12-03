@@ -22,6 +22,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import com.strategicgains.restexpress.Response;
 
@@ -35,6 +36,7 @@ extends RuntimeException
 	private static final long serialVersionUID = 1810995969641082808L;
 	private static final HttpResponseStatus STATUS = HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
+	private UUID id;
 	private HttpResponseStatus httpStatus;
 	private Map<String, String> headers;
 
@@ -43,12 +45,12 @@ extends RuntimeException
 
 	public ServiceException()
 	{
-		this(STATUS);
+		this((String) null);
 	}
 
 	public ServiceException(HttpResponseStatus status)
 	{
-		setHttpStatus(status);
+		this(status, (String) null);
 	}
 
 	/**
@@ -62,7 +64,7 @@ extends RuntimeException
 	public ServiceException(HttpResponseStatus status, String message)
 	{
 		super(message);
-		setHttpStatus(status);
+		initialize(status);
 	}
 
 	/**
@@ -76,7 +78,7 @@ extends RuntimeException
 	public ServiceException(HttpResponseStatus status, Throwable cause)
 	{
 		super(cause);
-		setHttpStatus(status);
+		initialize(status);
 	}
 
 	/**
@@ -93,11 +95,10 @@ extends RuntimeException
 	 * @param message
 	 * @param cause
 	 */
-	public ServiceException(HttpResponseStatus status, String message,
-	    Throwable cause)
+	public ServiceException(HttpResponseStatus status, String message, Throwable cause)
 	{
 		super(message, cause);
-		setHttpStatus(status);
+		initialize(status);
 	}
 
 	
@@ -107,7 +108,22 @@ extends RuntimeException
 	{
 		return httpStatus;
 	}
-	
+
+	public UUID getId()
+	{
+		return id;
+	}
+
+	@Override
+	public String toString()
+	{
+		return String.format("%s (%s): %s, %s", 
+			getClass().getSimpleName(),
+			getId().toString(),
+			getHttpStatus().toString(),
+			getLocalizedMessage());
+	}
+
 	/**
 	 * Adds headers, etc. to the reponse, if required for the exception.
 	 */
@@ -145,9 +161,20 @@ extends RuntimeException
 	
 	// SECTION: MUTATORS - PRIVATE
 
+	private void initialize(HttpResponseStatus status)
+    {
+	    setHttpStatus(status);
+		initializeId();
+    }
+
 	private void setHttpStatus(HttpResponseStatus status)
 	{
 		this.httpStatus = status;
+	}
+	
+	private void initializeId()
+	{
+		this.id = UUID.randomUUID();
 	}
 
 	
