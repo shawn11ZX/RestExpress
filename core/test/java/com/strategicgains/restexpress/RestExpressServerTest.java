@@ -21,8 +21,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.domain.JsendResultWrapper;
@@ -57,12 +57,13 @@ public class RestExpressServerTest
 	private static final String LITTLE_O_URL = SERVER_HOST + LITTLE_O_PATH;
 	private static final String LITTLE_OS_URL = SERVER_HOST + LITTLE_OS_PATH;
 
-	private RestExpress server = new RestExpress();
-	AbstractSerializationProvider serializer = new DefaultSerializationProvider();
+	private static RestExpress server = new RestExpress();
+	private static AbstractSerializationProvider serializer = new DefaultSerializationProvider();
 	private HttpClient http = new DefaultHttpClient();
 
-	@Before
-	public void createServer()
+	@BeforeClass
+	public static void createServer()
+	throws Exception
 	{
 		serializer.add(new JacksonJsonProcessor(Format.WRAPPED_JSON), new JsendResponseWrapper());
 		serializer.add(new XstreamXmlProcessor(Format.WRAPPED_XML), new JsendResponseWrapper());
@@ -79,14 +80,18 @@ public class RestExpressServerTest
 			.method(HttpMethod.GET);
 		server.uri(LITTLE_OS_PATTERN, new ObjectTestController())
 			.action("readAll", HttpMethod.GET);
+		server.uri("/unserialized", new StringTestController())
+			.noSerialization();
 		server.addMessageObserver(new SimpleConsoleLogMessageObserver());
 		
 		server.alias("littleObject", LittleO.class);
 //		server.alias("list", ArrayList.class);
+		server.bind(SERVER_PORT);
+		Thread.sleep(1000);
 	}
 
-	@After
-	public void shutdownServer()
+	@AfterClass
+	public static void shutdownServer()
 	{
 		server.shutdown();
 	}
@@ -98,8 +103,6 @@ public class RestExpressServerTest
 	public void shouldHandleGetRequests()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -114,8 +117,6 @@ public class RestExpressServerTest
 	public void shouldHandlePutRequests()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpPut request = new HttpPut(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -130,8 +131,6 @@ public class RestExpressServerTest
 	public void shouldHandlePostRequests()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpPost request = new HttpPost(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.CREATED.code(), response.getStatusLine().getStatusCode());
@@ -146,8 +145,6 @@ public class RestExpressServerTest
 	public void shouldHandleDeleteRequests()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpDelete request = new HttpDelete(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -162,8 +159,6 @@ public class RestExpressServerTest
 	public void shouldCallSpecifiedMethod()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL4_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -178,8 +173,6 @@ public class RestExpressServerTest
 	public void shouldFailWithMethodNotAllowed()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpDelete request = new HttpDelete(URL3_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED.code(), response.getStatusLine().getStatusCode());
@@ -197,8 +190,6 @@ public class RestExpressServerTest
 	public void shouldFailWithNotFound()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpDelete request = new HttpDelete(SERVER_HOST + "/x/y/z.json");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.NOT_FOUND.code(), response.getStatusLine().getStatusCode());
@@ -213,8 +204,6 @@ public class RestExpressServerTest
 	public void shouldReturnXmlUsingFormat()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL1_XML);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -229,8 +218,6 @@ public class RestExpressServerTest
 	public void shouldReturnXmlUsingAccept()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -246,8 +233,6 @@ public class RestExpressServerTest
 	public void shouldFavorFormatOverAcceptHeader()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL1_XML);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -263,8 +248,6 @@ public class RestExpressServerTest
 	public void shouldReturnJsonUsingFormat()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL1_JSON);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -279,8 +262,6 @@ public class RestExpressServerTest
 	public void shouldReturnErrorOnCapitalizedFormat()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-
 		HttpGet request = new HttpGet(URL1_PLAIN + ".JSON");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.getStatusLine().getStatusCode());
@@ -295,8 +276,6 @@ public class RestExpressServerTest
 	public void shouldReturnWrappedJsonUsingFormat()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL1_PLAIN + ".wjson");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -316,7 +295,6 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		serializer.setDefaultFormat(Format.WRAPPED_JSON);
-		server.bind(SERVER_PORT);
 
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -330,14 +308,14 @@ public class RestExpressServerTest
 		String data = extractJson(result);
 		assertEquals("\"read\"", data);
 		request.releaseConnection();
+		
+		serializer.setDefaultFormat(Format.JSON);
 	}
 
 	@Test
 	public void shouldReturnWrappedXmlUsingFormat()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL1_PLAIN + ".wxml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -358,7 +336,6 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		serializer.setDefaultFormat(Format.WRAPPED_XML);
-		server.bind(SERVER_PORT);
 		
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -373,14 +350,14 @@ public class RestExpressServerTest
 		assertTrue(entityString.contains("<data class=\"string\">read</data>"));
 		assertTrue(entityString.endsWith("</response>"));
 		request.releaseConnection();
+
+		serializer.setDefaultFormat(Format.JSON);
 	}
 
 	@Test
 	public void shouldReturnNonSerializedTextPlainResult()
 	throws Exception
 	{
-		server.uri("/unserialized", new StringTestController())
-			.noSerialization();
 		server.bind(SERVER_PORT);
 		
 		HttpGet request = new HttpGet(SERVER_HOST + "/unserialized");
@@ -397,8 +374,6 @@ public class RestExpressServerTest
 	public void shouldFailWithBadRequest()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL1_PLAIN + ".xyz");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.getStatusLine().getStatusCode());
@@ -413,8 +388,6 @@ public class RestExpressServerTest
 	public void shouldFailOnInvalidAccept()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/nogood");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -430,8 +403,6 @@ public class RestExpressServerTest
 	public void shouldSerializeObjectAsJson()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".json");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -447,8 +418,6 @@ public class RestExpressServerTest
 	public void shouldSerializeListAsJson()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".json");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -467,8 +436,6 @@ public class RestExpressServerTest
 	public void shouldNotContainContentRangeHeaderOnInvalidAcceptHeader()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(LITTLE_OS_URL);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "no-good/no-good");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -485,8 +452,6 @@ public class RestExpressServerTest
 	public void shouldSerializeObjectAsWrappedJson()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".wjson");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -506,8 +471,6 @@ public class RestExpressServerTest
 	public void shouldSerializeListAsWrappedJson()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".wjson");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -530,8 +493,6 @@ public class RestExpressServerTest
 	public void shouldSerializeObjectAsXml()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -547,8 +508,6 @@ public class RestExpressServerTest
 	public void shouldSerializeListAsXml()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -569,8 +528,6 @@ public class RestExpressServerTest
 	public void shouldSerializeObjectAsWrappedXml()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".wxml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -589,8 +546,6 @@ public class RestExpressServerTest
 	public void shouldSerializeListAsWrappedXml()
 	throws Exception
 	{
-		server.bind(SERVER_PORT);
-		
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".wxml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -634,7 +589,7 @@ public class RestExpressServerTest
 	// SECTION: INNER CLASSES
 
 	@SuppressWarnings("unused")
-	private class StringTestController
+	private static class StringTestController
 	{
         public String create(Request request, Response response)
         {
@@ -664,7 +619,7 @@ public class RestExpressServerTest
 	}
 	
 	@SuppressWarnings("unused")
-    private class ObjectTestController
+    private static class ObjectTestController
 	{
 		public LittleO read(Request request, Response Response)
 		{
