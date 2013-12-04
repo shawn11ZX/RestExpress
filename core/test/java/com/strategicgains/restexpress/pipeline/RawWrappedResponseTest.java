@@ -16,6 +16,7 @@
 package com.strategicgains.restexpress.pipeline;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import io.netty.handler.codec.http.HttpMethod;
 
@@ -33,7 +34,9 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.junit.Before;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.strategicgains.restexpress.RestExpress;
@@ -48,13 +51,16 @@ import com.strategicgains.restexpress.serialization.SerializationProvider;
  */
 public class RawWrappedResponseTest
 {
-	private RestExpress server = new RestExpress();
+	private static final int SERVER_PORT = 4489;
+	private static final String HOST = "http://localhost:" + SERVER_PORT;
+
+	private static RestExpress server = new RestExpress();
 	private HttpClient http = new DefaultHttpClient();
-	private WrappedResponseObserver observer;
+	private static WrappedResponseObserver observer;
     private StringBuffer httpResponse;
 	
-	@Before
-	public void initialize()
+	@BeforeClass
+	public static void initialize()
 	throws Exception
 	{
 		SerializationProvider provider = new DefaultSerializationProvider();
@@ -68,12 +74,26 @@ public class RawWrappedResponseTest
 		routes.defineRoutes(server);
 		observer = new WrappedResponseObserver();
 		server.addMessageObserver(observer);
+		server.bind(SERVER_PORT);
+		Thread.sleep(1000);
+	}
+
+	@After
+	public void reset()
+	{
+		observer.reset();
+	}
+
+	@AfterClass
+	public static void shutdown()
+	{
+		server.shutdown();
 	}
 
 	@Test
 	public void shouldWrapGetInRawJson()
 	{
-		sendEvent(HttpMethod.GET, "/normal_get.json", null);
+		sendEvent(HttpMethod.GET, HOST + "/normal_get.json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -85,7 +105,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapGetInRawJsonUsingQueryString()
 	{
-		sendEvent(HttpMethod.GET, "/normal_get?format=json", null);
+		sendEvent(HttpMethod.GET, HOST + "/normal_get?format=json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -97,7 +117,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapGetInRawXml()
 	{
-		sendEvent(HttpMethod.GET, "/normal_get.xml", null);
+		sendEvent(HttpMethod.GET, HOST + "/normal_get.xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -109,7 +129,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapGetInRawXmlUsingQueryString()
 	{
-		sendEvent(HttpMethod.GET, "/normal_get?format=xml", null);
+		sendEvent(HttpMethod.GET, HOST + "/normal_get?format=xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -121,7 +141,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapPutInRawJson()
 	{
-		sendEvent(HttpMethod.PUT, "/normal_put.json", null);
+		sendEvent(HttpMethod.PUT, HOST + "/normal_put.json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -133,7 +153,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapPutInRawJsonUsingQueryString()
 	{
-		sendEvent(HttpMethod.PUT, "/normal_put?format=json", null);
+		sendEvent(HttpMethod.PUT, HOST + "/normal_put?format=json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -145,7 +165,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapPutInRawXml()
 	{
-		sendEvent(HttpMethod.PUT, "/normal_put.xml", null);
+		sendEvent(HttpMethod.PUT, HOST + "/normal_put.xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -157,7 +177,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapPutInRawXmlUsingQueryString()
 	{
-		sendEvent(HttpMethod.PUT, "/normal_put?format=xml", null);
+		sendEvent(HttpMethod.PUT, HOST + "/normal_put?format=xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -169,7 +189,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapPostInRawJson()
 	{
-		sendEvent(HttpMethod.POST, "/normal_post.json", null);
+		sendEvent(HttpMethod.POST, HOST + "/normal_post.json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -181,7 +201,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapPostInRawJsonUsingQueryString()
 	{
-		sendEvent(HttpMethod.POST, "/normal_post?format=json", null);
+		sendEvent(HttpMethod.POST, HOST + "/normal_post?format=json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -193,7 +213,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapPostInRawXml()
 	{
-		sendEvent(HttpMethod.POST, "/normal_post.xml", null);
+		sendEvent(HttpMethod.POST, HOST + "/normal_post.xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -205,7 +225,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapPostInRawXmlUsingQueryString()
 	{
-		sendEvent(HttpMethod.POST, "/normal_post?format=xml", null);
+		sendEvent(HttpMethod.POST, HOST + "/normal_post?format=xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -217,7 +237,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapDeleteInRawJson()
 	{
-		sendEvent(HttpMethod.DELETE, "/normal_delete.json", null);
+		sendEvent(HttpMethod.DELETE, HOST + "/normal_delete.json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -229,7 +249,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapDeleteInRawJsonUsingQueryString()
 	{
-		sendEvent(HttpMethod.DELETE, "/normal_delete?format=json", null);
+		sendEvent(HttpMethod.DELETE, HOST + "/normal_delete?format=json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -241,7 +261,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapDeleteInRawXml()
 	{
-		sendEvent(HttpMethod.DELETE, "/normal_delete.xml", null);
+		sendEvent(HttpMethod.DELETE, HOST + "/normal_delete.xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -253,7 +273,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapDeleteInRawXmlUsingQueryString()
 	{
-		sendEvent(HttpMethod.DELETE, "/normal_delete?format=xml", null);
+		sendEvent(HttpMethod.DELETE, HOST + "/normal_delete?format=xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -265,7 +285,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapNotFoundInRawJson()
 	{
-		sendEvent(HttpMethod.GET, "/not_found.json", null);
+		sendEvent(HttpMethod.GET, HOST + "/not_found.json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
@@ -277,7 +297,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapNotFoundInRawJsonUsingQueryString()
 	{
-		sendEvent(HttpMethod.GET, "/not_found?format=json", null);
+		sendEvent(HttpMethod.GET, HOST + "/not_found?format=json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
@@ -289,7 +309,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapNotFoundInRawXml()
 	{
-		sendEvent(HttpMethod.GET, "/not_found.xml", null);
+		sendEvent(HttpMethod.GET, HOST + "/not_found.xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
@@ -301,7 +321,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapNotFoundInRawXmlUsingQueryString()
 	{
-		sendEvent(HttpMethod.GET, "/not_found?format=xml", null);
+		sendEvent(HttpMethod.GET, HOST + "/not_found?format=xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
@@ -313,7 +333,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapNullPointerInRawJson()
 	{
-		sendEvent(HttpMethod.GET, "/null_pointer.json", null);
+		sendEvent(HttpMethod.GET, HOST + "/null_pointer.json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
@@ -325,7 +345,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapNullPointerInRawJsonUsingQueryString()
 	{
-		sendEvent(HttpMethod.GET, "/null_pointer?format=json", null);
+		sendEvent(HttpMethod.GET, HOST + "/null_pointer?format=json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
@@ -337,7 +357,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapNullPointerInRawXml()
 	{
-		sendEvent(HttpMethod.GET, "/null_pointer.xml", null);
+		sendEvent(HttpMethod.GET, HOST + "/null_pointer.xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
@@ -349,7 +369,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapNullPointerInRawXmlUsingQueryString()
 	{
-		sendEvent(HttpMethod.GET, "/null_pointer?format=xml", null);
+		sendEvent(HttpMethod.GET, HOST + "/null_pointer?format=xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
@@ -361,67 +381,67 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldWrapInvalidUrlWithRawJson()
 	{
-		sendEvent(HttpMethod.GET, "/xyzt.json", null);
+		sendEvent(HttpMethod.GET, HOST + "/xyzt.json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
 		assertEquals(1, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("\"Unresolvable URL: http://null/xyzt.json\"", httpResponse.toString());
+		assertEquals("\"Unresolvable URL: " + HOST + "/xyzt.json\"", httpResponse.toString());
 	}
 
 	@Test
 	public void shouldWrapInvalidUrlWithRawJsonUsingQueryString()
 	{
-		sendEvent(HttpMethod.GET, "/xyzt?format=json", null);
+		sendEvent(HttpMethod.GET, HOST + "/xyzt?format=json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
 		assertEquals(1, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("\"Unresolvable URL: http://null/xyzt?format=json\"", httpResponse.toString());
+		assertEquals("\"Unresolvable URL: " + HOST + "/xyzt?format=json\"", httpResponse.toString());
 	}
 
 	@Test
 	public void shouldWrapInvalidUrlWithRawXml()
 	{
-		sendEvent(HttpMethod.GET, "/xyzt.xml", null);
+		sendEvent(HttpMethod.GET, HOST + "/xyzt.xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
 		assertEquals(1, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("<string>Unresolvable URL: http://null/xyzt.xml</string>", httpResponse.toString());
+		assertEquals("<string>Unresolvable URL: " + HOST + "/xyzt.xml</string>", httpResponse.toString());
 	}
 
 	@Test
 	public void shouldWrapInvalidUrlWithXmlUsingQueryString()
 	{
-		sendEvent(HttpMethod.GET, "/xyzt?format=xml", null);
+		sendEvent(HttpMethod.GET, HOST + "/xyzt?format=xml", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
 		assertEquals(1, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("<string>Unresolvable URL: http://null/xyzt?format=xml</string>", httpResponse.toString());
+		assertEquals("<string>Unresolvable URL: " + HOST + "/xyzt?format=xml</string>", httpResponse.toString());
 	}
 
 	@Test
 	public void shouldDeleteWithoutContent()
 	{
-		sendEvent(HttpMethod.DELETE, "/no_content_delete.json", null);
+		sendEvent(HttpMethod.DELETE, HOST + "/no_content_delete.json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
 		assertEquals(0, observer.getExceptionCount());
 //		System.out.println(httpResponse.toString());
-		assertEquals("null", httpResponse.toString());
+		assertNull(httpResponse);
 	}
 
 	@Test
 	public void shouldThrowExceptionOnDeleteNoContentContainingBody()
 	{
-		sendEvent(HttpMethod.DELETE, "/no_content_with_body_delete.json", null);
+		sendEvent(HttpMethod.DELETE, HOST + "/no_content_with_body_delete.json", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(0, observer.getSuccessCount());
@@ -432,7 +452,7 @@ public class RawWrappedResponseTest
 	@Test
 	public void shouldDeleteIgnoringJsonp()
 	{
-		sendEvent(HttpMethod.DELETE, "/normal_delete.json?jsonp=jsonp_callback", null);
+		sendEvent(HttpMethod.DELETE, HOST + "/normal_delete.json?jsonp=jsonp_callback", null);
 		assertEquals(1, observer.getReceivedCount());
 		assertEquals(1, observer.getCompleteCount());
 		assertEquals(1, observer.getSuccessCount());
@@ -485,7 +505,7 @@ public class RawWrappedResponseTest
 		{
 			HttpResponse response = (HttpResponse) http.execute(request);
 			HttpEntity entity = response.getEntity();
-			httpResponse.append(EntityUtils.toString(entity));
+			httpResponse = (entity == null ) ? null : new StringBuffer(EntityUtils.toString(entity));
 		}
 		catch(Exception e)
 		{
@@ -497,7 +517,7 @@ public class RawWrappedResponseTest
 		}
     }
 	
-	public class DummyRoutes
+	public static class DummyRoutes
 	extends RouteDeclaration
 	{
 		private Object controller = new WrappedResponseController();

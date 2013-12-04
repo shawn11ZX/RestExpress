@@ -73,4 +73,9 @@ extends MessageObserver
     {
     	return completeCount;
     }
+	
+	public void reset()
+	{
+		receivedCount = exceptionCount = successCount = completeCount = 0;
+	}
 }
