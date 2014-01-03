@@ -38,6 +38,7 @@ import com.strategicgains.restexpress.pipeline.PipelineBuilder;
 import com.strategicgains.restexpress.pipeline.Postprocessor;
 import com.strategicgains.restexpress.pipeline.Preprocessor;
 import com.strategicgains.restexpress.plugin.Plugin;
+import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.route.RouteBuilder;
 import com.strategicgains.restexpress.route.RouteDeclaration;
 import com.strategicgains.restexpress.route.RouteResolver;
@@ -72,6 +73,7 @@ public class RestExpress
 	private SocketSettings socketSettings = new SocketSettings();
 	private ServerSettings serverSettings = new ServerSettings();
 	private RouteDefaults routeDefaults = new RouteDefaults();
+	private boolean enforceHttpSpec = false;
 	private boolean useSystemOut;
 
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
@@ -283,6 +285,18 @@ public class RestExpress
 	public RestExpress setUseSystemOut(boolean useSystemOut)
 	{
 		this.useSystemOut = useSystemOut;
+		return this;
+	}
+	
+	public RestExpress setEnforceHttpSpec(boolean enforceHttpSpec)
+	{
+		this.enforceHttpSpec = enforceHttpSpec;
+		return this;
+	}
+
+	public RestExpress enforceHttpSpec()
+	{
+		setEnforceHttpSpec(true);
 		return this;
 	}
 
@@ -497,7 +511,7 @@ public class RestExpress
 
 		// Set up the event pipeline factory.
 		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
-		    createRouteResolver(), SERIALIZATION_PROVIDER);
+		    createRouteResolver(), SERIALIZATION_PROVIDER, new DefaultHttpResponseWriter(), enforceHttpSpec);
 
 		// Add MessageObservers to the request handler here, if desired...
 		requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));

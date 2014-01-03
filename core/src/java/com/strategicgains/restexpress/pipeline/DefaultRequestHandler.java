@@ -33,12 +33,11 @@ import com.strategicgains.restexpress.Response;
 import com.strategicgains.restexpress.exception.ExceptionMapping;
 import com.strategicgains.restexpress.exception.ExceptionUtils;
 import com.strategicgains.restexpress.exception.ServiceException;
-import com.strategicgains.restexpress.response.DefaultHttpResponseWriter;
 import com.strategicgains.restexpress.response.HttpResponseWriter;
 import com.strategicgains.restexpress.route.Action;
 import com.strategicgains.restexpress.route.RouteResolver;
-import com.strategicgains.restexpress.serialization.SerializationSettings;
 import com.strategicgains.restexpress.serialization.SerializationProvider;
+import com.strategicgains.restexpress.serialization.SerializationSettings;
 import com.strategicgains.restexpress.util.HttpSpecification;
 
 /**
@@ -59,22 +58,19 @@ extends SimpleChannelUpstreamHandler
 	private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
 	private ExceptionMapping exceptionMap = new ExceptionMapping();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
+	private boolean shouldEnforceHttpSpec = true;
 
 
 	// SECTION: CONSTRUCTORS
 
-	public DefaultRequestHandler(RouteResolver routeResolver, SerializationProvider serializationProvider)
-	{
-		this(routeResolver, serializationProvider, new DefaultHttpResponseWriter());
-	}
-
 	public DefaultRequestHandler(RouteResolver routeResolver, SerializationProvider serializationProvider,
-		HttpResponseWriter responseWriter)
+		HttpResponseWriter responseWriter, boolean enforceHttpSpec)
 	{
 		super();
 		this.routeResolver = routeResolver;
 		this.serializationProvider = serializationProvider;
 		setResponseWriter(responseWriter);
+		this.shouldEnforceHttpSpec = enforceHttpSpec;
 	}
 
 
@@ -165,7 +161,10 @@ extends SimpleChannelUpstreamHandler
      */
     private void enforceHttpSpecification(MessageContext context)
     {
-    	HttpSpecification.enforce(context.getResponse());
+    	if (shouldEnforceHttpSpec)
+    	{
+    		HttpSpecification.enforce(context.getResponse());
+    	}
     }
 
 	private void handleRestExpressException(ChannelHandlerContext ctx, Throwable cause)
