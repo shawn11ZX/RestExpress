@@ -6,7 +6,7 @@
 	<url>https://github.com/RestExpress/RestExpress</url>
 	<groupId>com.strategicgains</groupId>
 	<artifactId>restexpress-parent</artifactId>
-	<version>0.10.0</version>
+	<version>0.10.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -107,7 +107,7 @@
 		<url>git@github.com:RestExpress/RestExpress.git</url>
 		<connection>scm:git:git@github.com:RestExpress/RestExpress.git</connection>
 		<developerConnection>scm:git:git@github.com:RestExpress/RestExpress.git</developerConnection>
-		<tag>restexpress-parent-0.10.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<developers>
