@@ -539,7 +539,7 @@ public class RestExpress
 		// Bind and start to accept incoming connections.
 		if (shouldUseSystemOut())
 		{
-			System.out.println("Starting " + getName() + " Server on port " + port);
+			System.out.println(getName() + " server listening on port " + port);
 		}
 
 		Channel channel = bootstrap.bind(new InetSocketAddress(port));
