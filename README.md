@@ -90,7 +90,12 @@ Release 0.10.0 - SNAPSHOT (in branch 'master')
 * Implemented content-type negotiation using Content-Type header for serialization (e.g. 
   Request.getBodyAs(type)) and Accept header for deserialization. Implementation still
   favors .{format}, but uses content-type negotiation if format not supplied.
-* Upgraded Netty to 3.8.0 Final
+* Added RestExpress.enforceHttpSpec() and .setEnforceHttpSpec(boolean) to enable setting
+  the HTTP specification enforcement.  Previously, enforcement was always turned on. Now
+  default is OFF. With it off, RestExpress allows you to create non-standard (per the HTTP
+  specification) responses.
+* Removed com.strategicgains.restexpress.common.util.Callback interface since it wasn't being used.
+* Upgraded Netty to 3.9.0 Final
 
 Release 0.9.4.2 - 16 Oct 2013
 ----------------------------------------------------------------------------------------------------
