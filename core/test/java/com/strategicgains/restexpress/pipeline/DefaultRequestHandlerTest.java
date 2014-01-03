@@ -46,10 +46,13 @@ import com.strategicgains.restexpress.RestExpress;
 import com.strategicgains.restexpress.exception.BadRequestException;
 import com.strategicgains.restexpress.response.JsendResponseWrapper;
 import com.strategicgains.restexpress.response.RawResponseWrapper;
+import com.strategicgains.restexpress.route.RouteDeclaration;
+import com.strategicgains.restexpress.route.RouteResolver;
 import com.strategicgains.restexpress.serialization.NullSerializationProvider;
 import com.strategicgains.restexpress.serialization.SerializationProvider;
 import com.strategicgains.restexpress.serialization.json.JacksonJsonProcessor;
 import com.strategicgains.restexpress.serialization.xml.XstreamXmlProcessor;
+import com.strategicgains.restexpress.settings.RouteDefaults;
 
 
 /**
@@ -83,12 +86,20 @@ public class DefaultRequestHandlerTest
 		server.addMessageObserver(observer);
 		responseBody = new StringBuffer();
 		responseHeaders = new HashMap<String, List<String>>();
+
+		RouteResolver rr = new RouteResolver(routes.createRouteMapping(new RouteDefaults()));
+		DefaultRequestHandler requestHandler = new DefaultRequestHandler(rr, provider);
 	}
 
 	@After
 	public void shutdown()
 	{
 		server.shutdown();
+	}
+
+	@Test
+	public void sample()
+	{
 	}
 
 	@Test
@@ -507,8 +518,42 @@ public class DefaultRequestHandlerTest
     }
 	
 	public class DummyRoutes
+	extends RouteDeclaration
 	{
 		private Object controller = new FooBarController();
+
+        public void defineRoutes()
+        {
+            RouteDefaults defaults = new RouteDefaults();
+
+        	uri("/foo.{format}", controller, defaults)
+        		.action("fooAction", HttpMethod.GET);
+
+        	uri("/foo/{userPhrase}.{format}", controller, defaults)
+    			.action("verifyUrlDecodedParameters", HttpMethod.GET);
+
+        	uri("/bar.{format}", controller, defaults)
+        		.action("barAction", HttpMethod.GET);
+
+        	uri("/date.{format}", controller, defaults)
+    			.action("dateAction", HttpMethod.POST);
+
+        	uri("/unserializedDefault", controller, defaults)
+        		.action("unserializedDefault", HttpMethod.GET);
+
+        	uri("/unserialized", controller, defaults)
+        		.action("unserializedAction", HttpMethod.GET);
+
+        	uri("/unserializedToo", controller, defaults)
+        		.action("contentHeaderAction", HttpMethod.GET);
+
+        	uri("/serializedString.{format}", controller, defaults)
+    			.action("serializedStringAction", HttpMethod.GET);
+
+        	uri("/setBodyAction.html", controller, defaults)
+        		.action("setBodyAction", HttpMethod.GET)
+        		.format(Format.HTML);
+        }
 
         public void defineRoutes(RestExpress server)
         {
