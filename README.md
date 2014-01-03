@@ -80,6 +80,7 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.10.0 - SNAPSHOT (in branch 'master')
+* ** Breaking Change ** Repackaged to 'org.restexpress...' from 'com.strategicgains.restexpress...'
 * ** Breaking Change ** Re-added GSON capability from version 0.8.2, making things a little
   more pluggable with RestExpress.setSerializationProvider(SerializationProvider).
   DefaultSerializationProvider is the default. GsonSerializationProvider is also available,
