@@ -510,7 +510,7 @@ public class RestExpress
 
 		// Set up the event pipeline factory.
 		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
-		    createRouteResolver(), SERIALIZATION_PROVIDER, new DefaultHttpResponseWriter(), enforceHttpSpec);
+		    createRouteResolver(), getSerializationProvider(), new DefaultHttpResponseWriter(), enforceHttpSpec);
 
 		// Add MessageObservers to the request handler here, if desired...
 		requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));
