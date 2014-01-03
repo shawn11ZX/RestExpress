@@ -22,7 +22,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.restexpress.Response;
-import org.restexpress.util.StringUtils;
+import org.restexpress.common.util.StringUtils;
 
 /**
  * @author toddf

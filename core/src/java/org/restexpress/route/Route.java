@@ -29,10 +29,10 @@ import java.util.Set;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
+import org.restexpress.common.util.StringUtils;
 import org.restexpress.exception.ServiceException;
 import org.restexpress.url.UrlMatch;
 import org.restexpress.url.UrlMatcher;
-import org.restexpress.util.StringUtils;
 
 
 /**

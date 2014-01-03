@@ -24,13 +24,13 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.common.exception.ConfigurationException;
+import org.restexpress.common.util.StringUtils;
 import org.restexpress.contenttype.MediaRange;
 import org.restexpress.contenttype.MediaTypeParser;
 import org.restexpress.exception.BadRequestException;
 import org.restexpress.exception.NotAcceptableException;
 import org.restexpress.response.ResponseProcessor;
 import org.restexpress.response.ResponseWrapper;
-import org.restexpress.util.StringUtils;
 
 /**
  * @author toddf

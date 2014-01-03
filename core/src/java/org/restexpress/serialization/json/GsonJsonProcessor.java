@@ -23,7 +23,7 @@ import java.util.Date;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.restexpress.ContentType;
-import org.restexpress.util.StringUtils;
+import org.restexpress.common.util.StringUtils;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;

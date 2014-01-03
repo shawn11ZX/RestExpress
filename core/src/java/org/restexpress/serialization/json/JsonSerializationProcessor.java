@@ -20,10 +20,10 @@ import java.util.List;
 
 import org.restexpress.ContentType;
 import org.restexpress.Format;
+import org.restexpress.common.util.StringUtils;
 import org.restexpress.contenttype.MediaRange;
 import org.restexpress.contenttype.MediaTypeParser;
 import org.restexpress.serialization.AbstractSerializationProcessor;
-import org.restexpress.util.StringUtils;
 
 /**
  * @author toddf
