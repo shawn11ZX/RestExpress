@@ -26,7 +26,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.4.2</version>
+			<version>0.10.0</version>
 		</dependency>
 ```
 Development:
@@ -34,7 +34,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
+			<version>0.10.1-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -79,7 +79,8 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.10.0 - SNAPSHOT (in branch 'master')
+Release 0.10.0 - 3 Jan 2014
+---------------------------------------------------------------------------------------------------
 * ** Breaking Change ** Repackaged to 'org.restexpress...' from 'com.strategicgains.restexpress...'
 * ** Breaking Change ** Re-added GSON capability from version 0.8.2, making things a little
   more pluggable with RestExpress.setSerializationProvider(SerializationProvider).
