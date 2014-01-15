@@ -31,6 +31,7 @@ public abstract class ContentType
 	public static final String JAVASCRIPT = "application/javascript; charset=" + ENCODING;
 	public static final String JSON = "application/json; charset=" + ENCODING;
 	public static final String TEXT_PLAIN = "text/plain; charset=" + ENCODING;
+	public static final String TEXT_JAVASCRIPT = "text/javascript; charset=" + ENCODING;
 	public static final String XML = "application/xml; charset=" + ENCODING;
 	
 	private ContentType()

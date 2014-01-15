@@ -79,6 +79,11 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+Release 0.10.1 - SNAPSHOT
+---------------------------------------------------------------------------------------------------
+* Fixed NPE issue when RestExpress.setSerializationProvider() is not called.
+* Fixed misspelling in JsonSerializationProcessor.java for SUPPORTED_MEDIA_TYPES.
+
 Release 0.10.0 - 3 Jan 2014
 ---------------------------------------------------------------------------------------------------
 * ** Breaking Change ** Repackaged to 'org.restexpress...' from 'com.strategicgains.restexpress...'

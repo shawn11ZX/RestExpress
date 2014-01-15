@@ -426,7 +426,7 @@ public class RestExpressServerTest
 		HttpEntity entity = response.getEntity();
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
-		assertEquals("\"Supported Media Types: application/json; charset=UTF-8, application/javasctript; charset=UTF-8, text/javascript; charset=UTF-8, application/xml; charset=UTF-8, text/xml; charset=UTF-8\"", EntityUtils.toString(entity));
+		assertEquals("\"Supported Media Types: application/json; charset=UTF-8, application/javascript; charset=UTF-8, text/javascript; charset=UTF-8, application/xml; charset=UTF-8, text/xml; charset=UTF-8\"", EntityUtils.toString(entity));
 		request.releaseConnection();
 	}
 
@@ -481,7 +481,7 @@ public class RestExpressServerTest
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
 		assertNull(response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE));
-		assertEquals("\"Supported Media Types: application/json; charset=UTF-8, application/javasctript; charset=UTF-8, text/javascript; charset=UTF-8, application/xml; charset=UTF-8, text/xml; charset=UTF-8\"", EntityUtils.toString(entity));
+		assertEquals("\"Supported Media Types: application/json; charset=UTF-8, application/javascript; charset=UTF-8, text/javascript; charset=UTF-8, application/xml; charset=UTF-8, text/xml; charset=UTF-8\"", EntityUtils.toString(entity));
 		request.releaseConnection();
 	}
 

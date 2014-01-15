@@ -34,8 +34,8 @@ extends AbstractSerializationProcessor
 {
 	private static final String SUPPORTED_MEDIA_TYPES = StringUtils.join(",",
 		ContentType.JSON,
-		"application/javasctript; charset=" + ContentType.ENCODING,
-		"text/javascript; charset=" + ContentType.ENCODING);
+		ContentType.JAVASCRIPT,
+		ContentType.TEXT_JAVASCRIPT);
 	private static List<MediaRange> SUPPORTED_MEDIA_RANGES = MediaTypeParser.parse(SUPPORTED_MEDIA_TYPES);
 
 	public JsonSerializationProcessor()
