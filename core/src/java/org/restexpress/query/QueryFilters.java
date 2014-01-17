@@ -23,6 +23,8 @@ import org.restexpress.Request;
 import org.restexpress.common.query.FilterComponent;
 import org.restexpress.common.query.FilterOperator;
 import org.restexpress.common.query.QueryFilter;
+import org.restexpress.common.util.StringUtils;
+import org.restexpress.exception.BadRequestException;
 
 /**
  * A factory for RestExpress-Common QueryFilter instance, parsing from a Request.
@@ -42,13 +44,26 @@ public abstract class QueryFilters
 
 	/**
 	 * Create an instance of QueryFilter from the RestExpress request.
+	 * Assumes all resource properties are filterable.
 	 * 
 	 * @param request the current request
 	 */
 	public static QueryFilter parseFrom(Request request)
 	{
+		return parseFrom(request, null);
+	}
+
+	/**
+	 * Create an instance of QueryFilter from the RestExpress request, setting
+	 * the appropriate properties that can be filtered.
+	 * 
+	 * @param request the current request
+	 * @param allowedProperties a list of property names on which the resource can be filtered.
+	 */
+	public static QueryFilter parseFrom(Request request, List<String> allowedProperties)
+	{
 		String filterString = request.getHeader(FILTER_HEADER_NAME);
-		
+
 		if (filterString == null || filterString.trim().isEmpty())
 		{
 			return new QueryFilter();
@@ -67,7 +82,8 @@ public abstract class QueryFilters
 		for (String nameValue : nameValues)
 		{
 			nameValuePair = nameValue.split(NAME_VALUE_SEPARATOR);
-			
+			enforceSupportedProperties(allowedProperties, nameValuePair[0]);
+
 			if (nameValuePair.length == 1)
 			{
 				filters.add(new FilterComponent(nameValuePair[0], FilterOperator.CONTAINS, ""));
@@ -80,4 +96,13 @@ public abstract class QueryFilters
 
 		return new QueryFilter(filters);
 	}
+
+	private static void enforceSupportedProperties(List<String> allowedProperties, String requested)
+    {
+	    if (allowedProperties != null && !allowedProperties.contains(requested))
+	    {
+	    	throw new BadRequestException(requested + " is not a supported filter. Supported filter names are: "
+	    		+ StringUtils.join(", ", allowedProperties));
+	    }
+    }
 }

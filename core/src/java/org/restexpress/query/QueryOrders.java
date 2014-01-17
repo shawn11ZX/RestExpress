@@ -16,8 +16,12 @@
  */
 package org.restexpress.query;
 
+import java.util.List;
+
 import org.restexpress.Request;
 import org.restexpress.common.query.QueryOrder;
+import org.restexpress.common.util.StringUtils;
+import org.restexpress.exception.BadRequestException;
 
 /**
  * A factory for RestExpress-Common QueryOrder instances, parsing them from a Request.
@@ -33,11 +37,25 @@ public abstract class QueryOrders
 
 	/**
 	 * Create a QueryOrder instance from the RestExpress request.
+	 * Assumes all resource properties can be sorted-on.
 	 * 
 	 * @param request the current request
 	 * @return a QueryOrder instance
 	 */
 	public static QueryOrder parseFrom(Request request)
+	{
+		return parseFrom(request, null);
+	}
+
+	/**
+	 * Create a QueryOrder instance from the RestExpress request, setting the
+	 * properties on which the resource can be sorted.
+	 * 
+	 * @param request the current request
+	 * @param allowedProperties a list of property names on which the resource can be sorted.
+	 * @return a QueryOrder instance
+	 */
+	public static QueryOrder parseFrom(Request request, List<String> allowedProperties)
 	{
 		String sortString = request.getHeader(SORT_HEADER_NAME);
 
@@ -47,6 +65,37 @@ public abstract class QueryOrders
 		}
 		
 		String[] strings = sortString.split(SORT_SEPARATOR);
+		enforceAllowedProperties(allowedProperties, strings);
+
 		return new QueryOrder(strings);
 	}
+
+	private static void enforceAllowedProperties(List<String> allowedProperties, String[] requestedProperties)
+    {
+	    if (allowedProperties != null)
+		{
+			int i = 0;
+
+			for (String allowed : allowedProperties)
+			{
+				i = 0;
+
+				while (i < allowed.length())
+				{
+					String requested = requestedProperties[i++];
+
+					if (requested.endsWith(allowed))
+					{
+						break;
+					}
+					else if (i == allowed.length())
+					{
+						throw new BadRequestException(requested
+							+ " is not a supported sort field. Supported sort fields are: "
+							+ StringUtils.join(", ", allowedProperties));
+					}
+				}
+			}
+		}
+    }
 }

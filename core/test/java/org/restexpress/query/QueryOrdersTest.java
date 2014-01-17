@@ -18,6 +18,7 @@ package org.restexpress.query;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ import org.restexpress.Request;
 import org.restexpress.common.query.OrderCallback;
 import org.restexpress.common.query.OrderComponent;
 import org.restexpress.common.query.QueryOrder;
+import org.restexpress.exception.BadRequestException;
 import org.restexpress.query.QueryOrders;
 
 /**
@@ -38,6 +40,24 @@ import org.restexpress.query.QueryOrders;
  */
 public class QueryOrdersTest
 {
+	@Test
+	public void shouldParseQueryString()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings?sort=-name|description|-createdAt");
+		Request request = new Request(httpRequest, null);
+		QueryOrder o = QueryOrders.parseFrom(request);
+		assertTrue(o.isSorted());
+		OCallback callback = new OCallback();
+		o.iterate(callback);
+		assertEquals(3, callback.getCount());
+		assertEquals("name", callback.get("name").getFieldName());
+		assertTrue(callback.get("name").isDescending());
+		assertEquals("description", callback.get("description").getFieldName());
+		assertTrue(callback.get("description").isAscending());
+		assertEquals("createdAt", callback.get("createdAt").getFieldName());
+		assertTrue(callback.get("createdAt").isDescending());
+	}
+
 	@Test
 	public void shouldParseSortHeader()
 	{
@@ -55,6 +75,34 @@ public class QueryOrdersTest
 		assertTrue(callback.get("description").isAscending());
 		assertEquals("createdAt", callback.get("createdAt").getFieldName());
 		assertTrue(callback.get("createdAt").isDescending());
+	}
+
+	@Test
+	public void shouldAllowSupportedSortProperties()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("sort", "-name|description|-createdAt");
+		Request request = new Request(httpRequest, null);
+		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"name", "description", "createdAt"}));
+		assertTrue(o.isSorted());
+		OCallback callback = new OCallback();
+		o.iterate(callback);
+		assertEquals(3, callback.getCount());
+		assertEquals("name", callback.get("name").getFieldName());
+		assertTrue(callback.get("name").isDescending());
+		assertEquals("description", callback.get("description").getFieldName());
+		assertTrue(callback.get("description").isAscending());
+		assertEquals("createdAt", callback.get("createdAt").getFieldName());
+		assertTrue(callback.get("createdAt").isDescending());
+	}
+
+	@Test (expected=BadRequestException.class)
+	public void shouldThrowOnInvalidOrderProperty()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("sort", "-name|description|-createdAt");
+		Request request = new Request(httpRequest, null);
+		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 	}
 	
 	private class OCallback

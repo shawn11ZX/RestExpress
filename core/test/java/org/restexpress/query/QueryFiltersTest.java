@@ -17,7 +17,9 @@ package org.restexpress.query;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +32,7 @@ import org.restexpress.Request;
 import org.restexpress.common.query.FilterCallback;
 import org.restexpress.common.query.FilterComponent;
 import org.restexpress.common.query.QueryFilter;
-import org.restexpress.query.QueryFilters;
+import org.restexpress.exception.BadRequestException;
 
 /**
  * @author toddf
@@ -38,6 +40,20 @@ import org.restexpress.query.QueryFilters;
  */
 public class QueryFiltersTest
 {
+	@Test
+	public void shouldParseQueryString()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings?filter=name::todd|description::amazing");
+		Request request = new Request(httpRequest, null);
+		QueryFilter f = QueryFilters.parseFrom(request);
+		assertTrue(f.hasFilters());
+		FCallback callback = new FCallback();
+		f.iterate(callback);
+		assertEquals(2, callback.getFilterCount());
+		assertEquals("todd", callback.get("name"));
+		assertEquals("amazing", callback.get("description"));
+	}
+
 	@Test
 	public void shouldParseFilterHeader()
 	{
@@ -51,6 +67,30 @@ public class QueryFiltersTest
 		assertEquals(2, callback.getFilterCount());
 		assertEquals("todd", callback.get("name"));
 		assertEquals("amazing", callback.get("description"));
+	}
+
+	@Test
+	public void shouldAllowSupportedFilterProperties()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("filter", "name::todd|description::amazing");
+		Request request = new Request(httpRequest, null);
+		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"name", "description"}));
+		assertTrue(f.hasFilters());
+		FCallback callback = new FCallback();
+		f.iterate(callback);
+		assertEquals(2, callback.getFilterCount());
+		assertEquals("todd", callback.get("name"));
+		assertEquals("amazing", callback.get("description"));
+	}
+
+	@Test(expected=BadRequestException.class)
+	public void shouldThrowOnInvalidFilter()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("filter", "name::todd|description::amazing");
+		Request request = new Request(httpRequest, null);
+		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 	}
 	
 	private class FCallback
