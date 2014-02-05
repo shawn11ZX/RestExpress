@@ -65,15 +65,39 @@ public class ErrorResult
 	
 	
 	// SECTION: FACTORY
-	
+
+	/**
+	 * Creates an ErrorResult from the Response, including the root cause exception name as exceptionType.
+	 * 
+	 * @param response the RestExpress Response.
+	 * @return an ErrorResult instance.
+	 */
 	public static ErrorResult fromResponse(Response response)
+	{
+		return fromResponse(response, true);
+	}
+
+	/**
+	 * Creates an ErrorResult from the Response, optionally including the root cause exception name
+	 * as exceptionType.
+	 * 
+	 * @param response the RestExpress Response.
+	 * @param includeCause whether or not to include the root cause exception name as the exceptionType.
+	 * @return an ErrorResult instance.
+	 */
+	public static ErrorResult fromResponse(Response response, boolean includeCause)
 	{
 		if (response.hasException())
 		{
 			Throwable exception = response.getException();
 			Throwable rootCause = ExceptionUtils.findRootCause(exception);
 			String message = (rootCause != null ? rootCause.getMessage() : exception.getMessage());
-			String causeName = (rootCause != null ? rootCause.getClass().getSimpleName() : exception.getClass().getSimpleName());
+			String causeName = null;
+
+			if (includeCause)
+			{
+				causeName = (rootCause != null ? rootCause.getClass().getSimpleName() : exception.getClass().getSimpleName());
+			}
 
 			if (ServiceException.isAssignableFrom(exception))
 			{
