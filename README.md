@@ -1,5 +1,7 @@
 [![Build Status](https://buildhive.cloudbees.com/job/RestExpress/job/RestExpress/badge/icon)](https://buildhive.cloudbees.com/job/RestExpress/job/RestExpress/)
 
+[![Stories in Ready](https://badge.waffle.io/RestExpress/RestExpress.png?label=Ready)](http://waffle.io/RestExpress/RestExpress)
+
 RestExpress is a thin wrapper on the JBOSS Netty HTTP stack to provide a simple and easy way to
 create RESTful services in Java that support massive Internet Scale and performance.
 
@@ -24,7 +26,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.1</version>
+			<version>0.10.1</version>
 		</dependency>
 ```
 Development:
@@ -32,7 +34,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.9.2-SNAPSHOT</version>
+			<version>0.10.2-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -75,43 +77,91 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 * For more real-world examples, see the examples/ directory which contains additional projects that setup RestExpress services.  Simply do '**ant run**' to run them.  Then to see what's available perform a GET on the route: '/routes/metadata' to get a list of all the routes (or endpoints) available (e.g. localhost:8000/routes/metadata in the browser).
 
 ===================================================================================================
-BTW, if you're on a Mac or Linux box, you can do the following to get Ruby on Rails "scaffolding"
--like behavior by running the following from the RestExpress root directory:
-1) ant release
-2) ./src/scripts/install.sh
-3) cd <a new directory> (e.g. '~/src')
-4) <restexpress home>/src/scripts/restexpress.sh <name of project> (e.g. Sample)
-5) cd <new project directory> (e.g. Sample)
-6) ant run
-
-From another console, enter something like the following to test your new service suite:
-1) curl -i localhost:8081/sample/42
-
-You should see something like this:
-HTTP/1.1 404 Not Found
-Content-Type: application/json; charset=UTF-8
-Content-Length: 115
-
-{"code":404,"status":"error","message":"The order ID you requested was not found: 42","data":"NotFoundException"}
-
-===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.9.2 - SNAPSHOT (in branch 'master')
+Release 0.10.1 - 24 Jan 2014
+---------------------------------------------------------------------------------------------------
+* Fixed NPE issue when RestExpress.setSerializationProvider() is not called.
+* Fixed misspelling in JsonSerializationProcessor.java for SUPPORTED_MEDIA_TYPES.
+* Enhanced QueryFilters and QueryOrders to support enforcement of appropriate filter/order
+  properties—enabling the verification of appropriate orders and filters. Throws
+  BadRequestException on failure.
+* Removed core StringUtils in favor of common StringUtils.
+
+Release 0.10.0 - 3 Jan 2014
+---------------------------------------------------------------------------------------------------
+* ** Breaking Change ** Repackaged to 'org.restexpress...' from 'com.strategicgains.restexpress...'
+* ** Breaking Change ** Re-added GSON capability from version 0.8.2, making things a little
+  more pluggable with RestExpress.setSerializationProvider(SerializationProvider).
+  DefaultSerializationProvider is the default. GsonSerializationProvider is also available,
+  but requires adding GSON to your pom file.  Must refactor your own custom ResponseProcessor
+  class into a SerializationProvider implementor.
+* ** Breaking Change ** Removed RestExpress.putResponseProcessor(), .supportJson(), .supportXml(),
+  .supportTxt(), .noJson(), .noXml(), noTxt() as this is all implemented in the SerializationProvider.
+* Implemented content-type negotiation using Content-Type header for serialization (e.g. 
+  Request.getBodyAs(type)) and Accept header for deserialization. Implementation still
+  favors .{format}, but uses content-type negotiation if format not supplied.
+* Added RestExpress.enforceHttpSpec() and .setEnforceHttpSpec(boolean) to enable setting
+  the HTTP specification enforcement.  Previously, enforcement was always turned on. Now
+  default is OFF. With it off, RestExpress allows you to create non-standard (per the HTTP
+  specification) responses.
+* Removed com.strategicgains.restexpress.common.util.Callback interface since it wasn't being used.
+* Upgraded Netty to 3.9.0 Final
+
+Release 0.9.4.2 - 16 Oct 2013
+----------------------------------------------------------------------------------------------------
+* Added ErrorResultWrapper and ErrorResult to facilitate only wrapping error responses vs.
+  not wrapping or JSEND-style always-wrapped responses.
+
+Release 0.9.4 - 17 Jul 2013
+---------------------------------------------------------------------------------------------------
+* Fixed issue for plugins that are dependent on RouteMetadata. Fixed issue with routes
+  that depend on GET, PUT, POST, DELETE as the default--wasn't generating metadata
+  correctly for that corner case.
+* Fixed issue with RouteBuilder metadata generation where it wouldn't include the defaults if none set on route.
+* Updated javadoc for getFullPattern() and getPattern().
+* Changed Route.getBaseUrl() to perform null check to avoid getting 'null' string in value.
+* Combined RestExpress-Common as a sub-module and moved core RestExpress functionality
+  to the 'core' sub-module.
+
+Release 0.9.3 - 14 Jun 2013
+---------------------------------------------------------------------------------------------------
+* Fixed issue with setter getting called in deserialization instead of Jackson deserializer.
+* Removed LogLevel enumeration due to lack of use.
+* Fixed issue #61 - Large Chunked Request Causes Errors.  Added HttpChunkAggregator to the
+  pipeline.
+* Added RestExpress.setMaxContentSize(int) to allow limiting of total content length of requests
+  even if chunked.  Default max content size is 25K.
+* Added RestExpress.iterateRouteBuilders(Callback<RouteBuilder> callback) to facilitate
+  plugins, etc. augmenting or extracting information from the declared routes.
+
+Release 0.9.2 - 27 Mar 2013
+---------------------------------------------------------------------------------------------------
+* **DEPRECATED:** Request.getUrlDecodedHeader() and Request.getRawHeader() in favor of getHeader(). Since
+  all HTTP headers and query-string parameters are URL decoded before being put on the Request
+  object, these methods are redundant and cause problems.  Their functionality was also changed
+  to simply call getHeader()--so no URL decoding is done in getUrlDecodedHeader().
+* Ensured that parameters extracted from the URL are decoded before setting them as headers
+  on the Request.  Now all headers are URL decoded before any call to Request.getHeader(String).
+* Added Request.getRemoteAddress(), which returns the remote address of the request originator.
+* Merged pull request (Issue #58) from amitkarmakar13: add List&lt;String&gt; getHeaders(String)
+* Removed '?' and '#' as valid path segment characters in UrlPattern to conform better with
+  IETF RFC 3986, section 3.3-path. Made '{format}' a first-class element for matching URL route
+  patterns (by using '{format}' instead of a regex to match).
 
 Release 0.9.1 - 4 Mar 2013
 ---------------------------------------------------------------------------------------------------
-* BREAKING CHANGE: eliminated GSON. RestExpress now uses Jackson for JSON processing.
+* **BREAKING CHANGE:** eliminated GSON. RestExpress now uses Jackson for JSON processing.
   The changes are localized to the 'serialization' package.  Simply copy the ObjectIdDeserializer,
   ObjectIdSerializer and JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/mongodb/src/main/java/com/strategicgains/restexpress/scaffold/mongodb/serialization
   for MongoDB-based projects.  Or just the JsonSerializationProcessor from https://github.com/RestExpress/RestExpress-Scaffold/tree/master/minimal/src/main/java/com/strategicgains/restexpress/scaffold/minimal/serialization
   for a minimal project.
-* BREAKING CHANGE: Removed Chunking and compression settings. RestExpress does not support
+* **BREAKING CHANGE:** Removed Chunking and compression settings. RestExpress does not support
   chunking/streaming uploads.  So the setting were superfluous.  The facility is still there
   to support streaming downloads, however, and these will be chunked as necessary. As compression
   is based on the Accept header, support is always provided--settings are superfluous.
   NOTE: streaming downloads are not fully implemented yet.
-* BREAKING CHANGE: Removed LoggingHandler from the Netty pipeline and related setter methods.
+* **BREAKING CHANGE:** Removed LoggingHandler from the Netty pipeline and related setter methods.
 * Added HttpBasicAuthenticationPreprocessor to facilitate HTTP Basic Authentication. Added
   Flags.Auth.PUBLIC_ROUTE, NO_AUTHENTICATION, and NO_AUTHORIZATION to support configuration
   of HttpBasicAuthenticationPreprocessor (and other authentication/authorization 
