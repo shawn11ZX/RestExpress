@@ -29,6 +29,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.restexpress.ContentType;
 import org.restexpress.Request;
 import org.restexpress.Response;
+import org.restexpress.exception.DefaultExceptionMapper;
 import org.restexpress.exception.ExceptionMapping;
 import org.restexpress.exception.ExceptionUtils;
 import org.restexpress.exception.ServiceException;
@@ -55,7 +56,7 @@ extends SimpleChannelUpstreamHandler
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
 	private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
-	private ExceptionMapping exceptionMap = new ExceptionMapping();
+	private ExceptionMapping exceptionMap = new DefaultExceptionMapper();
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
 	private boolean shouldEnforceHttpSpec = true;
 

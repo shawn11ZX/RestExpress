@@ -79,6 +79,9 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+Release 0.10.2-SNAPSHOT (in branch 'master')
+* Refactored ExceptionMapping an interface, extracting previous implementation into DefaultExceptionMapper.
+
 Release 0.10.1 - 24 Jan 2014
 ---------------------------------------------------------------------------------------------------
 * Fixed NPE issue when RestExpress.setSerializationProvider() is not called.
