@@ -39,7 +39,8 @@ Development:
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
 
-Note that to use the SNAPSHOT version, you must enable snapshots and a repository in your pom file as follows:
+Note that to use the SNAPSHOT version, you must enable snapshots and a repository in your pom file as follows
+(if you already have a profile with repositories in your pom, you can just copy the <repository> section):
 ```xml
   <profiles>
     <profile>
@@ -47,7 +48,7 @@ Note that to use the SNAPSHOT version, you must enable snapshots and a repositor
           <activation><activeByDefault>true</activeByDefault></activation>
        <repositories>
          <repository>
-           <id>snapshots-repo</id>
+           <id>sonatype-snapshots-repo</id>
            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
            <releases><enabled>false</enabled></releases>
            <snapshots><enabled>true</enabled></snapshots>
