@@ -279,11 +279,27 @@ public class Request
 		return httpRequest.getHeaderNames();
 	}
 	
+	/**
+	* Adds a header to the request
+	* 
+	* Beware that headers set when parsing the HTTP request are indistinguishable
+	* from those set programmatically via this method. Consider using {@link
+	* #putAttachment} to persist data that should not be directly accessible by
+	* the request.
+	*/
 	public void addHeader(String name, String value)
     {
 		httpRequest.addHeader(name, value);
     }
 	
+	/**
+	* Adds a collection of headers to the request
+	* 
+	* Beware that headers set when parsing the HTTP request are indistinguishable
+	* from those set programmatically via this method. Consider using {@link
+	* #putAttachment} to persist data that should not be directly accessible by
+	* the request.
+	*/
 	public void addAllHeaders(Collection<Entry<String, String>> headers)
 	{
     	for (Entry<String, String> entry : headers)
