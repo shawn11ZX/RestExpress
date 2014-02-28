@@ -6,13 +6,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.restexpress.exception.ExceptionMapping;
-import org.restexpress.exception.ServiceException;
 
 
-public class ExceptionMappingTest
+public class DefaultExceptionMapperTest
 {
-	private ExceptionMapping mapping = new ExceptionMapping();
+	private ExceptionMapping mapping = new DefaultExceptionMapper();
 
 	@Test
 	public void shouldMapException()

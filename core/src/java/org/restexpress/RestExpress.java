@@ -29,6 +29,7 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import org.restexpress.domain.metadata.ServerMetadata;
+import org.restexpress.exception.DefaultExceptionMapper;
 import org.restexpress.exception.ExceptionMapping;
 import org.restexpress.exception.ServiceException;
 import org.restexpress.pipeline.DefaultRequestHandler;
@@ -79,7 +80,7 @@ public class RestExpress
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
 	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
 	private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
-	private ExceptionMapping exceptionMap = new ExceptionMapping();
+	private ExceptionMapping exceptionMap = new DefaultExceptionMapper();
 	private List<Plugin> plugins = new ArrayList<Plugin>();
 	private RouteDeclaration routeDeclarations = new RouteDeclaration();
 	
