@@ -83,6 +83,7 @@ public class Request
 		this.routeResolver = routeResolver;
 		this.serializationProvider = serializationProvider;
 	    createCorrelationId();
+        this.queryStringMap = new HashMap<String, String>();
 		parseQueryString(request);
 		determineEffectiveHttpMethod(request);
 	}
