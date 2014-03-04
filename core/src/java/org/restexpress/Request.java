@@ -17,8 +17,10 @@
 
 package org.restexpress;
 
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMethod;
@@ -184,6 +187,39 @@ public class Request
 		}
 		
 		return instance;
+	}
+
+	/**
+	 * Returns the request body as an InputStream.
+	 * 
+	 * @return an InputStream
+	 */
+	public InputStream getBodyAsStream()
+	{
+		return new ChannelBufferInputStream(getBody());
+	}
+
+	/**
+	 * Accesses the request body as a ByteBuffer.
+	 * It is equivalent to calling getBody().toByteBuffer().
+	 * 
+	 * @return a ByteBuffer.
+	 */
+	public ByteBuffer getBodyAsByteBuffer()
+	{
+		return getBody().toByteBuffer();
+	}
+
+	/**
+	 * Returns the byte array underlying the Netty ChannelBuffer for this request.
+	 * However, if the ChannelBuffer returns false to hasArray(), this
+	 * method returns null.
+	 * 
+	 * @return an array of byte, or null, if the ChannelBuffer is not backed by a byte array.
+	 */
+	public byte[] getBodyAsBytes()
+	{
+		return (getBody().hasArray() ? getBody().array() : null);
 	}
 
 	/**
