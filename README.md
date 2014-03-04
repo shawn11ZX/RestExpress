@@ -81,7 +81,8 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.10.2-SNAPSHOT (in branch 'master')
-* Refactored ExceptionMapping an interface, extracting previous implementation into DefaultExceptionMapper.
+* Refactored ExceptionMapping into an interface, extracting previous implementation into DefaultExceptionMapper.
+* Added new convenience methods on Request: getBodyAsStream(), getBodyAsBytes(), getBodyAsByteBuffer().
 
 Release 0.10.1 - 24 Jan 2014
 ---------------------------------------------------------------------------------------------------
