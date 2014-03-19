@@ -49,10 +49,6 @@ import org.restexpress.url.QueryStringParser;
  */
 public class Request
 {
-	// SECTION: CONSTANTS
-
-	private static final String DEFAULT_PROTOCOL = "http";
-	
 	private static AtomicLong nextCorrelationId = new AtomicLong(0);
 
 
@@ -398,7 +394,26 @@ public class Request
 		
 		return null;
 	}
-	
+
+	/**
+	 * Get the path pattern (without protocol://host:port) for a named Route and given HTTP method
+	 * 
+	 * @param method the HTTP method
+	 * @param resourceName the name of the route
+	 * @return the URL Path pattern, or null if the name/method does not exist.
+	 */
+	public String getNamedPath(HttpMethod method, String resourceName)
+	{
+		Route route = routeResolver.getNamedRoute(resourceName, method);
+		
+		if (route != null)
+		{
+			return route.getPattern();
+		}
+		
+		return null;
+	}
+
 	public Map<String, String> getQueryStringMap()
 	{
 		return queryStringMap;
@@ -435,14 +450,13 @@ public class Request
 	}
 
 	/**
-	 * Get the protocol of the request.  RESTExpress currently only supports 'http'
-	 * and will always return that value.
+	 * Get the protocol of the request.
 	 * 
-	 * @return "http"
+	 * @return "http" or "https," etc. lower-case.
 	 */
 	public String getProtocol()
 	{
-		return DEFAULT_PROTOCOL;
+		return httpRequest.getProtocolVersion().getProtocolName().toLowerCase();
 	}
 	
 	/**
