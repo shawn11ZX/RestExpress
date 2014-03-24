@@ -27,9 +27,11 @@ import org.junit.Test;
 import org.restexpress.common.query.QueryRange;
 import org.restexpress.domain.JsendResultWrapper;
 import org.restexpress.pipeline.SimpleConsoleLogMessageObserver;
+import org.restexpress.response.ErrorResponseWrapper;
 import org.restexpress.response.JsendResponseWrapper;
 import org.restexpress.serialization.AbstractSerializationProvider;
 import org.restexpress.serialization.DefaultSerializationProvider;
+import org.restexpress.serialization.NullSerializationProvider;
 import org.restexpress.serialization.json.JacksonJsonProcessor;
 import org.restexpress.serialization.xml.XstreamXmlProcessor;
 
@@ -602,6 +604,60 @@ public class RestExpressServerTest
 		String entityString = EntityUtils.toString(entity);
 		JsendResultWrapper o = serializer.getSerializer(Format.WRAPPED_XML).deserialize(entityString, JsendResultWrapper.class);
 		verifyList(((ArrayList<LittleO>)o.getData()).toArray(new LittleO[0]));
+		request.releaseConnection();
+	}
+
+    @Test
+	public void shouldSerializeApplicationHalJson()
+	throws Exception
+	{
+    	AbstractSerializationProvider serializer = new NullSerializationProvider();
+    	JacksonJsonProcessor jsonProc = new JacksonJsonProcessor();
+    	jsonProc.addSupportedMediaTypes(ContentType.HAL_JSON);
+		serializer.add(jsonProc, new ErrorResponseWrapper());
+		RestExpress.setSerializationProvider(serializer);
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(LITTLE_OS_URL);
+		request.addHeader(HttpHeaders.Names.ACCEPT, "application/hal+json");
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.HAL_JSON, entity.getContentType().getValue());
+		Header range = response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE);
+		assertNotNull(range);
+		assertEquals("items 0-2/3", range.getValue());
+		String entityString = EntityUtils.toString(entity);
+		LittleO[] os = serializer.getSerializer(Format.JSON).deserialize(entityString, LittleO[].class);
+		verifyList(os);
+		request.releaseConnection();
+	}
+
+    @Test
+	public void shouldSerializeApplicationXmlJson()
+	throws Exception
+	{
+    	AbstractSerializationProvider serializer = new NullSerializationProvider();
+    	XstreamXmlProcessor xmlProc = new XstreamXmlProcessor();
+    	xmlProc.addSupportedMediaTypes(ContentType.HAL_XML);
+		serializer.add(xmlProc, new ErrorResponseWrapper());
+		RestExpress.setSerializationProvider(serializer);
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(LITTLE_OS_URL);
+		request.addHeader(HttpHeaders.Names.ACCEPT, "application/hal+xml");
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.HAL_XML, entity.getContentType().getValue());
+		Header range = response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE);
+		assertNotNull(range);
+		assertEquals("items 0-2/3", range.getValue());
+		String entityString = EntityUtils.toString(entity);
+		ArrayList<LittleO> os = serializer.getSerializer(Format.XML).deserialize(entityString, ArrayList.class);
+		verifyList(os.toArray(new LittleO[0]));
 		request.releaseConnection();
 	}
 

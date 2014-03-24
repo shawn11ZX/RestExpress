@@ -27,6 +27,8 @@ public abstract class ContentType
 	public static final Charset CHARSET = Charset.forName(ENCODING);
 
 	public static final String CSS = "text/css; charset=" + ENCODING;
+	public static final String HAL_JSON = "application/hal+json; charset=" + ENCODING;
+	public static final String HAL_XML = "application/hal+xml; charset=" + ENCODING;
 	public static final String HTML = "text/html; charset=" + ENCODING;
 	public static final String JAVASCRIPT = "application/javascript; charset=" + ENCODING;
 	public static final String JSON = "application/json; charset=" + ENCODING;
