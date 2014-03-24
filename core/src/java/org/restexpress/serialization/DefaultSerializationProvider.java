@@ -17,7 +17,7 @@ package org.restexpress.serialization;
 
 import org.restexpress.response.RawResponseWrapper;
 import org.restexpress.serialization.json.JacksonJsonProcessor;
-import org.serialization.xml.XstreamXmlProcessor;
+import org.restexpress.serialization.xml.XstreamXmlProcessor;
 
 
 /**

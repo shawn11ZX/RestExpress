@@ -24,11 +24,6 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.restexpress.ContentType;
-import org.restexpress.Format;
-import org.restexpress.Request;
-import org.restexpress.Response;
-import org.restexpress.RestExpress;
 import org.restexpress.common.query.QueryRange;
 import org.restexpress.domain.JsendResultWrapper;
 import org.restexpress.pipeline.SimpleConsoleLogMessageObserver;
@@ -36,7 +31,7 @@ import org.restexpress.response.JsendResponseWrapper;
 import org.restexpress.serialization.AbstractSerializationProvider;
 import org.restexpress.serialization.DefaultSerializationProvider;
 import org.restexpress.serialization.json.JacksonJsonProcessor;
-import org.serialization.xml.XstreamXmlProcessor;
+import org.restexpress.serialization.xml.XstreamXmlProcessor;
 
 public class RestExpressServerTest
 {

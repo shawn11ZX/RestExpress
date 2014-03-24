@@ -148,4 +148,21 @@ public class MediaRange
 		
 		return rank;
     }
+
+	@Override
+	public boolean equals(Object that)
+	{
+		return equals((MediaRange) that);
+	}
+
+	public boolean equals(MediaRange that)
+	{
+		boolean result = (name.equals(that.name) && type.equals(that.type) && subtype.equals(that.subtype));
+		
+		if (!result) return false;
+
+		if (qvalue != that.qvalue) return false;
+
+		return parameters.equals(that.parameters);
+	}
 }

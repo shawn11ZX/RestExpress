@@ -43,8 +43,8 @@ import org.restexpress.route.RouteResolver;
 import org.restexpress.serialization.NullSerializationProvider;
 import org.restexpress.serialization.SerializationProvider;
 import org.restexpress.serialization.json.JacksonJsonProcessor;
+import org.restexpress.serialization.xml.XstreamXmlProcessor;
 import org.restexpress.settings.RouteDefaults;
-import org.serialization.xml.XstreamXmlProcessor;
 
 
 /**

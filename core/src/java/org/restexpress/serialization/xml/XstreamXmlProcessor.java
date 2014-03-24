@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.serialization.xml;
+package org.restexpress.serialization.xml;
 
 import java.util.ArrayList;
 import java.util.Collections;

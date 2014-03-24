@@ -13,7 +13,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-package org.serialization.xml;
+package org.restexpress.serialization.xml;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +21,6 @@ import java.util.List;
 import org.restexpress.ContentType;
 import org.restexpress.Format;
 import org.restexpress.common.util.StringUtils;
-import org.restexpress.contenttype.MediaRange;
 import org.restexpress.contenttype.MediaTypeParser;
 import org.restexpress.serialization.AbstractSerializationProcessor;
 import org.restexpress.serialization.AliasingSerializationProcessor;
@@ -37,7 +36,6 @@ implements AliasingSerializationProcessor
 	private static final String SUPPORTED_MEDIA_TYPES = StringUtils.join(",",
 		ContentType.XML,
 		"text/xml; charset=" + ContentType.ENCODING);
-	private static List<MediaRange> SUPPORTED_MEDIA_RANGES = MediaTypeParser.parse(SUPPORTED_MEDIA_TYPES);
 
 	public XmlSerializationProcessor()
 	{
@@ -51,12 +49,6 @@ implements AliasingSerializationProcessor
 
 	public XmlSerializationProcessor(List<String> supportedFormats)
 	{
-		super(supportedFormats);
+		super(supportedFormats, MediaTypeParser.parse(SUPPORTED_MEDIA_TYPES));
 	}
-
-	@Override
-    public List<MediaRange> getSupportedMediaRanges()
-    {
-		return SUPPORTED_MEDIA_RANGES;
-    }
 }

@@ -21,7 +21,6 @@ import java.util.List;
 import org.restexpress.ContentType;
 import org.restexpress.Format;
 import org.restexpress.common.util.StringUtils;
-import org.restexpress.contenttype.MediaRange;
 import org.restexpress.contenttype.MediaTypeParser;
 import org.restexpress.serialization.AbstractSerializationProcessor;
 
@@ -36,7 +35,6 @@ extends AbstractSerializationProcessor
 		ContentType.JSON,
 		ContentType.JAVASCRIPT,
 		ContentType.TEXT_JAVASCRIPT);
-	private static List<MediaRange> SUPPORTED_MEDIA_RANGES = MediaTypeParser.parse(SUPPORTED_MEDIA_TYPES);
 
 	public JsonSerializationProcessor()
 	{
@@ -50,12 +48,6 @@ extends AbstractSerializationProcessor
 
 	public JsonSerializationProcessor(List<String> supportedFormats)
 	{
-		super(supportedFormats);
+		super(supportedFormats, MediaTypeParser.parse(SUPPORTED_MEDIA_TYPES));
 	}
-
-	@Override
-    public List<MediaRange> getSupportedMediaRanges()
-    {
-	    return SUPPORTED_MEDIA_RANGES;
-    }
 }
