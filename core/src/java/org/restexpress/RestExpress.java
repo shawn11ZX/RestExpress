@@ -264,9 +264,9 @@ public class RestExpress
 	 */
 	public RestExpress addFinallyProcessor(Postprocessor processor)
 	{
-		if (!postprocessors.contains(processor))
+		if (!finallyProcessors.contains(processor))
 		{
-			postprocessors.add(processor);
+			finallyProcessors.add(processor);
 		}
 
 		return this;
