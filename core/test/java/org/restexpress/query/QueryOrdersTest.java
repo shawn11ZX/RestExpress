@@ -104,6 +104,24 @@ public class QueryOrdersTest
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 	}
+
+	@Test
+	public void shouldAllowSingleOrder()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("sort", "-abc");
+		Request request = new Request(httpRequest, null);
+		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
+	}
+
+	@Test (expected=BadRequestException.class)
+	public void shouldThrowOnSingleInvalidOrder()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("sort", "-something");
+		Request request = new Request(httpRequest, null);
+		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
+	}
 	
 	private class OCallback
 	implements OrderCallback

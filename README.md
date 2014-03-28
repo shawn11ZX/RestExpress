@@ -86,6 +86,7 @@ Release 0.10.2-SNAPSHOT (in branch 'master')
 * Added new method Request.getNamedPath() that returns only the route path pattern instead of the
   entire URL, which Request.getNamedUrl() does.
 * Request.getProtocol() now returns the protocol from the underlying HttpRequest instance.
+* Fixed issue in QueryOrders where only a single valid order parameters is supported. Caused IndexOutOfBoundsException.
 
 Release 0.10.1 - 24 Jan 2014
 ---------------------------------------------------------------------------------------------------

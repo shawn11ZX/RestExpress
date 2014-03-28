@@ -80,15 +80,15 @@ public abstract class QueryOrders
 			{
 				i = 0;
 
-				while (i < allowed.length())
+				while (i < requestedProperties.length)
 				{
 					String requested = requestedProperties[i++];
 
 					if (requested.endsWith(allowed))
 					{
-						break;
+						return;
 					}
-					else if (i == allowed.length())
+					else if (i == requestedProperties.length)
 					{
 						throw new BadRequestException(requested
 							+ " is not a supported sort field. Supported sort fields are: "

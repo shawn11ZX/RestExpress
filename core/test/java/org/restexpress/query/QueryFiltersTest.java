@@ -92,6 +92,24 @@ public class QueryFiltersTest
 		Request request = new Request(httpRequest, null);
 		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 	}
+
+	@Test
+	public void shouldAllowSingleFilter()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("filter", "abc::todd");
+		Request request = new Request(httpRequest, null);
+		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
+	}
+
+	@Test(expected=BadRequestException.class)
+	public void shouldThrowOnSingleInvalidFilter()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
+		httpRequest.addHeader("filter", "name::todd");
+		Request request = new Request(httpRequest, null);
+		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
+	}
 	
 	private class FCallback
 	implements FilterCallback
