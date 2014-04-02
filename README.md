@@ -88,6 +88,7 @@ Release 0.10.2-SNAPSHOT (in branch 'master')
 * Request.getProtocol() now returns the protocol from the underlying HttpRequest instance.
 * Fixed issue in QueryOrders where only a single valid order parameters is supported. Caused IndexOutOfBoundsException.
 * Fixed an issue in RestExpress.java where finally processors were assigned as post processors. This could affect some finally processor implementations, such as timers, etc. since they are now run later in the process.
+* Fixed an issue with finally processors, they are now called before the message is returned to the client (after serialization), or in the finally block (if an error occurs, response is in indeterminite state).
 
 Release 0.10.1 - 24 Jan 2014
 ---------------------------------------------------------------------------------------------------

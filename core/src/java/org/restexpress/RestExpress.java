@@ -249,8 +249,9 @@ public class RestExpress
 	}
 
 	/**
-	 * Add a Postprocessor instance that gets called in a finally block after
-	 * the message is processed.  Finally processors are Postprocessor instances
+	 * Add a Postprocessor instance that gets called right before the serialized
+	 * message is sent to the client, or in a finally block after the message is
+	 * processed, if an error occurs.  Finally processors are Postprocessor instances
 	 * that are guaranteed to run even if an error is thrown from the controller
 	 * or somewhere else in the route.  A Finally Processor is useful for adding
 	 * headers or transforming results even during error conditions. Finally

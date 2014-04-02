@@ -134,8 +134,7 @@ extends SimpleChannelUpstreamHandler
 			invokePostprocessors(postprocessors, context.getRequest(), context.getResponse());
 			serializeResponse(context, false);
 			enforceHttpSpecification(context);
-			
-			// TODO: this is a problem if a FinallyProcessor changes the response.  It will only work in 'accidentally' and intermittently.
+			invokeFinallyProcessors(finallyProcessors, context.getRequest(), context.getResponse());
 			writeResponse(ctx, context);
 			notifySuccess(context);
 		}
@@ -145,7 +144,6 @@ extends SimpleChannelUpstreamHandler
 		}
 		finally
 		{
-			invokeFinallyProcessors(finallyProcessors, context.getRequest(), context.getResponse());
 			notifyComplete(context);
 		}
 	}
@@ -191,6 +189,7 @@ extends SimpleChannelUpstreamHandler
 		context.setException(rootCause);
 		notifyException(context);
 		serializeResponse(context, true);
+		invokeFinallyProcessors(finallyProcessors, context.getRequest(), context.getResponse());
 		writeResponse(ctx, context);
 	}
 
