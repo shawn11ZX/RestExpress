@@ -87,6 +87,7 @@ Release 0.10.2-SNAPSHOT (in branch 'master')
   entire URL, which Request.getNamedUrl() does.
 * Request.getProtocol() now returns the protocol from the underlying HttpRequest instance.
 * Fixed issue in QueryOrders where only a single valid order parameters is supported. Caused IndexOutOfBoundsException.
+* Fixed an issue in RestExpress.java where finally processors were assigned as post processors. This could affect some finally processor implementations, such as timers, etc. since they are now run later in the process.
 
 Release 0.10.1 - 24 Jan 2014
 ---------------------------------------------------------------------------------------------------
