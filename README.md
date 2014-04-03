@@ -89,6 +89,12 @@ Release 0.10.2-SNAPSHOT (in branch 'master')
 * Fixed issue in QueryOrders where only a single valid order parameters is supported. Caused IndexOutOfBoundsException.
 * Fixed an issue in RestExpress.java where finally processors were assigned as post processors. This could affect some finally processor implementations, such as timers, etc. since they are now run later in the process.
 * Fixed an issue with finally processors, they are now called before the message is returned to the client (after serialization), or in the finally block (if an error occurs, response is in indeterminite state).
+* Introduced another factory method in ErrorResult, allowing elimination of exceptionType in output.
+* Introduced RequestContext, a Map of name/value pairs much like the Log4j mapped diagnostic contexts (MDC), as an instrument for passing augmentation data from different sources to lower levels in the framework.
+* Can now add supported MediaRange(s) dynamically at startup, such as application/hal+json.
+* ** Breaking Change ** Repackaged org.serialization.xml to org.restexpress.serialization.xml
+* Added ContentType.HAL_JSON and ContentType.HAL_XML plus new RestExpressServerTest tests.
+* Introduced RoutePlugin to simplify plugins that create internal routes.
 
 Release 0.10.1 - 24 Jan 2014
 ---------------------------------------------------------------------------------------------------
@@ -98,6 +104,8 @@ Release 0.10.1 - 24 Jan 2014
   properties—enabling the verification of appropriate orders and filters. Throws
   BadRequestException on failure.
 * Removed core StringUtils in favor of common StringUtils.
+* Fixed issue where default serialization processor was not used if setSerializationProcessor() was not called.
+* Changed RestExpress server startup message from “Starting <name> Server on port <port>” to “<name> server listening on port <port>”
 
 Release 0.10.0 - 3 Jan 2014
 ---------------------------------------------------------------------------------------------------
