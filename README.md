@@ -26,7 +26,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.10.1</version>
+			<version>0.10.2</version>
 		</dependency>
 ```
 Development:
@@ -34,7 +34,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.10.2-SNAPSHOT</version>
+			<version>0.10.3-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -81,6 +81,9 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.10.2-SNAPSHOT (in branch 'master')
+
+Release 0.10.2 - 3 Apr 2014
+---------------------------
 * Refactored ExceptionMapping into an interface, extracting previous implementation into DefaultExceptionMapper.
 * Added new convenience methods on Request: getBodyAsStream(), getBodyAsBytes(), getBodyAsByteBuffer().
 * Added new method Request.getNamedPath() that returns only the route path pattern instead of the
