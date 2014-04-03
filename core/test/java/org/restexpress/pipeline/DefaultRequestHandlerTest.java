@@ -365,13 +365,16 @@ public class DefaultRequestHandlerTest
 		NoopPostprocessor p1 = new NoopPostprocessor();
 		NoopPostprocessor p2 = new NoopPostprocessor();
 		NoopPostprocessor p3 = new NoopPostprocessor();
+		messageHandler.addPostprocessor(p1);
+		messageHandler.addPostprocessor(p2);
+		messageHandler.addPostprocessor(p3);
 		messageHandler.addFinallyProcessor(p1);
 		messageHandler.addFinallyProcessor(p2);
 		messageHandler.addFinallyProcessor(p3);
 		sendGetEvent("/foo");
-		assertEquals(1, p1.getCallCount());
-		assertEquals(1, p2.getCallCount());
-		assertEquals(1, p3.getCallCount());
+		assertEquals(2, p1.getCallCount());
+		assertEquals(2, p2.getCallCount());
+		assertEquals(2, p3.getCallCount());
 	}
 
 	@Test
@@ -380,6 +383,9 @@ public class DefaultRequestHandlerTest
 		NoopPostprocessor p1 = new NoopPostprocessor();
 		NoopPostprocessor p2 = new NoopPostprocessor();
 		NoopPostprocessor p3 = new NoopPostprocessor();
+		messageHandler.addPostprocessor(p1);
+		messageHandler.addPostprocessor(p2);
+		messageHandler.addPostprocessor(p3);
 		messageHandler.addFinallyProcessor(p1);
 		messageHandler.addFinallyProcessor(p2);
 		messageHandler.addFinallyProcessor(p3);
@@ -395,11 +401,14 @@ public class DefaultRequestHandlerTest
 		NoopPostprocessor p1 = new ExceptionPostprocessor();
 		NoopPostprocessor p2 = new ExceptionPostprocessor();
 		NoopPostprocessor p3 = new ExceptionPostprocessor();
+		messageHandler.addPostprocessor(p1);	// this one throws the exception in Postprocessors
+		messageHandler.addPostprocessor(p2);	// not called
+		messageHandler.addPostprocessor(p3);	// not called
 		messageHandler.addFinallyProcessor(p1);
 		messageHandler.addFinallyProcessor(p2);
 		messageHandler.addFinallyProcessor(p3);
 		sendGetEvent("/foo");
-		assertEquals(1, p1.getCallCount());
+		assertEquals(2, p1.getCallCount());
 		assertEquals(1, p2.getCallCount());
 		assertEquals(1, p3.getCallCount());
 	}
