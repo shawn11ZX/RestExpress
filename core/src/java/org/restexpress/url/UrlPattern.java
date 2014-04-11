@@ -82,7 +82,7 @@ implements UrlMatcher
 	private static final String URL_FORMAT_MATCH_REGEX = "(?:\\\\.\\([\\\\w%]+?\\))?";
 
 	// Finds the query string portion within a URL. Appended to the end of the built-up regex string.
-	private static final String URL_QUERY_STRING_REGEX = "(?:\\?.+?)?$";
+	private static final String URL_QUERY_STRING_REGEX = "(?:\\?.*?)?$";
 
 	/**
 	 * The URL pattern describing the URL layout and any parameters.

@@ -80,7 +80,8 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.10.2-SNAPSHOT (in branch 'master')
+Release 0.10.3-SNAPSHOT (in branch 'master')
+* Change URL Pattern matcher to allow URLs with '?' at the end, but no query-string parameters following it.
 
 Release 0.10.2 - 3 Apr 2014
 ---------------------------

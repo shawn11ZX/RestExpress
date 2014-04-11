@@ -173,6 +173,38 @@ public class UrlPatternTest
 	}
 
 	@Test
+	public void shouldMatchUrlWithQuestionMark()
+	{
+		UrlMatch match = p.match("/xxx/12345/yyy/67890?");
+		assertNotNull(match);
+		assertNull(match.get("format"));
+		assertEquals("12345", match.get("a_id"));
+		assertEquals("67890", match.get("b_id"));
+		
+		match = p.match("/xxx/12.345/yyy/678.90?");
+		assertNotNull(match);
+		assertNull(match.get("format"));
+		assertEquals("12.345", match.get("a_id"));
+		assertEquals("678.90", match.get("b_id"));
+	}
+
+	@Test
+	public void shouldMatchUrlWithQuestionMarkAndFormat()
+	{
+		UrlMatch match = pFormat.match("/xxx/12345/yyy/67890.json?");
+		assertNotNull(match);
+		assertEquals("json", match.get("format"));
+		assertEquals("12345", match.get("a_id"));
+		assertEquals("67890", match.get("b_id"));
+		
+		match = pFormat.match("/xxx/12.345/yyy/678.90.json?");
+		assertNotNull(match);
+		assertEquals("json", match.get("format"));
+		assertEquals("12.345", match.get("a_id"));
+		assertEquals("678.90", match.get("b_id"));
+	}
+
+	@Test
 	public void shouldParseParametersWithPeriods()
 	{
 		UrlMatch match = p.match("/xxx/1.0/yyy/67890?x=y&a=b");
