@@ -83,6 +83,10 @@ Change History/Release Notes:
 Release 0.10.3-SNAPSHOT (in branch 'master')
 * Change URL Pattern matcher to allow URLs with '?' at the end, but no query-string parameters following it.
 * Changed compiler output version to 1.7 (from 1.6).
+* Added SSL support (from Clark Hobbie).
+* Fixed error message in QueryRange.setLimit(int) from 'limit must be >= 0' to 'limit must be > 0' (from GCL).
+* Changed Request.getQueryStringMap() to never return null (from Kevin Williams).
+* Expose the creation of the DefaultRequestHandler (via RestExpress.buildRequestHandler()) to rest engines not using "main()" or "bind()" (from Ryan Dietrich).
 
 Release 0.10.2 - 3 Apr 2014
 ---------------------------
