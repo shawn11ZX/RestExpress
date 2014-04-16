@@ -82,6 +82,7 @@ Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.10.3-SNAPSHOT (in branch 'master')
 * Change URL Pattern matcher to allow URLs with '?' at the end, but no query-string parameters following it.
+* Changed compiler output version to 1.7 (from 1.6).
 
 Release 0.10.2 - 3 Apr 2014
 ---------------------------
