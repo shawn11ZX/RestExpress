@@ -166,7 +166,7 @@ public class Request
 
 	/**
 	 * Attempts to deserialize the request body into an instance of the given type.
-	 * If the serialization process returns null, throws BadResquestExcption using
+	 * If the serialization process returns null, throws BadRequestException using
 	 * the message.
 	 * 
 	 * @param type the resulting type.
@@ -276,7 +276,7 @@ public class Request
 	}
 	
 	/**
-	 * Gets the named header fromthe request. Throws BadRequestException(message)
+	 * Gets the named header from the request. Throws BadRequestException(message)
 	 * if the header is not present.
 	 * Both HTTP headers and query-string parameters are set as headers on the Request,
 	 * with query-string parameters overriding headers if there is a name clash.
