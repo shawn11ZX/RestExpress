@@ -7,7 +7,7 @@ import java.security.KeyStore;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
-public class SSLUtil
+public class SslUtil
 {
 	public static SSLContext loadContext(String keyStore,
 			String filePassword, String keyPassword) throws Exception
