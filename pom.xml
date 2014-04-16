@@ -6,7 +6,7 @@
 	<url>https://github.com/RestExpress/RestExpress</url>
 	<groupId>com.strategicgains</groupId>
 	<artifactId>restexpress-parent</artifactId>
-	<version>0.9.5-SNAPSHOT</version>
+	<version>0.10.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -46,8 +46,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>

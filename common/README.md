@@ -12,7 +12,7 @@ Stable build:
 <dependency>
 	<groupId>com.strategicgains</groupId>
 	<artifactId>RestExpress-Common</artifactId>
-	<version>1.0.2</version>
+	<version>0.9.4.2</version>
 </dependency>
 ```
 Development (snapshot) build:
@@ -20,12 +20,13 @@ Development (snapshot) build:
 <dependency>
 	<groupId>com.strategicgains</groupId>
 	<artifactId>RestExpress-Common</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>0.10.0-SNAPSHOT</version>
 </dependency>
 ```
 
 Release Notes
 =============
+Versions now track with RestExpress.  See parent README.
 
 1.0.3 - In development
 -----
