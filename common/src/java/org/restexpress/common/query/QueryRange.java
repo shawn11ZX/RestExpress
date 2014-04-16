@@ -118,12 +118,12 @@ implements Cloneable
 	 * Set the query limit, which represents the maximum number of results returned
 	 * in a query.
 	 * 
-	 * @param value an integer >= zero
+	 * @param value an integer > zero
 	 * @throws IllegalArgumentException if the limit is less-than zero
 	 */
 	public void setLimit(int value)
 	{
-		if (value < 0) throw new IllegalArgumentException("limit must be >= 0");
+		if (value <= 0) throw new IllegalArgumentException("limit must be > 0");
 
 		this.limit = Integer.valueOf(value);
 	}
