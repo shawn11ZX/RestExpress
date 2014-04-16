@@ -15,15 +15,22 @@
 */
 package org.restexpress;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.*;
-import org.junit.*;
-import org.restexpress.exception.BadRequestException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+import org.jboss.netty.handler.codec.http.HttpMethod;
+import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.junit.Before;
+import org.junit.Test;
+import org.restexpress.exception.BadRequestException;
 
 /**
  * @author toddf
