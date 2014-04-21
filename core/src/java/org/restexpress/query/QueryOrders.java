@@ -72,29 +72,27 @@ public abstract class QueryOrders
 
 	private static void enforceAllowedProperties(List<String> allowedProperties, String[] requestedProperties)
     {
+		if (requestedProperties == null) return;
+
 	    if (allowedProperties != null)
 		{
 			int i = 0;
 
-			for (String allowed : allowedProperties)
+			while (i < requestedProperties.length)
 			{
-				i = 0;
+				String requested = requestedProperties[i++];
 
-				while (i < requestedProperties.length)
+				for (String allowed : allowedProperties)
 				{
-					String requested = requestedProperties[i++];
-
 					if (requested.endsWith(allowed))
 					{
 						return;
 					}
-					else if (i == requestedProperties.length)
-					{
-						throw new BadRequestException(requested
-							+ " is not a supported sort field. Supported sort fields are: "
-							+ StringUtils.join(", ", allowedProperties));
-					}
 				}
+
+				throw new BadRequestException(requested
+					+ " is not a supported sort field. Supported sort fields are: "
+					+ StringUtils.join(", ", allowedProperties));
 			}
 		}
     }
