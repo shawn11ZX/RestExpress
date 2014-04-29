@@ -38,7 +38,7 @@ import org.restexpress.serialization.json.JacksonJsonProcessor;
 public class JacksonJsonProcessorTest
 {
 	private static final String JSON = "{\"integer\":2,\"string\":\"another string value\",\"date\":\"1963-12-06T12:30:00.000Z\",\"p\":\"good stuff\"}";
-	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"????????????\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
+	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"我能吞下\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
 
 	private SerializationProcessor processor = new JacksonJsonProcessor();
 
@@ -125,11 +125,44 @@ public class JacksonJsonProcessorTest
 		assertNotNull(o);
 		assertTrue(o.getClass().isAssignableFrom(KnownObject.class));
 		assertEquals(2, o.integer);
-		assertEquals("????????????", o.string);
+		assertEquals("我能吞下", o.string);
 		Calendar c = Calendar.getInstance();
 		c.setTime(o.date);
 		assertEquals(11, c.get(Calendar.MONTH));
 		assertEquals(6, c.get(Calendar.DAY_OF_MONTH));
 		assertEquals(1963, c.get(Calendar.YEAR));
 	}
+
+	@Test
+	public void shouldEncodeSerializedXssJsonArray()
+	{
+		KnownObject ko = new KnownObject();
+		ko.sa = new String[] {"this", "is", "an", "evil", "Json", "<script>alert(\'xss')</script>"};
+		String json = processor.serialize(ko);
+		assertNotNull(json);
+		assertTrue(json.startsWith("{"));
+		assertTrue(json.contains("\"integer\":1"));
+		assertTrue(json.contains("\"string\":\"string value\""));
+		assertTrue(json.contains("\"date\":\"1964-12-17T23:30:00.000Z"));
+		assertTrue(json.contains("\"p\":\"something private"));
+		assertFalse(json.contains("\"q\":"));
+		assertTrue(json.contains("\"sa\":[\"this\",\"is\",\"an\",\"evil\",\"Json\",\"&lt;script&gt;alert('xss')&lt;/script&gt;\"]"));
+		assertTrue(json.endsWith("}"));
+	}
+
+	@Test
+	public void shouldEncodeSerializedXssJsonString()
+	{
+		KnownObject ko = new KnownObject();
+		ko.string = "<script>alert('xss')</script>";
+		String json = processor.serialize(ko);
+		assertNotNull(json);
+		assertTrue(json.startsWith("{"));
+		assertTrue(json.contains("\"integer\":1"));
+		assertTrue(json.contains("\"string\":\"&lt;script&gt;alert('xss')&lt;/script&gt;"));
+		assertTrue(json.contains("\"date\":\"1964-12-17T23:30:00.000Z"));
+		assertTrue(json.contains("\"p\":\"something private"));
+		assertFalse(json.contains("\"q\":"));
+		assertFalse(json.contains("\"sa\":"));
+		assertTrue(json.endsWith("}"));	}
 }

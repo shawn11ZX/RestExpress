@@ -93,6 +93,7 @@ extends JsonSerializationProcessor
     {
 		module
 			.addSerializer(Date.class, new JacksonTimepointSerializer())
+			.addSerializer(String.class, new JacksonEncodingStringSerializer())
 			.addDeserializer(Date.class, new JacksonTimepointDeserializer());
 		initialize(module);
     }

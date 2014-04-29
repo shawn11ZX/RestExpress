@@ -16,6 +16,7 @@
 package org.restexpress.serialization.xml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -117,5 +118,40 @@ public class XstreamXmlProcessorTest
 		ChannelBuffer buf = ChannelBuffers.EMPTY_BUFFER;
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNull(o);
+	}
+
+	@Test
+	public void shouldEncodeSerializedXssArray()
+	{
+		KnownObject ko = new KnownObject();
+		ko.sa = new String[] {"this", "is", "an", "evil", "Json", "<script>alert(\'xss')</script>"};
+		String xml = processor.serialize(ko);
+		assertNotNull(xml);
+		assertTrue(xml.startsWith("<KnownObject>"));
+		assertTrue(xml.contains("<integer>1</integer>"));
+		assertTrue(xml.contains("<date>1964-12-17T23:30:00.000Z</date>"));
+		assertTrue(xml.contains("<p>something private</p>"));
+		assertTrue(xml.contains("<sa>"));
+		assertTrue(xml.contains("<string>&lt;script&gt;alert(&apos;xss&apos;)&lt;/script&gt;</string>"));
+		assertTrue(xml.contains("</sa>"));
+		assertFalse(xml.contains("<q>"));
+		assertTrue(xml.endsWith("</KnownObject>"));
+	}
+
+	@Test
+	public void shouldEncodeSerializedXssString()
+	{
+		KnownObject ko = new KnownObject();
+		ko.string = "<script>alert('xss')</script>";
+		String xml = processor.serialize(ko);
+		assertNotNull(xml);
+		assertTrue(xml.startsWith("<KnownObject>"));
+		assertTrue(xml.contains("<integer>1</integer>"));
+		assertTrue(xml.contains("<string>&lt;script&gt;alert(&apos;xss&apos;)&lt;/script&gt;</string>"));
+		assertTrue(xml.contains("<date>1964-12-17T23:30:00.000Z</date>"));
+		assertTrue(xml.contains("<p>something private</p>"));
+		assertFalse(xml.contains("<q>"));
+		assertFalse(xml.contains("<sa>"));
+		assertTrue(xml.endsWith("</KnownObject>"));
 	}
 }

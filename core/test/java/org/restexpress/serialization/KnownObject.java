@@ -32,6 +32,7 @@ public class KnownObject
 	@SuppressWarnings("deprecation")
     public Date date = new Date(64, 11, 17, 16, 30);
 	private String p = "something private";
+	public String[] sa;
 	
 	public String getP()
 	{
