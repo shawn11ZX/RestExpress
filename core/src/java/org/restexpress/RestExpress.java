@@ -19,7 +19,9 @@ package org.restexpress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
@@ -31,6 +33,7 @@ import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
+import org.restexpress.domain.metadata.RouteMetadata;
 import org.restexpress.domain.metadata.ServerMetadata;
 import org.restexpress.exception.DefaultExceptionMapper;
 import org.restexpress.exception.ExceptionMapping;
@@ -637,7 +640,9 @@ public class RestExpress
 	}
 
 	/**
-	 * @return
+	 * Retrieve metadata about the routes in this RestExpress server.
+	 * 
+	 * @return ServerMetadata instance.
 	 */
 	public ServerMetadata getRouteMetadata()
 	{
@@ -649,6 +654,39 @@ public class RestExpress
 //		m.addAllSupportedFormats(getResponseProcessors().keySet());
 		m.addAllRoutes(routeDeclarations.getMetadata());
 		return m;
+	}
+
+	/**
+	 * Retrieve the named routes in this RestExpress server, creating a Map
+	 * of them by name, with the value portion being populated with the URL
+	 * pattern. Any '.{format}' portion of the URL pattern is omitted.
+	 * <p/>
+	 * If the Base URL is set, it is included in the URL pattern.
+	 * <p/>
+	 * Only named routes are included in the output.
+	 * 
+	 * @return a Map of Route Name/URL pairs.
+	 */
+	public Map<String, String> getRouteUrlsByName()
+	{
+		final Map<String, String> urlsByName = new HashMap<String, String>();
+
+		iterateRouteBuilders(new Callback<RouteBuilder>()
+		{
+			@Override
+			public void process(RouteBuilder routeBuilder)
+			{
+				RouteMetadata route = routeBuilder.asMetadata();
+
+				if (route.getName() != null)
+				{
+					urlsByName.put(route.getName(), getBaseUrl()
+						+ route.getUri().getPattern().replace(".{format}", ""));
+				}
+			}
+		});
+
+		return urlsByName;
 	}
 
 	public RestExpress registerPlugin(Plugin plugin)
