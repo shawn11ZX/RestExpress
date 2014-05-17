@@ -221,13 +221,32 @@ public class Request
 
 	/**
 	 * Returns the body as a Map of name/value pairs from a url-form-encoded form submission.
+	 * The values returned are URL-decoded.
 	 * 
 	 * @return
 	 */
 	public Map<String, List<String>> getBodyFromUrlFormEncoded()
 	{
-		QueryStringDecoder qsd = new QueryStringDecoder(getBody().toString(ContentType.CHARSET), ContentType.CHARSET, false);
-		return qsd.getParameters();
+		return getBodyFromUrlFormEncoded(true);
+	}
+
+	/**
+	 * Returns the body as a Map of name/value pairs from a url-form-encoded form submission.
+	 * The values returned are URL-decoded depending on the value of shouldDecode.
+	 * 
+	 * @param shouldDecode true if the returned values should be URL-decoded
+	 * @return
+	 */
+	public Map<String, List<String>> getBodyFromUrlFormEncoded(boolean shouldDecode)
+	{
+		if (shouldDecode)
+		{
+			QueryStringDecoder qsd = new QueryStringDecoder(getBody().toString(ContentType.CHARSET), ContentType.CHARSET, false);
+			return qsd.getParameters();			
+		}
+
+		QueryStringParser qsp = new QueryStringParser(getBody().toString(ContentType.CHARSET), false);
+		return qsp.getParameters();
 	}
 
 	public void setBody(ChannelBuffer body)
