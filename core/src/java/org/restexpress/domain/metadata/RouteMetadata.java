@@ -55,14 +55,15 @@ public class RouteMetadata
 		this.uri = uri;
 	}
 
-	public List<String> getSupportedFormats()
+	@SuppressWarnings("unchecked")
+    public List<String> getSupportedFormats()
 	{
-		return supportedFormats;
+		return supportedFormats == null ? Collections.EMPTY_LIST : supportedFormats;
 	}
 	
 	public void addSupportedFormat(String format)
 	{
-		if (getSupportedFormats() == null)
+		if (supportedFormats == null)
 		{
 			supportedFormats = new ArrayList<String>();
 		}
@@ -91,9 +92,10 @@ public class RouteMetadata
 		this.defaultFormat = defaultFormat;
 	}
 	
-	public List<String> getMethods()
+	@SuppressWarnings("unchecked")
+    public List<String> getMethods()
 	{
-		return methods;
+		return methods == null ? Collections.EMPTY_LIST : methods;
 	}
 	
 	public void addMethod(String method)
@@ -122,9 +124,10 @@ public class RouteMetadata
 		this.isSerialized = isSerialized;
 	}
 	
-	public List<String> getAliases()
+	@SuppressWarnings("unchecked")
+    public List<String> getAliases()
 	{
-		return Collections.unmodifiableList(aliases);
+		return aliases == null ? Collections.EMPTY_LIST : Collections.unmodifiableList(aliases);
 	}
 	
 	public void addAlias(String alias)
