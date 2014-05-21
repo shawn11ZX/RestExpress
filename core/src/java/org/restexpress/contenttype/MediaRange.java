@@ -165,4 +165,10 @@ public class MediaRange
 
 		return parameters.equals(that.parameters);
 	}
+
+	@Override
+	public int hashCode()
+	{
+		return 31 + name.hashCode() + parameters.hashCode() + (int) (qvalue * 10.0);
+	}
 }
