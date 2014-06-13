@@ -17,6 +17,7 @@
 package org.restexpress.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.restexpress.Request;
@@ -50,7 +51,19 @@ public abstract class QueryFilters
 	 */
 	public static QueryFilter parseFrom(Request request)
 	{
-		return parseFrom(request, null);
+		return parseFrom(request, (List<String>) null);
+	}
+
+	/**
+	 * Create an instance of QueryFilter from the RestExpress request, setting
+	 * the appropriate properties that can be filtered.
+	 * 
+	 * @param request the current request
+	 * @param allowedProperties an array of property names on which the resource can be filtered.
+	 */
+	public static QueryFilter parseFrom(Request request, String... allowedProperties)
+	{
+		return parseFrom(request, Arrays.asList(allowedProperties));
 	}
 
 	/**

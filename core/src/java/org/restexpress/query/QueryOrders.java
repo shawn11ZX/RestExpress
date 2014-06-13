@@ -16,6 +16,7 @@
  */
 package org.restexpress.query;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.restexpress.Request;
@@ -44,7 +45,20 @@ public abstract class QueryOrders
 	 */
 	public static QueryOrder parseFrom(Request request)
 	{
-		return parseFrom(request, null);
+		return parseFrom(request, (List<String>) null);
+	}
+
+	/**
+	 * Create a QueryOrder instance from the RestExpress request, setting the
+	 * properties on which the resource can be sorted.
+	 * 
+	 * @param request the current request
+	 * @param allowedProperties an array of property names on which the resource can be sorted.
+	 * @return a QueryOrder instance
+	 */
+	public static QueryOrder parseFrom(Request request, String... allowedProperties)
+	{
+		return parseFrom(request, Arrays.asList(allowedProperties));
 	}
 
 	/**
