@@ -28,6 +28,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.junit.Test;
 import org.restexpress.Request;
 import org.restexpress.Response;
@@ -145,7 +146,7 @@ public class RestExpressTest
 		server.noSystemOut();
 		assertFalse(server.shouldUseSystemOut());
 	}
-	
+
 	@Test
 	public void shouldCallDefaultMethods()
 	throws ClientProtocolException, IOException
@@ -191,31 +192,80 @@ public class RestExpressTest
 		assertEquals(1, controller.create);
 		assertEquals(1, controller.update);
 		delete.releaseConnection();
+
+		re.shutdown();
+	}
+
+	@Test
+	public void shouldSetOutputMediaType()
+	throws ClientProtocolException, IOException
+	{
+		RestExpress re = new RestExpress();
+		NoopController controller = new NoopController();
+		re.uri(TEST_PATH, controller);
+		re.bind(TEST_PORT);
+
+		HttpClient client = new DefaultHttpClient();
+
+		HttpPost post = new HttpPost(TEST_URL);
+		post.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
+		HttpResponse response = (HttpResponse) client.execute(post);
+		assertEquals(201, response.getStatusLine().getStatusCode());
+		assertEquals(ContentType.JSON, controller.outputMediaType);
+		post.releaseConnection();
+
+		HttpGet get = new HttpGet(TEST_URL);
+		get.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
+		response = (HttpResponse) client.execute(get);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(ContentType.JSON, controller.outputMediaType);
+		get.releaseConnection();
+
+		HttpPut put = new HttpPut(TEST_URL);
+		put.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
+		response = (HttpResponse) client.execute(put);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(ContentType.JSON, controller.outputMediaType);
+		put.releaseConnection();
+
+		HttpDelete delete = new HttpDelete(TEST_URL);
+		delete.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
+		response = (HttpResponse) client.execute(delete);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(ContentType.JSON, controller.outputMediaType);
+		delete.releaseConnection();
+
+		re.shutdown();
 	}
 
 	public class NoopController
     {
 		int create, read, update, delete = 0;
+		String outputMediaType;
 
 		public void create(Request req, Response res)
 		{
 			++create;
 			res.setResponseCreated();
+			outputMediaType = res.getSerializationSettings().getMediaType();
 		}
 
 		public void read(Request req, Response res)
 		{
 			++read;
+			outputMediaType = res.getSerializationSettings().getMediaType();
 		}
 
 		public void update(Request req, Response res)
 		{
 			++update;
+			outputMediaType = res.getSerializationSettings().getMediaType();
 		}
 
 		public void delete(Request req, Response res)
 		{
 			++delete;
+			outputMediaType = res.getSerializationSettings().getMediaType();
 		}
     }
 }
