@@ -26,7 +26,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.restexpress.common.query.QueryRange;
 import org.restexpress.domain.JsendResultWrapper;
+import org.restexpress.exception.BadRequestException;
 import org.restexpress.pipeline.SimpleConsoleLogMessageObserver;
+import org.restexpress.postprocessor.TestPostprocessor;
+import org.restexpress.preprocessor.ErrorPreprocessor;
 import org.restexpress.response.ErrorResponseWrapper;
 import org.restexpress.response.JsendResponseWrapper;
 import org.restexpress.serialization.AbstractSerializationProvider;
@@ -57,29 +60,41 @@ public class RestExpressServerTest
 	private static final String URL4_PLAIN = SERVER_HOST + URL_PATH4;
 	private static final String LITTLE_O_URL = SERVER_HOST + LITTLE_O_PATH;
 	private static final String LITTLE_OS_URL = SERVER_HOST + LITTLE_OS_PATH;
+	private static final String PATTERN_EXCEPTION_STRING = "/strings/exception";
+	private static final String PATTERN_EXCEPTION_LITTLE_O = "/objects/exception";
+	private static final String URL_EXCEPTION_STRING = SERVER_HOST + PATTERN_EXCEPTION_STRING;
+	private static final String URL_EXCEPTION_LITTLE_O = SERVER_HOST + PATTERN_EXCEPTION_LITTLE_O;
 
-	private RestExpress server = new RestExpress();
-	AbstractSerializationProvider serializer = new DefaultSerializationProvider();
+	private RestExpress server;
+	AbstractSerializationProvider serializer;
 	private HttpClient http = new DefaultHttpClient();
 
 	@Before
 	public void createServer()
 	{
+		server = new RestExpress();
+		serializer = new DefaultSerializationProvider();
 		serializer.add(new JacksonJsonProcessor(Format.WRAPPED_JSON), new JsendResponseWrapper());
 		serializer.add(new XstreamXmlProcessor(Format.WRAPPED_XML), new JsendResponseWrapper());
 		RestExpress.setSerializationProvider(serializer);
+		StringTestController stringTestController = new StringTestController();
+		ObjectTestController objectTestController = new ObjectTestController();
 
-		server.uri(URL_PATTERN1, new StringTestController());
-		server.uri(URL_PATTERN2, new StringTestController());
-		server.uri(URL_PATTERN3, new StringTestController())
+		server.uri(URL_PATTERN1, stringTestController);
+		server.uri(URL_PATTERN2, stringTestController);
+		server.uri(URL_PATTERN3, stringTestController)
 			.method(HttpMethod.GET, HttpMethod.POST);
-		server.uri(URL_PATTERN4, new StringTestController())	// Collection route.
+		server.uri(PATTERN_EXCEPTION_STRING, stringTestController)
+			.action("throwException", HttpMethod.GET);
+		server.uri(URL_PATTERN4, stringTestController)	// Collection route.
 			.method(HttpMethod.POST)
 			.action("readAll", HttpMethod.GET);
-		server.uri(LITTLE_O_PATTERN, new ObjectTestController())
+		server.uri(LITTLE_O_PATTERN, objectTestController)
 			.method(HttpMethod.GET);
-		server.uri(LITTLE_OS_PATTERN, new ObjectTestController())
+		server.uri(LITTLE_OS_PATTERN, objectTestController)
 			.action("readAll", HttpMethod.GET);
+		server.uri(PATTERN_EXCEPTION_LITTLE_O, objectTestController)
+			.action("throwException", HttpMethod.GET);
 		server.addMessageObserver(new SimpleConsoleLogMessageObserver());
 		
 		server.alias("littleObject", LittleO.class);
@@ -661,6 +676,145 @@ public class RestExpressServerTest
 		request.releaseConnection();
 	}
 
+    @Test
+	public void shouldSerializeUnmappedPreprocessorException()
+	throws Exception
+	{
+    	AbstractSerializationProvider serializer = new NullSerializationProvider();
+    	JacksonJsonProcessor jsonProc = new JacksonJsonProcessor();
+		serializer.add(jsonProc, new ErrorResponseWrapper(), true);
+		RestExpress.setSerializationProvider(serializer);
+		server.addPreprocessor(new ErrorPreprocessor());
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(LITTLE_OS_URL);
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		assertNull(response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE));
+		String entityString = EntityUtils.toString(entity);
+		assertNotNull(entityString);
+		assertTrue(entityString.contains("\"errorId\":\""));
+		assertTrue(entityString.contains("\"httpStatus\":500"));
+		assertTrue(entityString.contains("\"message\":\"ErrorPreprocessor\""));
+		assertTrue(entityString.contains("\"errorType\":\"RuntimeException\""));
+		request.releaseConnection();
+	}
+
+    @Test
+	public void shouldSerializeMappedPreprocessorException()
+	throws Exception
+	{
+    	AbstractSerializationProvider serializer = new NullSerializationProvider();
+    	JacksonJsonProcessor jsonProc = new JacksonJsonProcessor();
+		serializer.add(jsonProc, new ErrorResponseWrapper(), true);
+		RestExpress.setSerializationProvider(serializer);
+		server.addPreprocessor(new ErrorPreprocessor());
+		server.mapException(RuntimeException.class, BadRequestException.class);
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(LITTLE_OS_URL);
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.BAD_REQUEST.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		assertNull(response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE));
+		String entityString = EntityUtils.toString(entity);
+		assertNotNull(entityString);
+		assertTrue(entityString.contains("\"errorId\":\""));
+		assertTrue(entityString.contains("\"httpStatus\":400"));
+		assertTrue(entityString.contains("\"message\":\"ErrorPreprocessor\""));
+		assertTrue(entityString.contains("\"errorType\":\"RuntimeException\""));
+		request.releaseConnection();
+	}
+
+    @Test
+	public void shouldSerializeUnmappedException()
+	throws Exception
+	{
+    	AbstractSerializationProvider serializer = new NullSerializationProvider();
+    	JacksonJsonProcessor jsonProc = new JacksonJsonProcessor();
+		serializer.add(jsonProc, new ErrorResponseWrapper(), true);
+		RestExpress.setSerializationProvider(serializer);
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(URL_EXCEPTION_LITTLE_O);
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		assertNull(response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE));
+		String entityString = EntityUtils.toString(entity);
+		assertNotNull(entityString);
+		assertTrue(entityString.contains("\"errorId\":\""));
+		assertTrue(entityString.contains("\"httpStatus\":500"));
+		assertTrue(entityString.contains("\"message\":\"ObjectTestController\""));
+		assertTrue(entityString.contains("\"errorType\":\"NullPointerException\""));
+		request.releaseConnection();
+	}
+
+    @Test
+	public void shouldSerializeMappedException()
+	throws Exception
+	{
+    	AbstractSerializationProvider serializer = new NullSerializationProvider();
+    	JacksonJsonProcessor jsonProc = new JacksonJsonProcessor();
+		serializer.add(jsonProc, new ErrorResponseWrapper(), true);
+		RestExpress.setSerializationProvider(serializer);
+		server.mapException(NullPointerException.class, BadRequestException.class);
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(URL_EXCEPTION_LITTLE_O);
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.BAD_REQUEST.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		assertNull(response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE));
+		String entityString = EntityUtils.toString(entity);
+		assertNotNull(entityString);
+		assertTrue(entityString.contains("\"errorId\":\""));
+		assertTrue(entityString.contains("\"httpStatus\":400"));
+		assertTrue(entityString.contains("\"message\":\"ObjectTestController\""));
+		assertTrue(entityString.contains("\"errorType\":\"NullPointerException\""));
+		request.releaseConnection();
+	}
+
+    @Test
+	public void shouldCallFinallyProcessorOnException()
+	throws Exception
+	{
+    	TestPostprocessor postprocessor = new TestPostprocessor();
+    	server.addFinallyProcessor(postprocessor);
+		server.bind(SERVER_PORT);
+		
+		HttpGet request = new HttpGet(URL_EXCEPTION_LITTLE_O);
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(1, postprocessor.callCount());
+		request.releaseConnection();
+	}
+
+    @Test
+	public void shouldCallFinallyProcessorOnPreprocessorException()
+	throws Exception
+	{
+    	TestPostprocessor postprocessor = new TestPostprocessor();
+    	server.addFinallyProcessor(postprocessor);
+    	server.addPreprocessor(new ErrorPreprocessor());
+		server.bind(SERVER_PORT);
+
+		HttpGet request = new HttpGet(LITTLE_OS_URL);
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(1, postprocessor.callCount());
+		request.releaseConnection();
+	}
+
 	private String extractJson(String string)
     {
 		final String search = "\"data\":";
@@ -716,6 +870,12 @@ public class RestExpressServerTest
 		{
 			return "readAll";
 		}
+
+		public void throwException(Request request, Response response)
+		throws Exception
+		{
+			throw new NullPointerException(this.getClass().getSimpleName());
+		}
 	}
 	
 	@SuppressWarnings("unused")
@@ -724,6 +884,12 @@ public class RestExpressServerTest
 		public LittleO read(Request request, Response Response)
 		{
 			return newLittleO(3);
+		}
+
+		public void throwException(Request request, Response response)
+		throws Exception
+		{
+			throw new NullPointerException(this.getClass().getSimpleName());
 		}
 		
 		public List<LittleO> readAll(Request request, Response response)
