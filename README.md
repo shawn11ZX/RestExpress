@@ -80,7 +80,16 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+Release 0.10.4-SNAPSHOT - in branch 'main'
+------------------------------------------
+* Added XSS prevention outbound encoding to GsonJsonProcessor adding GsonEncodingStringSerializer.
+* Added parseFrom(Request, String[]) method to QueryFilters and QueryOrders.
+* Added tests to verify output media type.
+* Added tests for wrapping of exceptions in processing and preprocessors.
+
+
 Release 0.10.3 - 27 May 2014
+----------------------------
 * Change URL Pattern matcher to allow URLs with '?' at the end, but no query-string parameters following it.
 * Changed compiler output version to 1.7 (from 1.6).
 * Added SSL support (from Clark Hobbie).

@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 public class JacksonEncodingStringSerializer
 extends JsonSerializer<String>
 {
-
 	@Override
     public void serialize(String value, JsonGenerator jgen, SerializerProvider provider)
     throws IOException, JsonProcessingException
