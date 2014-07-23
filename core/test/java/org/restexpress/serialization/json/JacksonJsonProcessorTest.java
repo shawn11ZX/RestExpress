@@ -164,5 +164,6 @@ public class JacksonJsonProcessorTest
 		assertTrue(json.contains("\"p\":\"something private"));
 		assertFalse(json.contains("\"q\":"));
 		assertFalse(json.contains("\"sa\":"));
-		assertTrue(json.endsWith("}"));	}
+		assertTrue(json.endsWith("}"));
+	}
 }

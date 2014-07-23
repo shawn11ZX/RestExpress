@@ -49,6 +49,7 @@ extends JsonSerializationProcessor
 		gson = new GsonBuilder()
 		    .disableHtmlEscaping()
 		    .registerTypeAdapter(Date.class, new GsonTimepointSerializer())
+		    .registerTypeAdapter(String.class, new GsonEncodingStringSerializer())
 		    .setDateFormat(DateAdapterConstants.TIMESTAMP_OUTPUT_FORMAT)
 		    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
 		    .create();

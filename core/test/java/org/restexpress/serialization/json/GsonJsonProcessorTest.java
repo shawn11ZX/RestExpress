@@ -46,7 +46,6 @@ public class GsonJsonProcessorTest
 	public void shouldSerializeObject()
 	{
 		String json = processor.serialize(new KnownObject());
-//		System.out.println(json);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
@@ -131,5 +130,39 @@ public class GsonJsonProcessorTest
 		assertEquals(11, c.get(Calendar.MONTH));
 		assertEquals(6, c.get(Calendar.DAY_OF_MONTH));
 		assertEquals(1963, c.get(Calendar.YEAR));
+	}
+
+	@Test
+	public void shouldEncodeSerializedXssJsonArray()
+	{
+		KnownObject ko = new KnownObject();
+		ko.sa = new String[] {"this", "is", "an", "evil", "Json", "<script>alert(\'xss')</script>"};
+		String json = processor.serialize(ko);
+		assertNotNull(json);
+		assertTrue(json.startsWith("{"));
+		assertTrue(json.contains("\"integer\":1"));
+		assertTrue(json.contains("\"string\":\"string value\""));
+		assertTrue(json.contains("\"date\":\"1964-12-17T23:30:00.000Z"));
+		assertTrue(json.contains("\"p\":\"something private"));
+		assertFalse(json.contains("\"q\":"));
+		assertTrue(json.contains("\"sa\":[\"this\",\"is\",\"an\",\"evil\",\"Json\",\"&lt;script&gt;alert('xss')&lt;/script&gt;\"]"));
+		assertTrue(json.endsWith("}"));
+	}
+
+	@Test
+	public void shouldEncodeSerializedXssJsonString()
+	{
+		KnownObject ko = new KnownObject();
+		ko.string = "<script>alert('xss')</script>";
+		String json = processor.serialize(ko);
+		assertNotNull(json);
+		assertTrue(json.startsWith("{"));
+		assertTrue(json.contains("\"integer\":1"));
+		assertTrue(json.contains("\"string\":\"&lt;script&gt;alert('xss')&lt;/script&gt;"));
+		assertTrue(json.contains("\"date\":\"1964-12-17T23:30:00.000Z"));
+		assertTrue(json.contains("\"p\":\"something private"));
+		assertFalse(json.contains("\"q\":"));
+		assertFalse(json.contains("\"sa\":"));
+		assertTrue(json.endsWith("}"));
 	}
 }
