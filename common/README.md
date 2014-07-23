@@ -12,7 +12,7 @@ Stable build:
 <dependency>
 	<groupId>com.strategicgains</groupId>
 	<artifactId>RestExpress-Common</artifactId>
-	<version>0.9.4.2</version>
+	<version>0.10.3</version>
 </dependency>
 ```
 Development (snapshot) build:
@@ -20,7 +20,7 @@ Development (snapshot) build:
 <dependency>
 	<groupId>com.strategicgains</groupId>
 	<artifactId>RestExpress-Common</artifactId>
-	<version>0.10.0-SNAPSHOT</version>
+	<version>0.10.4-SNAPSHOT</version>
 </dependency>
 ```
 

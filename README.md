@@ -80,7 +80,12 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+Release 0.10.4-SNAPSHOT (in branch 'master')
+--------------------------------------------
+* Added Expansions, Expansion, ExpansionCallback to facilitate link expansion concepts on the query-string.
+
 Release 0.10.3 - 27 May 2014
+----------------------------
 * Change URL Pattern matcher to allow URLs with '?' at the end, but no query-string parameters following it.
 * Changed compiler output version to 1.7 (from 1.6).
 * Added SSL support (from Clark Hobbie).
