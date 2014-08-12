@@ -88,6 +88,7 @@ Release 0.10.4-SNAPSHOT (in branch 'master')
 * Added parseFrom(Request, String[]) method to QueryFilters and QueryOrders.
 * Added tests to verify output media type.
 * Added tests for wrapping of exceptions in processing and preprocessors.
+* Fixed bug in AbstractSerializationProvider.resolveRequest() to use best matched Media Type, if available (vs. just the Content-Type header).
 
 Release 0.10.3 - 27 May 2014
 ----------------------------

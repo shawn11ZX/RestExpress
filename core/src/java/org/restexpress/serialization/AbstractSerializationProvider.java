@@ -146,6 +146,7 @@ implements SerializationProvider
 	{
 		ResponseProcessor processor = null;
 	    String format = request.getFormat();
+	    String bestMatch = null;
 
 		if (format != null)
 		{
@@ -160,7 +161,7 @@ implements SerializationProvider
 		if (processor == null)
 		{
 			List<MediaRange> requestedMediaRanges = MediaTypeParser.parse(request.getHeader(HttpHeaders.Names.CONTENT_TYPE));
-			String bestMatch = MediaTypeParser.getBestMatch(supportedMediaRanges, requestedMediaRanges);
+			bestMatch = MediaTypeParser.getBestMatch(supportedMediaRanges, requestedMediaRanges);
 	
 			if (bestMatch != null)
 			{
@@ -173,7 +174,7 @@ implements SerializationProvider
 			processor = defaultProcessor;
 		}
 
-		return new SerializationSettings(request.getHeader(HttpHeaders.Names.CONTENT_TYPE), processor);
+		return new SerializationSettings((bestMatch == null ? request.getHeader(HttpHeaders.Names.CONTENT_TYPE) : bestMatch), processor);
 	}
 
 	@Override
