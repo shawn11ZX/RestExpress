@@ -21,6 +21,9 @@ import org.restexpress.Response;
 import org.restexpress.response.ResponseProcessor;
 
 /**
+ * Contains the Media-Type and a reference to the appropriate {@link ResponseProcessor}
+ * to perform request-body parsing.
+ * 
  * @author toddf
  * @since Jul 23, 2013
  */

@@ -90,6 +90,7 @@ Release 0.10.4-SNAPSHOT (in branch 'master')
 * Added tests for wrapping of exceptions in processing and preprocessors.
 * Fixed bug in AbstractSerializationProvider.resolveRequest() to use best matched Media Type, if available (vs. just the Content-Type header).
 * Introduced _ignore_http_status query-string parameter to force call to return 200 status (even on failure).
+* Introduced Request.getMediaType() and Request.getSerializationSettings(), as well as, Response.getMediaType().
 
 Release 0.10.3 - 27 May 2014
 ----------------------------

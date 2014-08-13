@@ -298,7 +298,19 @@ public class Response
 	{
 		return (serializationSettings != null);
 	}
-	
+
+	/**
+	 * Return the best-match Content-Type for this response.
+	 * If an error has occurred before content-type negotiation has occurred,
+	 * returns null.
+	 * 
+	 * @return the best-match Content-Type using content-type negotiation. Possibly null.
+	 */
+	public String getMediaType()
+	{
+		return (hasSerializationSettings() ? serializationSettings.getMediaType() : null);
+	}
+
 	public SerializationSettings getSerializationSettings()
 	{
 		return serializationSettings;

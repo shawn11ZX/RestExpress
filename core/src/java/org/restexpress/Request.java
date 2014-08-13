@@ -41,6 +41,7 @@ import org.restexpress.exception.BadRequestException;
 import org.restexpress.route.Route;
 import org.restexpress.route.RouteResolver;
 import org.restexpress.serialization.SerializationProvider;
+import org.restexpress.serialization.SerializationSettings;
 import org.restexpress.url.QueryStringParser;
 
 /**
@@ -64,6 +65,8 @@ public class Request
 	private String correlationId;
 	private Map<String, Object> attachments;
 	private Map<String, String> queryStringMap;
+
+	private SerializationSettings serializationSettings;
 
 	
 	// SECTION: CONSTRUCTOR
@@ -153,6 +156,17 @@ public class Request
     }
 
 	/**
+	 * Perform content-type negotiation and return the 
+	 * best-match Media-Type as a string from this request.
+	 * 
+	 * @return the best-match media type.
+	 */
+	public String getMediaType()
+	{
+		return getSerializationSettings().getMediaType();
+	}
+
+	/**
 	 * Attempts to deserialize the request body into an instance of the given type.
 	 * 
 	 * @param type the resulting type
@@ -161,7 +175,23 @@ public class Request
 	 */
 	public <T> T getBodyAs(Class<T> type)
 	{
-		return serializationProvider.resolveRequest(this).deserialize(this, type);
+		return getSerializationSettings().deserialize(this, type);
+	}
+
+	/**
+	 * Perform content-type negotiation for the request and return a
+	 * corresponding {@link SerializationSettings} instance.
+	 * 
+	 * @return {@link SerializationSettings}. Never null.
+	 */
+	public SerializationSettings getSerializationSettings()
+	{
+		if (serializationSettings == null)
+		{
+			serializationSettings = serializationProvider.resolveRequest(this);
+		}
+
+		return serializationSettings;
 	}
 
 	/**
