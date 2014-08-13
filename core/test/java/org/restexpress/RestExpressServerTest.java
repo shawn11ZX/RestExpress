@@ -62,7 +62,7 @@ public class RestExpressServerTest
 	private static final String LITTLE_OS_URL = SERVER_HOST + LITTLE_OS_PATH;
 	private static final String PATTERN_EXCEPTION_STRING = "/strings/exception";
 	private static final String PATTERN_EXCEPTION_LITTLE_O = "/objects/exception";
-	private static final String URL_EXCEPTION_STRING = SERVER_HOST + PATTERN_EXCEPTION_STRING;
+//	private static final String URL_EXCEPTION_STRING = SERVER_HOST + PATTERN_EXCEPTION_STRING;
 	private static final String URL_EXCEPTION_LITTLE_O = SERVER_HOST + PATTERN_EXCEPTION_LITTLE_O;
 
 	private RestExpress server;
@@ -203,6 +203,25 @@ public class RestExpressServerTest
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
 		assertEquals("\"" + URL3_PLAIN + "\"", EntityUtils.toString(entity));
+		String methods = response.getHeaders(HttpHeaders.Names.ALLOW)[0].getValue();
+		assertTrue(methods.contains("GET"));
+		assertTrue(methods.contains("POST"));
+		request.releaseConnection();
+	}
+
+	@Test
+	public void shouldFailWithOk()
+	throws Exception
+	{
+		server.bind(SERVER_PORT);
+		
+		HttpDelete request = new HttpDelete(URL3_PLAIN + "?" + Parameters.Query.IGNORE_HTTP_STATUS + "=true");
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		HttpEntity entity = response.getEntity();
+		assertTrue(entity.getContentLength() > 0l);
+		assertEquals(ContentType.JSON, entity.getContentType().getValue());
+		assertEquals("\"" + URL3_PLAIN + "?_ignore_http_status=true\"", EntityUtils.toString(entity));
 		String methods = response.getHeaders(HttpHeaders.Names.ALLOW)[0].getValue();
 		assertTrue(methods.contains("GET"));
 		assertTrue(methods.contains("POST"));

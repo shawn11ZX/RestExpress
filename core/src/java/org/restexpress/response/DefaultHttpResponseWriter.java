@@ -12,7 +12,9 @@ import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.restexpress.ContentType;
+import org.restexpress.Parameters;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.util.HttpSpecification;
@@ -27,7 +29,7 @@ implements HttpResponseWriter
 	@Override
 	public void write(ChannelHandlerContext ctx, Request request, Response response)
 	{
-		HttpResponse httpResponse = new DefaultHttpResponse(request.getHttpVersion(), response.getResponseStatus());
+		HttpResponse httpResponse = createHttpResponse(request, response);
 		addHeaders(response, httpResponse);		
 
 		if (response.hasBody() && HttpSpecification.isContentAllowed(response))
@@ -67,6 +69,16 @@ implements HttpResponseWriter
 			ctx.getChannel().write(httpResponse).addListener(ChannelFutureListener.CLOSE);
 		}
 	}
+
+	private HttpResponse createHttpResponse(Request request, Response response)
+    {
+		if (request.getHeader(Parameters.Query.IGNORE_HTTP_STATUS) == null)
+		{
+			return new DefaultHttpResponse(request.getHttpVersion(), response.getResponseStatus());
+		}
+
+		return new DefaultHttpResponse(request.getHttpVersion(), HttpResponseStatus.OK);
+    }
 
 	/**
      * @param response
