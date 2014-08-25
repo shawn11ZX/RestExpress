@@ -75,7 +75,7 @@ extends SimpleChannelUpstreamHandler
 
 
 	// SECTION: MUTATORS
-	
+
 	public void addMessageObserver(MessageObserver... observers)
 	{
 		for (MessageObserver observer : observers)
@@ -92,7 +92,7 @@ extends SimpleChannelUpstreamHandler
 		exceptionMap.map(from, to);
 		return this;
 	}
-	
+
 	public DefaultRequestHandler setExceptionMap(ExceptionMapping map)
 	{
 		this.exceptionMap = map;
@@ -120,23 +120,8 @@ extends SimpleChannelUpstreamHandler
 
 		try
 		{
-			notifyReceived(context);
-			resolveRoute(context);
-			resolveResponseProcessor(context);
-			invokePreprocessors(preprocessors, context.getRequest());
-			Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
-
-			if (result != null)
-			{
-				context.getResponse().setBody(result);
-			}
-	
-			invokePostprocessors(postprocessors, context.getRequest(), context.getResponse());
-			serializeResponse(context, false);
-			enforceHttpSpecification(context);
-			invokeFinallyProcessors(finallyProcessors, context.getRequest(), context.getResponse());
-			writeResponse(ctx, context);
-			notifySuccess(context);
+			// Process the request
+			processRequest(ctx, context);
 		}
 		catch(Throwable t)
 		{
@@ -146,6 +131,28 @@ extends SimpleChannelUpstreamHandler
 		{
 			notifyComplete(context);
 		}
+	}
+
+	private void processRequest(ChannelHandlerContext ctx, MessageContext context)
+	throws Throwable
+	{
+		notifyReceived(context);
+		resolveRoute(context);
+		resolveResponseProcessor(context);
+		invokePreprocessors(preprocessors, context.getRequest());
+		Object result = context.getAction().invoke(context.getRequest(), context.getResponse());
+
+		if (result != null)
+		{
+			context.getResponse().setBody(result);
+		}
+
+		invokePostprocessors(postprocessors, context.getRequest(), context.getResponse());
+		serializeResponse(context, false);
+		enforceHttpSpecification(context);
+		invokeFinallyProcessors(finallyProcessors, context.getRequest(), context.getResponse());
+		writeResponse(ctx, context);
+		notifySuccess(context);
 	}
 
 	private void resolveResponseProcessor(MessageContext context)
@@ -170,11 +177,11 @@ extends SimpleChannelUpstreamHandler
 	{
 		MessageContext context = (MessageContext) ctx.getAttachment();
 		Throwable rootCause = mapServiceException(cause);
-		
+
 		if (rootCause != null) // was/is a ServiceException
 		{
 			context.setHttpStatus(((ServiceException) rootCause).getHttpStatus());
-			
+
 			if (ServiceException.class.isAssignableFrom(rootCause.getClass()))
 			{
 				((ServiceException) rootCause).augmentResponse(context.getResponse());
@@ -200,7 +207,7 @@ extends SimpleChannelUpstreamHandler
 		try
 		{
 			MessageContext messageContext = (MessageContext) ctx.getAttachment();
-			
+
 			if (messageContext != null)
 			{
 				messageContext.setException(event.getCause());
@@ -286,7 +293,7 @@ extends SimpleChannelUpstreamHandler
     		observer.onSuccess(context.getRequest(), context.getResponse());
     	}
     }
-	
+
 	public void addPreprocessor(Preprocessor handler)
 	{
 		if (!preprocessors.contains(handler))
@@ -346,7 +353,7 @@ extends SimpleChannelUpstreamHandler
 
 	/**
 	 * Uses the exceptionMap to map a Throwable to a ServiceException, if possible.
-	 * 
+	 *
 	 * @param cause
 	 * @return Either a ServiceException or the root cause of the exception.
 	 */
@@ -356,7 +363,7 @@ extends SimpleChannelUpstreamHandler
 		{
 			return cause;
 		}
-			
+
 		return exceptionMap.getExceptionFor(cause);
     }
 
@@ -409,11 +416,11 @@ extends SimpleChannelUpstreamHandler
 				if (response.isSerialized())
 				{
 					String serialized = settings.serialize(response);
-					
+
 					if (serialized != null)
 					{
 						response.setBody(serialized);
-	
+
 						if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
 						{
 							response.setContentType(settings.getMediaType());
