@@ -92,6 +92,10 @@ Release 0.10.4 - 5 Sep 2014
 * Introduced Request.getMediaType() and Request.getSerializationSettings(), as well as, Response.getMediaType().
 * Added new constructor for JacksonJsonProcessor and GsonJsonProcessor to be able to turn off default outbound HTML-encoding behavior.
 * Refactored DefaultRequestHandler.messageReceived() method into two to allow for better instrumentation via java agents like AppDynamics (from Codey Whitt).
+* Upgraded Jackson Databind to 2.4.2
+* Upgraded XStream to 1.4.7
+* Upgraded Netty to 3.9.4.Final
+* Upgraded GSON dependency to 2.3
 
 Release 0.10.3 - 27 May 2014
 ----------------------------
