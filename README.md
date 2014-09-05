@@ -84,13 +84,14 @@ Release 0.10.4-SNAPSHOT (in branch 'master')
 --------------------------------------------
 * Upgraded Jackson Databind to version 2.4.1 to fix an issue with incorrect serialization for objects that have embedded objects.
 * Added XSS prevention outbound encoding to GsonJsonProcessor adding GsonEncodingStringSerializer.
-* Added Expansions, Expansion, ExpansionCallback to facilitate link expansion concepts on the query-string.
 * Added parseFrom(Request, String[]) method to QueryFilters and QueryOrders.
 * Added tests to verify output media type.
 * Added tests for wrapping of exceptions in processing and preprocessors.
 * Fixed bug in AbstractSerializationProvider.resolveRequest() to use best matched Media Type, if available (vs. just the Content-Type header).
 * Introduced _ignore_http_status query-string parameter to force call to return 200 status (even on failure).
 * Introduced Request.getMediaType() and Request.getSerializationSettings(), as well as, Response.getMediaType().
+* Added new constructor for JacksonJsonProcessor and GsonJsonProcessor to be able to turn off default outbound HTML-encoding behavior.
+* Refactored DefaultRequestHandler.messageReceived() method into two to allow for better instrumentation via java agents like AppDynamics (from Codey Whitt).
 
 Release 0.10.3 - 27 May 2014
 ----------------------------
