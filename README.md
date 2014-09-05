@@ -80,8 +80,8 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.10.4-SNAPSHOT (in branch 'master')
---------------------------------------------
+Release 0.10.4 - 5 Sep 2014
+---------------------------
 * Upgraded Jackson Databind to version 2.4.1 to fix an issue with incorrect serialization for objects that have embedded objects.
 * Added XSS prevention outbound encoding to GsonJsonProcessor adding GsonEncodingStringSerializer.
 * Added parseFrom(Request, String[]) method to QueryFilters and QueryOrders.
