@@ -43,6 +43,11 @@ import com.strategicgains.util.date.DateAdapterConstants;
  * A SerializationProcessor to handle JSON input/output. It anticipates ISO
  * 8601-compatible time points for date instances and outputs dates as ISO 8601
  * time points.
+ * <p/>
+ * This serialization processor also, by default, outbound HTML-encodes all strings to
+ * help protect from cross-site scripting (XSS) attacks. The default behavior may be
+ * turned off by calling new JacksonJsonProcessor(false) or using your own SimpleModule
+ * or ObjectMapper instance.
  * 
  * @author toddf
  * @since Mar 16, 2010
@@ -51,15 +56,27 @@ public class JacksonJsonProcessor
 extends JsonSerializationProcessor
 {
 	private ObjectMapper mapper;
+	private boolean shouldOutboundEncode;
 
 	public JacksonJsonProcessor()
 	{
-		this(Format.JSON);
+		this(true);
+	}
+
+	public JacksonJsonProcessor(boolean shouldOutboundEncode)
+	{
+		this(Format.JSON, shouldOutboundEncode);
 	}
 
 	public JacksonJsonProcessor(String format)
 	{
+		this(format, true);
+	}
+
+	public JacksonJsonProcessor(String format, boolean shouldOutboundEncode)
+	{
 		super(format);
+		this.shouldOutboundEncode = shouldOutboundEncode;
 		SimpleModule module = new SimpleModule();
 		initializeModule(module);
 	}
@@ -93,8 +110,13 @@ extends JsonSerializationProcessor
     {
 		module
 			.addSerializer(Date.class, new JacksonTimepointSerializer())
-			.addSerializer(String.class, new JacksonEncodingStringSerializer())
 			.addDeserializer(Date.class, new JacksonTimepointDeserializer());
+
+		if (shouldOutboundEncode)
+		{
+			module.addSerializer(String.class, new JacksonEncodingStringSerializer());
+		}
+
 		initialize(module);
     }
 

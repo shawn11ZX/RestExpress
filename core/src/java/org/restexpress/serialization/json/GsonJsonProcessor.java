@@ -34,6 +34,10 @@ import com.strategicgains.util.date.DateAdapterConstants;
  * A SerializationProcessor to handle JSON input/output using GSON. It anticipates ISO
  * 8601-compatible time points for date instances and outputs dates as ISO 8601
  * time points.
+ * <p/>
+ * This serialization processor also, by default, outbound HTML-encodes all strings to
+ * help protect from cross-site scripting (XSS) attacks. The default behavior may be
+ * turned off by calling new GsonJsonProcessor(false) or using your own Gson instance.
  * 
  * @author toddf
  * @since Mar 16, 2010
@@ -45,14 +49,24 @@ extends JsonSerializationProcessor
 
 	public GsonJsonProcessor()
 	{
+		this(true);
+	}
+
+	public GsonJsonProcessor(boolean shouldOutboundEncode)
+	{
 		super();
-		gson = new GsonBuilder()
+		GsonBuilder builder = new GsonBuilder()
 		    .disableHtmlEscaping()
 		    .registerTypeAdapter(Date.class, new GsonTimepointSerializer())
-		    .registerTypeAdapter(String.class, new GsonEncodingStringSerializer())
 		    .setDateFormat(DateAdapterConstants.TIMESTAMP_OUTPUT_FORMAT)
-		    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-		    .create();
+		    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+
+		if (shouldOutboundEncode)
+		{
+			builder.registerTypeAdapter(String.class, new GsonEncodingStringSerializer());
+		}
+
+		gson = builder.create();
 	}
 
 	public GsonJsonProcessor(Gson gson)
