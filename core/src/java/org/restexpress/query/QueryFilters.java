@@ -19,6 +19,8 @@ package org.restexpress.query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.restexpress.Request;
 import org.restexpress.common.query.FilterComponent;
@@ -36,9 +38,10 @@ import org.restexpress.exception.BadRequestException;
  */
 public abstract class QueryFilters
 {
+	private static final String FILTER_REGEX = "(.+?):(.*?):(.+?)";
+	private static final Pattern FILTER_PATTERN = Pattern.compile(FILTER_REGEX);
 	private static final String FILTER_HEADER_NAME = "filter";
 	private static final String FILTER_SEPARATOR = "\\|";
-	private static final String NAME_VALUE_SEPARATOR = "::";
 	
 	
 	// SECTION: FACTORY
@@ -89,26 +92,40 @@ public abstract class QueryFilters
 			return new QueryFilter();
 		}
 
-		String[] nameValuePair;
-		List<FilterComponent> filters = new ArrayList<FilterComponent>();
-		
+		List<FilterComponent> filters = new ArrayList<FilterComponent>(nameValues.length);
+
 		for (String nameValue : nameValues)
 		{
-			nameValuePair = nameValue.split(NAME_VALUE_SEPARATOR);
-			enforceSupportedProperties(allowedProperties, nameValuePair[0]);
+			Matcher m = FILTER_PATTERN.matcher(nameValue);
 
-			if (nameValuePair.length == 1)
+			if (m.matches())
 			{
-				filters.add(new FilterComponent(nameValuePair[0], FilterOperator.CONTAINS, ""));
-			}
-			else
-			{
-				filters.add( new FilterComponent(nameValuePair[0], FilterOperator.CONTAINS, nameValuePair[1]));
+				String field = m.group(1);
+				enforceSupportedProperties(allowedProperties, field);
+				FilterOperator operator = findOperator(m.group(2));
+				filters.add(new FilterComponent(field, operator, m.group(3)));
 			}
 		}
 
 		return new QueryFilter(filters);
 	}
+
+	private static FilterOperator findOperator(String operation)
+    {
+		if (operation == null || "".equals(operation)) return FilterOperator.CONTAINS;
+
+		String operator = operation.trim().toLowerCase();
+
+		if ("=".equals(operator)) return FilterOperator.EQUALS;
+		if ("!=".equals(operator)) return FilterOperator.NOT_EQUALS;
+		if ("<".equals(operator)) return FilterOperator.LESS_THAN;
+		if ("<=".equals(operator)) return FilterOperator.LESS_THAN_OR_EQUAL_TO;
+		if (">".equals(operator)) return FilterOperator.GREATER_THAN;
+		if (">=".equals(operator)) return FilterOperator.GREATER_THAN_OR_EQUAL_TO;
+		if ("*".equals(operator)) return FilterOperator.STARTS_WITH;
+
+		return FilterOperator.EQUALS;
+    }
 
 	private static void enforceSupportedProperties(List<String> allowedProperties, String requested)
     {

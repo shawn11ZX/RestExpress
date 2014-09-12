@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.restexpress.Request;
 import org.restexpress.common.query.FilterCallback;
 import org.restexpress.common.query.FilterComponent;
+import org.restexpress.common.query.FilterOperator;
 import org.restexpress.common.query.QueryFilter;
 import org.restexpress.exception.BadRequestException;
 
@@ -41,6 +42,54 @@ import org.restexpress.exception.BadRequestException;
 public class QueryFiltersTest
 {
 	@Test
+	public void shouldParseEqualityOperatorFromQueryString()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings?filter=name:=:todd|description:!=:amazing");
+		Request request = new Request(httpRequest, null);
+		QueryFilter f = QueryFilters.parseFrom(request);
+		assertTrue(f.hasFilters());
+		FCallback callback = new FCallback();
+		f.iterate(callback);
+		assertEquals(2, callback.getFilterCount());
+		assertEquals("todd", callback.get("name").getValue());
+		assertEquals(FilterOperator.EQUALS, callback.get("name").getOperator());
+		assertEquals("amazing", callback.get("description").getValue());
+		assertEquals(FilterOperator.NOT_EQUALS, callback.get("description").getOperator());
+	}
+
+	@Test
+	public void shouldParseLessThanOperatorsFromQueryString()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings?filter=name:<:todd|description:<=:amazing");
+		Request request = new Request(httpRequest, null);
+		QueryFilter f = QueryFilters.parseFrom(request);
+		assertTrue(f.hasFilters());
+		FCallback callback = new FCallback();
+		f.iterate(callback);
+		assertEquals(2, callback.getFilterCount());
+		assertEquals("todd", callback.get("name").getValue());
+		assertEquals(FilterOperator.LESS_THAN, callback.get("name").getOperator());
+		assertEquals("amazing", callback.get("description").getValue());
+		assertEquals(FilterOperator.LESS_THAN_OR_EQUAL_TO, callback.get("description").getOperator());
+	}
+
+	@Test
+	public void shouldParseGreaterThanOperatorsFromQueryString()
+	{
+		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings?filter=name:>=:todd|description:>:amazing");
+		Request request = new Request(httpRequest, null);
+		QueryFilter f = QueryFilters.parseFrom(request);
+		assertTrue(f.hasFilters());
+		FCallback callback = new FCallback();
+		f.iterate(callback);
+		assertEquals(2, callback.getFilterCount());
+		assertEquals("todd", callback.get("name").getValue());
+		assertEquals(FilterOperator.GREATER_THAN_OR_EQUAL_TO, callback.get("name").getOperator());
+		assertEquals("amazing", callback.get("description").getValue());
+		assertEquals(FilterOperator.GREATER_THAN, callback.get("description").getOperator());
+	}
+
+	@Test
 	public void shouldParseQueryString()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings?filter=name::todd|description::amazing");
@@ -50,8 +99,10 @@ public class QueryFiltersTest
 		FCallback callback = new FCallback();
 		f.iterate(callback);
 		assertEquals(2, callback.getFilterCount());
-		assertEquals("todd", callback.get("name"));
-		assertEquals("amazing", callback.get("description"));
+		assertEquals("todd", callback.get("name").getValue());
+		assertEquals(FilterOperator.CONTAINS, callback.get("name").getOperator());
+		assertEquals("amazing", callback.get("description").getValue());
+		assertEquals(FilterOperator.CONTAINS, callback.get("description").getOperator());
 	}
 
 	@Test
@@ -65,23 +116,27 @@ public class QueryFiltersTest
 		FCallback callback = new FCallback();
 		f.iterate(callback);
 		assertEquals(2, callback.getFilterCount());
-		assertEquals("todd", callback.get("name"));
-		assertEquals("amazing", callback.get("description"));
+		assertEquals("todd", callback.get("name").getValue());
+		assertEquals(FilterOperator.CONTAINS, callback.get("name").getOperator());
+		assertEquals("amazing", callback.get("description").getValue());
+		assertEquals(FilterOperator.CONTAINS, callback.get("name").getOperator());
 	}
 
 	@Test
 	public void shouldAllowSupportedFilterProperties()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("filter", "name::todd|description::amazing");
+		httpRequest.addHeader("filter", "name:=:todd|description:*:amazing");
 		Request request = new Request(httpRequest, null);
 		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"name", "description"}));
 		assertTrue(f.hasFilters());
 		FCallback callback = new FCallback();
 		f.iterate(callback);
 		assertEquals(2, callback.getFilterCount());
-		assertEquals("todd", callback.get("name"));
-		assertEquals("amazing", callback.get("description"));
+		assertEquals("todd", callback.get("name").getValue());
+		assertEquals(FilterOperator.EQUALS, callback.get("name").getOperator());
+		assertEquals("amazing", callback.get("description").getValue());
+		assertEquals(FilterOperator.STARTS_WITH, callback.get("description").getOperator());
 	}
 
 	@Test(expected=BadRequestException.class)
@@ -114,20 +169,20 @@ public class QueryFiltersTest
 	private class FCallback
 	implements FilterCallback
 	{
-		private Map<String, Object> filters = new HashMap<String, Object>();
+		private Map<String, FilterComponent> filters = new HashMap<String, FilterComponent>();
 
         @Override
         public void filterOn(FilterComponent c)
         {
-        	filters.put(c.getField(), c.getValue());
+        	filters.put(c.getField(), c);
         }
-        
+
         public int getFilterCount()
         {
         	return filters.size();
         }
         
-        public Object get(String name)
+        public FilterComponent get(String name)
         {
         	return filters.get(name);
         }
