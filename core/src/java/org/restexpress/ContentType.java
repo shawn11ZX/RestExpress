@@ -25,17 +25,18 @@ public abstract class ContentType
 {
 	public static final String ENCODING = "UTF-8";
 	public static final Charset CHARSET = Charset.forName(ENCODING);
+	public static final String CHARSET_PARAMETER = "; charset=" + ENCODING; 
 
-	public static final String CSS = "text/css; charset=" + ENCODING;
-	public static final String HAL_JSON = "application/hal+json; charset=" + ENCODING;
-	public static final String HAL_XML = "application/hal+xml; charset=" + ENCODING;
-	public static final String HTML = "text/html; charset=" + ENCODING;
-	public static final String JAVASCRIPT = "application/javascript; charset=" + ENCODING;
-	public static final String JSON = "application/json; charset=" + ENCODING;
-	public static final String TEXT_PLAIN = "text/plain; charset=" + ENCODING;
-	public static final String TEXT_JAVASCRIPT = "text/javascript; charset=" + ENCODING;
-	public static final String XML = "application/xml; charset=" + ENCODING;
-	public static final String SIREN = "application/vnd.siren+json";
+	public static final String CSS = "text/css" + CHARSET_PARAMETER;
+	public static final String HAL_JSON = "application/hal+json" + CHARSET_PARAMETER;
+	public static final String HAL_XML = "application/hal+xml" + CHARSET_PARAMETER;
+	public static final String HTML = "text/html" + CHARSET_PARAMETER;
+	public static final String JAVASCRIPT = "application/javascript" + CHARSET_PARAMETER;
+	public static final String JSON = "application/json" + CHARSET_PARAMETER;
+	public static final String TEXT_PLAIN = "text/plain" + CHARSET_PARAMETER;
+	public static final String TEXT_JAVASCRIPT = "text/javascript" + CHARSET_PARAMETER;
+	public static final String XML = "application/xml" + CHARSET_PARAMETER;
+	public static final String SIREN = "application/vnd.siren+json" + CHARSET_PARAMETER;
 	
 	private ContentType()
 	{
