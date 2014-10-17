@@ -16,6 +16,7 @@
 package org.restexpress.plugin;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,11 @@ extends AbstractPlugin
 		return this;
 	}
 
+	public List<String> flags()
+	{
+		return Collections.unmodifiableList(flags);
+	}
+
 	public RoutePlugin parameter(String name, Object value)
 	{
 		if (!parameters.containsKey(name))
@@ -65,6 +71,11 @@ extends AbstractPlugin
 		}
 
 		return this;
+	}
+
+	public Map<String, Object> parameters()
+	{
+		return Collections.unmodifiableMap(parameters);
 	}
 
 	void applyFlags(RouteBuilder routeBuilder)
