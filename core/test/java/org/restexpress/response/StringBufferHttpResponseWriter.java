@@ -19,10 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.restexpress.ContentType;
 import org.restexpress.Request;
 import org.restexpress.Response;
-import org.restexpress.response.HttpResponseWriter;
 
 /**
  * @author toddf
@@ -56,6 +57,19 @@ implements HttpResponseWriter
 				List<String> headerValues = new ArrayList<String>(response.getHeaders(headerName));
 				headers.put(headerName, headerValues);
 			}
+		}
+
+		if (response.getBody() == null)
+		{
+			body.append("null");
+			return;
+		}
+
+		if (ChannelBuffer.class.isAssignableFrom(response.getBody().getClass()))
+		{
+			ChannelBuffer buf = (ChannelBuffer) response.getBody();
+			body.append(buf.toString(ContentType.CHARSET));
+			return;
 		}
 
 		body.append(response.getBody());

@@ -465,7 +465,7 @@ public class DefaultRequestHandlerTest
 		try
 		{
 			HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path);
-			request.setContent(ChannelBuffers.copiedBuffer(body, Charset.defaultCharset()));
+			request.setContent(ChannelBuffers.copiedBuffer(body, ContentType.CHARSET));
 	
 		    pl.sendUpstream(new UpstreamMessageEvent(
 		    	channel,

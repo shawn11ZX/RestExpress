@@ -37,7 +37,7 @@ implements HttpResponseWriter
 			// If the response body already contains a ChannelBuffer, use it.
 			if (ChannelBuffer.class.isAssignableFrom(response.getBody().getClass()))
 			{
-				httpResponse.setContent(ChannelBuffers.wrappedBuffer((ChannelBuffer) response.getBody()));
+				httpResponse.setContent((ChannelBuffer) response.getBody());
 			}
 			else // response body is assumed to be a string (e.g. JSON or XML).
 			{

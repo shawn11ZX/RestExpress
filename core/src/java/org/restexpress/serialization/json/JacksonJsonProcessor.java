@@ -24,8 +24,11 @@ import java.util.Date;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
+import org.jboss.netty.buffer.ChannelBufferOutputStream;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.restexpress.ContentType;
 import org.restexpress.Format;
+import org.restexpress.common.util.StringUtils;
 import org.restexpress.serialization.DeserializationException;
 import org.restexpress.serialization.SerializationException;
 
@@ -55,6 +58,7 @@ import com.strategicgains.util.date.DateAdapterConstants;
 public class JacksonJsonProcessor
 extends JsonSerializationProcessor
 {
+	private static final byte[] EMPTY_STRING_BYTES = StringUtils.EMPTY_STRING.getBytes(ContentType.CHARSET);
 	private ObjectMapper mapper;
 	private boolean shouldOutboundEncode;
 
@@ -186,13 +190,20 @@ extends JsonSerializationProcessor
 	}
 
 	@Override
-	public String serialize(Object object)
+	public ChannelBuffer serialize(Object object)
 	{
 		try
 		{
-			return (object == null ? "" : mapper.writeValueAsString(object));
+			if (object == null)
+			{
+				return ChannelBuffers.wrappedBuffer(EMPTY_STRING_BYTES);
+			}
+
+			ChannelBuffer b = ChannelBuffers.dynamicBuffer();
+			mapper.writeValue(new ChannelBufferOutputStream(b), object);
+			return b;
 		}
-		catch (JsonProcessingException e)
+		catch (IOException e)
 		{
 			throw new SerializationException(e);
 		}

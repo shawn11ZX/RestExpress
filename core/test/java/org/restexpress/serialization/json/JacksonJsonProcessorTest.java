@@ -45,7 +45,8 @@ public class JacksonJsonProcessorTest
 	@Test
 	public void shouldSerializeObject()
 	{
-		String json = processor.serialize(new KnownObject());
+		ChannelBuffer jsonBuf = processor.serialize(new KnownObject());
+		String json = jsonBuf.toString(ContentType.CHARSET);
 //		System.out.println(json);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
@@ -60,8 +61,8 @@ public class JacksonJsonProcessorTest
 	@Test
 	public void shouldSerializeNull()
 	{
-		String json = processor.serialize(null);
-		assertEquals("", json);
+		ChannelBuffer jsonBuf = processor.serialize(null);
+		assertEquals("", jsonBuf.toString(ContentType.CHARSET));
 	}
 
 	@Test
@@ -138,7 +139,8 @@ public class JacksonJsonProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.sa = new String[] {"this", "is", "an", "evil", "Json", "<script>alert(\'xss')</script>"};
-		String json = processor.serialize(ko);
+		ChannelBuffer jsonBuf = processor.serialize(ko);
+		String json = jsonBuf.toString(ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
@@ -155,7 +157,8 @@ public class JacksonJsonProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.string = "<script>alert('xss')</script>";
-		String json = processor.serialize(ko);
+		ChannelBuffer jsonBuf = processor.serialize(ko);
+		String json = jsonBuf.toString(ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));

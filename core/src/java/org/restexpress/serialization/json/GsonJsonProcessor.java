@@ -22,6 +22,7 @@ import java.util.Date;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.restexpress.ContentType;
 import org.restexpress.common.util.StringUtils;
 
@@ -45,6 +46,8 @@ import com.strategicgains.util.date.DateAdapterConstants;
 public class GsonJsonProcessor
 extends JsonSerializationProcessor
 {
+	private static final byte[] EMPTY_STRING_BYTES = StringUtils.EMPTY_STRING.getBytes(ContentType.CHARSET);
+
 	private Gson gson;
 
 	public GsonJsonProcessor()
@@ -91,10 +94,16 @@ extends JsonSerializationProcessor
 	}
 
 	@Override
-	public String serialize(Object object)
+	public ChannelBuffer serialize(Object object)
 	{
-		if (object == null) return StringUtils.EMPTY_STRING;
+		if (object == null)
+		{
+			return ChannelBuffers.wrappedBuffer(EMPTY_STRING_BYTES);
+		}
 
-		return gson.toJson(object);
+//		ChannelBuffer b = ChannelBuffers.dynamicBuffer();
+//		gson.toJson(object, new BufferedWriter(new OutputStreamWriter(new ChannelBufferOutputStream(b), ContentType.CHARSET)));
+//		return b;
+		return ChannelBuffers.wrappedBuffer(gson.toJson(object).getBytes(ContentType.CHARSET));
 	}
 }

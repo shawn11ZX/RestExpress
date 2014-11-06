@@ -19,6 +19,7 @@ package org.restexpress.pipeline;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -415,7 +416,7 @@ extends SimpleChannelUpstreamHandler
 			{
 				if (response.isSerialized())
 				{
-					String serialized = settings.serialize(response);
+					ChannelBuffer serialized = settings.serialize(response);
 
 					if (serialized != null)
 					{

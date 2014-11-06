@@ -17,6 +17,7 @@ package org.restexpress.response;
 
 import java.util.List;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.contenttype.MediaRange;
@@ -58,7 +59,7 @@ public class ResponseProcessor
 		return serializer.deserialize(request.getBody(), type);
 	}
 
-	public String serialize(Response response)
+	public ChannelBuffer serialize(Response response)
 	{
 		Object wrapped = wrapper.wrap(response);
 		
