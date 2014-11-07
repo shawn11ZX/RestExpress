@@ -101,6 +101,7 @@ extends JsonSerializationProcessor
 			return ChannelBuffers.wrappedBuffer(EMPTY_STRING_BYTES);
 		}
 
+		// TODO: Determine why this doesn't work...
 //		ChannelBuffer b = ChannelBuffers.dynamicBuffer();
 //		gson.toJson(object, new BufferedWriter(new OutputStreamWriter(new ChannelBufferOutputStream(b), ContentType.CHARSET)));
 //		return b;
