@@ -17,6 +17,8 @@
 
 package org.restexpress.serialization.xml;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -92,16 +94,16 @@ extends XmlSerializationProcessor
 	// SECTION: SERIALIZATION PROCESSOR
 
 	@Override
-	public ChannelBuffer serialize(Object object)
+	public ByteBuffer serialize(Object object)
 	{
 		if (object == null)
 		{
-			return ChannelBuffers.wrappedBuffer(EMPTY_STRING_BYTES);
+			return ByteBuffer.wrap(EMPTY_STRING_BYTES);
 		}
 
-		ChannelBuffer b = ChannelBuffers.dynamicBuffer();
-		xstream.toXML(object, new ChannelBufferOutputStream(b));
-		return b;
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		xstream.toXML(object, b);
+		return ByteBuffer.wrap(b.toByteArray());
 	}
 
 	@Override

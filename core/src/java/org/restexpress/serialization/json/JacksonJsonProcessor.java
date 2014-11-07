@@ -17,15 +17,15 @@
 
 package org.restexpress.serialization.json;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.buffer.ChannelBufferOutputStream;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.restexpress.ContentType;
 import org.restexpress.Format;
 import org.restexpress.common.util.StringUtils;
@@ -190,18 +190,19 @@ extends JsonSerializationProcessor
 	}
 
 	@Override
-	public ChannelBuffer serialize(Object object)
+	public ByteBuffer serialize(Object object)
 	{
 		try
 		{
 			if (object == null)
 			{
-				return ChannelBuffers.wrappedBuffer(EMPTY_STRING_BYTES);
+				return ByteBuffer.wrap(EMPTY_STRING_BYTES);
 			}
 
-			ChannelBuffer b = ChannelBuffers.dynamicBuffer();
-			mapper.writeValue(new ChannelBufferOutputStream(b), object);
-			return b;
+
+			ByteArrayOutputStream b = new ByteArrayOutputStream();
+			mapper.writeValue(b, object);
+			return ByteBuffer.wrap(b.toByteArray());
 		}
 		catch (IOException e)
 		{

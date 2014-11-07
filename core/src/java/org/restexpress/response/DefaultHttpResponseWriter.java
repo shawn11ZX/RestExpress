@@ -39,7 +39,7 @@ implements HttpResponseWriter
 			{
 				httpResponse.setContent((ChannelBuffer) response.getBody());
 			}
-			else // response body is assumed to be a string (e.g. JSON or XML).
+			else // response body is assumed to be a string (e.g. raw JSON or XML).
 			{
 				httpResponse.setContent(ChannelBuffers.copiedBuffer(response.getBody().toString(), ContentType.CHARSET));
 			}

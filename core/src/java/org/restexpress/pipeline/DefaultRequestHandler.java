@@ -16,10 +16,11 @@
  */
 package org.restexpress.pipeline;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -416,11 +417,11 @@ extends SimpleChannelUpstreamHandler
 			{
 				if (response.isSerialized())
 				{
-					ChannelBuffer serialized = settings.serialize(response);
+					ByteBuffer serialized = settings.serialize(response);
 
 					if (serialized != null)
 					{
-						response.setBody(serialized);
+						response.setBody(ChannelBuffers.wrappedBuffer(serialized));
 
 						if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
 						{

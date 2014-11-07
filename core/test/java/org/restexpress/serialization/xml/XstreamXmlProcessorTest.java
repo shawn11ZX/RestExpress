@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.ByteBuffer;
 import java.util.Calendar;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -29,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.restexpress.ContentType;
 import org.restexpress.serialization.KnownObject;
-import org.restexpress.serialization.xml.XstreamXmlProcessor;
 
 /**
  * @author toddf
@@ -50,8 +50,8 @@ public class XstreamXmlProcessorTest
 	@Test
 	public void shouldSerializeObject()
 	{
-		ChannelBuffer xmlBuf = processor.serialize(new KnownObject());
-		String xml = xmlBuf.toString(ContentType.CHARSET);
+		ByteBuffer xmlBuf = processor.serialize(new KnownObject());
+		String xml = new String(xmlBuf.array(), ContentType.CHARSET);
 		assertNotNull(xml);
 //		System.out.println(xml);
 		assertTrue(xml.startsWith("<KnownObject>"));
@@ -64,8 +64,8 @@ public class XstreamXmlProcessorTest
 	@Test
 	public void shouldSerializeNull()
 	{
-		ChannelBuffer xmlBuf = processor.serialize(null);
-		assertEquals("", xmlBuf.toString(ContentType.CHARSET));
+		ByteBuffer xmlBuf = processor.serialize(null);
+		assertEquals("", new String(xmlBuf.array(), ContentType.CHARSET));
 	}
 
 	@Test
@@ -126,8 +126,8 @@ public class XstreamXmlProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.sa = new String[] {"this", "is", "an", "evil", "Json", "<script>alert(\'xss')</script>"};
-		ChannelBuffer xmlBuf = processor.serialize(ko);
-		String xml = xmlBuf.toString(ContentType.CHARSET);
+		ByteBuffer xmlBuf = processor.serialize(ko);
+		String xml = new String(xmlBuf.array(), ContentType.CHARSET);
 		assertNotNull(xml);
 		assertTrue(xml.startsWith("<KnownObject>"));
 		assertTrue(xml.contains("<integer>1</integer>"));
@@ -145,8 +145,8 @@ public class XstreamXmlProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.string = "<script>alert('xss')</script>";
-		ChannelBuffer xmlBuf = processor.serialize(ko);
-		String xml = xmlBuf.toString(ContentType.CHARSET);
+		ByteBuffer xmlBuf = processor.serialize(ko);
+		String xml = new String(xmlBuf.array(), ContentType.CHARSET);
 		assertNotNull(xml);
 		assertTrue(xml.startsWith("<KnownObject>"));
 		assertTrue(xml.contains("<integer>1</integer>"));

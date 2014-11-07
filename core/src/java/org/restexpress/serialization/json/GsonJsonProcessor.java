@@ -18,11 +18,11 @@
 package org.restexpress.serialization.json;
 
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.util.Date;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.restexpress.ContentType;
 import org.restexpress.common.util.StringUtils;
 
@@ -94,17 +94,17 @@ extends JsonSerializationProcessor
 	}
 
 	@Override
-	public ChannelBuffer serialize(Object object)
+	public ByteBuffer serialize(Object object)
 	{
 		if (object == null)
 		{
-			return ChannelBuffers.wrappedBuffer(EMPTY_STRING_BYTES);
+			return ByteBuffer.wrap(EMPTY_STRING_BYTES);
 		}
 
 		// TODO: Determine why this doesn't work...
-//		ChannelBuffer b = ChannelBuffers.dynamicBuffer();
-//		gson.toJson(object, new BufferedWriter(new OutputStreamWriter(new ChannelBufferOutputStream(b), ContentType.CHARSET)));
-//		return b;
-		return ChannelBuffers.wrappedBuffer(gson.toJson(object).getBytes(ContentType.CHARSET));
+//		ByteArrayOutputStream b = new ByteArrayOutputStream();
+//		gson.toJson(object, new BufferedWriter(new OutputStreamWriter(b, ContentType.CHARSET)));
+//		return ByteBuffer.wrap(b.toByteArray());
+		return ByteBuffer.wrap(gson.toJson(object).getBytes(ContentType.CHARSET));
 	}
 }

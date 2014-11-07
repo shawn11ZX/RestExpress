@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.ByteBuffer;
 import java.util.Calendar;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -29,7 +30,6 @@ import org.junit.Test;
 import org.restexpress.ContentType;
 import org.restexpress.serialization.KnownObject;
 import org.restexpress.serialization.SerializationProcessor;
-import org.restexpress.serialization.json.GsonJsonProcessor;
 
 /**
  * @author toddf
@@ -45,8 +45,8 @@ public class GsonJsonProcessorTest
 	@Test
 	public void shouldSerializeObject()
 	{
-		ChannelBuffer jsonBuf = processor.serialize(new KnownObject());
-		String json = jsonBuf.toString(ContentType.CHARSET);
+		ByteBuffer jsonBuf = processor.serialize(new KnownObject());
+		String json = new String(jsonBuf.array(), ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
@@ -60,8 +60,8 @@ public class GsonJsonProcessorTest
 	@Test
 	public void shouldSerializeNull()
 	{
-		ChannelBuffer jsonBuf = processor.serialize(null);
-		assertEquals("", jsonBuf.toString(ContentType.CHARSET));
+		ByteBuffer jsonBuf = processor.serialize(null);
+		assertEquals("", new String(jsonBuf.array(), ContentType.CHARSET));
 	}
 
 	@Test
@@ -138,8 +138,8 @@ public class GsonJsonProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.sa = new String[] {"this", "is", "an", "evil", "Json", "<script>alert(\'xss')</script>"};
-		ChannelBuffer jsonBuf = processor.serialize(ko);
-		String json = jsonBuf.toString(ContentType.CHARSET);
+		ByteBuffer jsonBuf = processor.serialize(ko);
+		String json = new String(jsonBuf.array(), ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
@@ -156,8 +156,8 @@ public class GsonJsonProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.string = "<script>alert('xss')</script>";
-		ChannelBuffer jsonBuf = processor.serialize(ko);
-		String json = jsonBuf.toString(ContentType.CHARSET);
+		ByteBuffer jsonBuf = processor.serialize(ko);
+		String json = new String(jsonBuf.array(), ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
