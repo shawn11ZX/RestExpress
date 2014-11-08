@@ -174,7 +174,6 @@ public class RouteMapping
 	// SECTION: UTILITY
 
 	/**
-	 * @param method
 	 * @param route
 	 */
 	public void addRoute(Route route)

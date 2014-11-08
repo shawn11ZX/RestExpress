@@ -134,10 +134,6 @@ public class RestExpress
 	 * swapped out using the putSerializationProcessor(String,
 	 * SerializationProcessor) method, creating your own instance of
 	 * SerializationProcessor as necessary.
-	 * 
-	 * @param routes
-	 *            a RouteDeclaration that declares the URL routes that this
-	 *            service supports.
 	 */
 	public RestExpress()
 	{

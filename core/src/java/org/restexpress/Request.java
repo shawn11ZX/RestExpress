@@ -337,7 +337,7 @@ public class Request
 	 * 
 	 * @param name
 	 * @return the requested header
-	 * @throws BadRequestException(message) if 'name' doesn't exist as a header.
+	 * @throws BadRequestException if 'name' doesn't exist as a header.
 	 */
 	public String getHeader(String name, String message)
 	{
@@ -691,8 +691,6 @@ public class Request
 	 * If the request HTTP method is post, allow a query string parameter to determine
 	 * the request HTTP method of the post (e.g. _method=DELETE or _method=PUT).  This
 	 * supports DELETE and PUT from the browser.
-	 * 
-	 * @param parameters
 	 */
 	private void determineEffectiveHttpMethod(HttpRequest request)
 	{

@@ -132,10 +132,8 @@ public class Response
 	 * Add a "Content-Range" header to the response, setting it to the range and count.
 	 * This enables datagrid-style pagination support.
 	 * 
-	 * @param response
 	 * @param range
 	 * @param count
-	 * @param size
 	 */
 	public void addRangeHeader(QueryRange range, long count)
 	{
@@ -152,7 +150,7 @@ public class Response
 	 * the requested QueryRange, returned collection size and maximum data set size.
 	 * 
 	 * @param queryRange
-	 * @param results
+	 * @param size
 	 * @param count
 	 */
 	public void setCollectionResponse(QueryRange queryRange, int size, long count)
