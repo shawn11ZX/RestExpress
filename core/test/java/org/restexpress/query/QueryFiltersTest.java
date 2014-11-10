@@ -17,7 +17,6 @@ package org.restexpress.query;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -109,7 +108,7 @@ public class QueryFiltersTest
 	public void shouldParseFilterHeader()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("filter", "name::todd|description::amazing");
+		httpRequest.headers().add("filter", "name::todd|description::amazing");
 		Request request = new Request(httpRequest, null);
 		QueryFilter f = QueryFilters.parseFrom(request);
 		assertTrue(f.hasFilters());
@@ -126,7 +125,7 @@ public class QueryFiltersTest
 	public void shouldAllowSupportedFilterProperties()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("filter", "name:=:todd|description:*:amazing");
+		httpRequest.headers().add("filter", "name:=:todd|description:*:amazing");
 		Request request = new Request(httpRequest, null);
 		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"name", "description"}));
 		assertTrue(f.hasFilters());
@@ -143,27 +142,28 @@ public class QueryFiltersTest
 	public void shouldThrowOnInvalidFilter()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("filter", "name::todd|description::amazing");
+		httpRequest.headers().add("filter", "name::todd|description::amazing");
 		Request request = new Request(httpRequest, null);
-		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
+		QueryFilters.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 	}
 
 	@Test
 	public void shouldAllowSingleFilter()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("filter", "abc::todd");
+		httpRequest.headers().add("filter", "abc::todd");
 		Request request = new Request(httpRequest, null);
 		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
+		assertTrue(f.hasFilters());
 	}
 
 	@Test(expected=BadRequestException.class)
 	public void shouldThrowOnSingleInvalidFilter()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("filter", "name::todd");
+		httpRequest.headers().add("filter", "name::todd");
 		Request request = new Request(httpRequest, null);
-		QueryFilter f = QueryFilters.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
+		QueryFilters.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 	}
 	
 	private class FCallback

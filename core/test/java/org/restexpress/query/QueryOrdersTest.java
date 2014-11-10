@@ -61,7 +61,7 @@ public class QueryOrdersTest
 	public void shouldParseSortHeader()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "-name|description|-createdAt");
+		httpRequest.headers().add("sort", "-name|description|-createdAt");
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request);
 		assertTrue(o.isSorted());
@@ -80,7 +80,7 @@ public class QueryOrdersTest
 	public void shouldAllowSupportedSortProperties()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "-name|description|-createdAt");
+		httpRequest.headers().add("sort", "-name|description|-createdAt");
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"name", "description", "createdAt"}));
 		assertTrue(o.isSorted());
@@ -99,16 +99,16 @@ public class QueryOrdersTest
 	public void shouldThrowOnInvalidOrderProperty()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "-name|description|-createdAt");
+		httpRequest.headers().add("sort", "-name|description|-createdAt");
 		Request request = new Request(httpRequest, null);
-		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
+		QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 	}
 
 	@Test
 	public void shouldAllowSingleOrder()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "abc");
+		httpRequest.headers().add("sort", "abc");
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 		assertNotNull(o);
@@ -132,7 +132,7 @@ public class QueryOrdersTest
 	public void shouldAllowSingleOrderAtEnd()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "ghi");
+		httpRequest.headers().add("sort", "ghi");
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 		assertTrue(o.isSorted());
@@ -155,7 +155,7 @@ public class QueryOrdersTest
 	public void shouldAllowSingleDescendingOrder()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "-abc");
+		httpRequest.headers().add("sort", "-abc");
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 		assertTrue(o.isSorted());
@@ -178,7 +178,7 @@ public class QueryOrdersTest
 	public void shouldAllowSingleDescendingOrderAtEnd()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "-ghi");
+		httpRequest.headers().add("sort", "-ghi");
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 		assertTrue(o.isSorted());
@@ -201,16 +201,16 @@ public class QueryOrdersTest
 	public void shouldThrowOnSingleInvalidOrder()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "-something");
+		httpRequest.headers().add("sort", "-something");
 		Request request = new Request(httpRequest, null);
-		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
+		QueryOrders.parseFrom(request, Arrays.asList(new String[] {"abc", "def", "ghi"}));
 	}
 
 	@Test
 	public void shouldAllowSingleAllowedOrder()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "ghi");
+		httpRequest.headers().add("sort", "ghi");
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"ghi"}));
 		assertNotNull(o);
@@ -235,7 +235,7 @@ public class QueryOrdersTest
 	public void shouldAllowSingleDescendingAllowedOrder()
 	{
 		HttpRequest httpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://www.example.com/somethings");
-		httpRequest.addHeader("sort", "-ghi");
+		httpRequest.headers().add("sort", "-ghi");
 		Request request = new Request(httpRequest, null);
 		QueryOrder o = QueryOrders.parseFrom(request, Arrays.asList(new String[] {"ghi"}));
 		assertTrue(o.isSorted());
