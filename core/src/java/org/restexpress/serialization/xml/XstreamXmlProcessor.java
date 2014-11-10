@@ -25,8 +25,6 @@ import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.buffer.ChannelBufferOutputStream;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.restexpress.ContentType;
 import org.restexpress.Format;
 import org.restexpress.common.util.StringUtils;

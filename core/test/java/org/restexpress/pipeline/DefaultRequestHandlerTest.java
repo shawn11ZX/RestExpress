@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +41,6 @@ import org.restexpress.Format;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.exception.BadRequestException;
-import org.restexpress.pipeline.DefaultRequestHandler;
-import org.restexpress.pipeline.MessageObserver;
-import org.restexpress.pipeline.PipelineBuilder;
-import org.restexpress.pipeline.Postprocessor;
 import org.restexpress.response.DefaultHttpResponseWriter;
 import org.restexpress.response.JsendResponseWrapper;
 import org.restexpress.response.RawResponseWrapper;
