@@ -80,6 +80,16 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+Release 0.10.5-SNAPSHOT - in 'master' branch
+-----------------------
+* Changed FilterComponent.setValue(String) signature to setValue(Object).
+* Added suite of operators (:<:, :<=:, :>:, :>=:, :=:, :!=:, :*: [as starts-with]) to filter operations.
+* Added UnsupportedMediaTypeException which returns 415 HTTP status code.
+* Added ContentType.SIREN
+* Added RoutePlugin.flags() and .parameters() to retrieve flags and parameters, respectively.
+* Altered httpRequest.xxxHeader() calls to use httpRequest.headers().xxx() to eliminate deprecation warnings.
+* Upgraded to Netty 3.9.5 final.
+
 Release 0.10.4 - 5 Sep 2014
 ---------------------------
 * Upgraded Jackson Databind to version 2.4.1 to fix an issue with incorrect serialization for objects that have embedded objects.
