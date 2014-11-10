@@ -22,9 +22,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.junit.Before;
 import org.junit.Test;
 import org.restexpress.ContentType;
 import org.restexpress.serialization.KnownObject;
@@ -41,6 +43,11 @@ public class GsonJsonProcessorTest
 	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"????????????\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
 
 	private SerializationProcessor processor = new GsonJsonProcessor();
+
+    @Before
+    public void setup(){
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
 	@Test
 	public void shouldSerializeObject()
