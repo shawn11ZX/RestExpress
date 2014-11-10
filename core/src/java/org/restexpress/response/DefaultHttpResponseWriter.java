@@ -1,5 +1,5 @@
 /*
- * Copyright 2010, eCollege, Inc.  All rights reserved.
+ * Copyright 2010-2014, Strategic Gains, Inc.  All rights reserved.
  */
 package org.restexpress.response;
 
@@ -50,20 +50,20 @@ implements HttpResponseWriter
 	  		// Add 'Content-Length' header only for a keep-alive connection.
 			if (HttpSpecification.isContentLengthAllowed(response))
 	  		{
-				httpResponse.setHeader(CONTENT_LENGTH, String.valueOf(httpResponse.getContent().readableBytes()));
+				httpResponse.headers().set(CONTENT_LENGTH, String.valueOf(httpResponse.getContent().readableBytes()));
 	  		}
 
 			// Support "Connection: Keep-Alive" for HTTP 1.0 requests.
 			if (request.isHttpVersion1_0()) 
 			{
-				httpResponse.addHeader(CONNECTION, "Keep-Alive");
+				httpResponse.headers().add(CONNECTION, "Keep-Alive");
 			}
 
 	  		ctx.getChannel().write(httpResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
 	  	}
 		else
 		{
-			httpResponse.setHeader(CONNECTION, "close");
+			httpResponse.headers().set(CONNECTION, "close");
 
 			// Close the connection as soon as the message is sent.
 			ctx.getChannel().write(httpResponse).addListener(ChannelFutureListener.CLOSE);
@@ -90,7 +90,7 @@ implements HttpResponseWriter
     	{
     		for (String value : response.getHeaders(name))
     		{
-    			httpResponse.addHeader(name, value);
+    			httpResponse.headers().add(name, value);
     		}
     	}
     }
