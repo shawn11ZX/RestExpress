@@ -8,6 +8,7 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGT
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
@@ -45,6 +46,8 @@ implements HttpResponseWriter
 			}
 		}
 
+		Channel channel = ctx.getChannel();
+
 		if (request.isKeepAlive())
 	  	{
 	  		// Add 'Content-Length' header only for a keep-alive connection.
@@ -59,14 +62,14 @@ implements HttpResponseWriter
 				httpResponse.headers().add(CONNECTION, "Keep-Alive");
 			}
 
-	  		ctx.getChannel().write(httpResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+	  		channel.write(httpResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
 	  	}
 		else
 		{
 			httpResponse.headers().set(CONNECTION, "close");
 
 			// Close the connection as soon as the message is sent.
-			ctx.getChannel().write(httpResponse).addListener(ChannelFutureListener.CLOSE);
+			channel.write(httpResponse).addListener(ChannelFutureListener.CLOSE);
 		}
 	}
 
