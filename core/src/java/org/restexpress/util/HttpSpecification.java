@@ -41,7 +41,7 @@ public final class HttpSpecification
 
 	public static void enforce(Response response)
 	{
-		int status = response.getResponseStatus().getCode();
+		int status = response.getResponseStatus().code();
 
 		if (is1xx(status))
 		{
@@ -94,7 +94,7 @@ public final class HttpSpecification
 		HttpResponseStatus status = response.getResponseStatus();
 		return !(HttpResponseStatus.NO_CONTENT.equals(status)
 		    || HttpResponseStatus.NOT_MODIFIED.equals(status)
-		    || is1xx(status.getCode()));
+		    || is1xx(status.code()));
 	}
 
 	// SECTION: UTILITY - PRIVATE

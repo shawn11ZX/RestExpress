@@ -272,7 +272,7 @@ public class Request
 		if (shouldDecode)
 		{
 			QueryStringDecoder qsd = new QueryStringDecoder(getBody().toString(ContentType.CHARSET), ContentType.CHARSET, false);
-			return qsd.getParameters();			
+			return qsd.parameters();
 		}
 
 		QueryStringParser qsp = new QueryStringParser(getBody().toString(ContentType.CHARSET), false);
@@ -522,7 +522,7 @@ public class Request
 	 */
 	public String getProtocol()
 	{
-		return httpRequest.getProtocolVersion().getProtocolName().toLowerCase();
+		return httpRequest.getProtocolVersion().protocolName().toLowerCase();
 	}
 	
 	/**
@@ -642,7 +642,7 @@ public class Request
 	
 	public boolean isHttpVersion1_0()
 	{
-		return ((httpVersion.getMajorVersion() == 1) && (httpVersion.getMinorVersion() == 0));
+		return ((httpVersion.majorVersion() == 1) && (httpVersion.minorVersion() == 0));
 	}
 	
 	public InetSocketAddress getRemoteAddress()

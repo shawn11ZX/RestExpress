@@ -292,7 +292,7 @@ public abstract class RouteBuilder
 		for (Route route : routes)
 		{
 			uriMeta.addAllParameters(route.getUrlParameters());
-			metadata.addMethod(route.getMethod().getName());
+			metadata.addMethod(route.getMethod().name());
 		}
 
 		metadata.setUri(uriMeta);
