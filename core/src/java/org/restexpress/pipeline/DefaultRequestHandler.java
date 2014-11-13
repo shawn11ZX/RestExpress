@@ -21,9 +21,9 @@ import java.util.List;
 
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.util.AttributeKey;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.restexpress.ContentType;
@@ -46,8 +46,11 @@ import org.restexpress.util.HttpSpecification;
  */
 @Sharable
 public class DefaultRequestHandler
-extends SimpleChannelUpstreamHandler
+extends SimpleChannelInboundHandler<FullHttpRequest>
 {
+    //SECTION: CONSTANTS
+    private static final AttributeKey<MessageContext> CONTEXT_KEY = AttributeKey.valueOf("context");
+
 	// SECTION: INSTANCE VARIABLES
 
 	private RouteResolver routeResolver;
@@ -113,7 +116,7 @@ extends SimpleChannelUpstreamHandler
 	// SECTION: SIMPLE-CHANNEL-UPSTREAM-HANDLER
 
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event)
+	public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest event)
 	throws Exception
 	{
 		MessageContext context = createInitialContext(ctx, event);
@@ -175,7 +178,7 @@ extends SimpleChannelUpstreamHandler
 	private void handleRestExpressException(ChannelHandlerContext ctx, Throwable cause)
 	throws Exception
 	{
-		MessageContext context = (MessageContext) ctx.getAttachment();
+		MessageContext context = (MessageContext) ctx.attr(CONTEXT_KEY).get();
 		Throwable rootCause = mapServiceException(cause);
 
 		if (rootCause != null) // was/is a ServiceException
@@ -201,16 +204,16 @@ extends SimpleChannelUpstreamHandler
 	}
 
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent event)
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable throwable)
 	throws Exception
 	{
 		try
 		{
-			MessageContext messageContext = (MessageContext) ctx.getAttachment();
+			MessageContext messageContext = (MessageContext) ctx.attr(CONTEXT_KEY).get();
 
 			if (messageContext != null)
 			{
-				messageContext.setException(event.getCause());
+				messageContext.setException(throwable.getCause());
 				notifyException(messageContext);
 			}
 		}
@@ -221,16 +224,16 @@ extends SimpleChannelUpstreamHandler
 		}
 		finally
 		{
-			event.getChannel().close();
+			ctx.channel().close();
 		}
 	}
 
-	private MessageContext createInitialContext(ChannelHandlerContext ctx, MessageEvent event)
+	private MessageContext createInitialContext(ChannelHandlerContext ctx, FullHttpRequest httpRequest)
 	{
-		Request request = createRequest(event, ctx);
+		Request request = createRequest(httpRequest, ctx);
 		Response response = createResponse();
 		MessageContext context = new MessageContext(request, response);
-		ctx.setAttachment(context);
+		ctx.attr(CONTEXT_KEY).set(context);
 		return context;
 	}
 
@@ -371,9 +374,9 @@ extends SimpleChannelUpstreamHandler
      * @param request
      * @return
      */
-    private Request createRequest(MessageEvent event, ChannelHandlerContext context)
+    private Request createRequest(FullHttpRequest request, ChannelHandlerContext context)
     {
-    	return new Request(event, routeResolver, serializationProvider);
+    	return new Request(request, routeResolver, serializationProvider);
     }
 
 	/**
