@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
+import io.netty.handler.codec.http.FullHttpRequest;
 import org.jboss.netty.channel.MessageEvent;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -55,7 +56,7 @@ public class Request
 
 	// SECTION: INSTANCE VARIABLES
 
-	private HttpRequest httpRequest;
+	private FullHttpRequest httpRequest;
 	private HttpVersion httpVersion;
 	private InetSocketAddress remoteAddress;
 	private RouteResolver routeResolver;
@@ -71,12 +72,12 @@ public class Request
 	
 	// SECTION: CONSTRUCTOR
 
-	public Request(HttpRequest request, RouteResolver routeResolver)
+	public Request(FullHttpRequest request, RouteResolver routeResolver)
 	{
 		this(request, routeResolver, null);
 	}
 
-	public Request(HttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
+	public Request(FullHttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
 	{
 		super();
 		this.httpRequest = request;
@@ -152,7 +153,7 @@ public class Request
 
 	public ByteBuf getBody()
     {
-		return httpRequest.getContent();
+		return httpRequest.content();
     }
 
 	/**
@@ -281,7 +282,7 @@ public class Request
 
 	public void setBody(ByteBuf body)
     {
-		httpRequest.setContent(body);
+		httpRequest.content().setBytes(0, body);
     }
 
 	public void clearHeaders()
@@ -492,7 +493,14 @@ public class Request
 
 	public boolean isChunked()
 	{
-		return httpRequest.isChunked();
+        //This is the logic the Netty 3.9.x used to determine if data was chunked.  There may be a methodology more
+        // inline with Netty 4.x.x to determine if the request is chunked.  TODO: Implement updated logic.
+        for (String header : httpRequest.headers().getAll(HttpHeaders.Names.TRANSFER_ENCODING)) {
+            if (HttpHeaders.Values.CHUNKED.equalsIgnoreCase(header)) {
+                return true;
+            }
+        }
+        return false;
 	}
 	
 	/**
