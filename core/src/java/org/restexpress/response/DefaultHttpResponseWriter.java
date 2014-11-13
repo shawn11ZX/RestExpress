@@ -6,8 +6,8 @@ package org.restexpress.response;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultHttpResponse;
@@ -34,14 +34,14 @@ implements HttpResponseWriter
 
 		if (response.hasBody() && HttpSpecification.isContentAllowed(response))
 		{
-			// If the response body already contains a ChannelBuffer, use it.
-			if (ChannelBuffer.class.isAssignableFrom(response.getBody().getClass()))
+			// If the response body already contains a ByteBuf, use it.
+			if (ByteBuf.class.isAssignableFrom(response.getBody().getClass()))
 			{
-				httpResponse.setContent(ChannelBuffers.wrappedBuffer((ChannelBuffer) response.getBody()));
+				httpResponse.setContent(Unpooled.wrappedBuffer((ByteBuf) response.getBody()));
 			}
 			else // response body is assumed to be a string (e.g. JSON or XML).
 			{
-				httpResponse.setContent(ChannelBuffers.copiedBuffer(response.getBody().toString(), ContentType.CHARSET));
+				httpResponse.setContent(Unpooled.copiedBuffer(response.getBody().toString(), ContentType.CHARSET));
 			}
 		}
 

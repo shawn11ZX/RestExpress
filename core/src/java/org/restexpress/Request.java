@@ -29,8 +29,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import org.jboss.netty.channel.MessageEvent;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -150,7 +150,7 @@ public class Request
 		return getEffectiveHttpMethod().equals(HttpMethod.PUT);
 	}
 
-	public ChannelBuffer getBody()
+	public ByteBuf getBody()
     {
 		return httpRequest.getContent();
     }
@@ -223,7 +223,7 @@ public class Request
 	 */
 	public InputStream getBodyAsStream()
 	{
-		return new ChannelBufferInputStream(getBody());
+		return new ByteBufInputStream(getBody());
 	}
 
 	/**
@@ -234,15 +234,15 @@ public class Request
 	 */
 	public ByteBuffer getBodyAsByteBuffer()
 	{
-		return getBody().toByteBuffer();
+		return getBody().nioBuffer();
 	}
 
 	/**
-	 * Returns the byte array underlying the Netty ChannelBuffer for this request.
-	 * However, if the ChannelBuffer returns false to hasArray(), this
+	 * Returns the byte array underlying the Netty ByteBuf for this request.
+	 * However, if the ByteBuf returns false to hasArray(), this
 	 * method returns null.
 	 * 
-	 * @return an array of byte, or null, if the ChannelBuffer is not backed by a byte array.
+	 * @return an array of byte, or null, if the ByteBuf is not backed by a byte array.
 	 */
 	public byte[] getBodyAsBytes()
 	{
@@ -279,7 +279,7 @@ public class Request
 		return qsp.getParameters();
 	}
 
-	public void setBody(ChannelBuffer body)
+	public void setBody(ByteBuf body)
     {
 		httpRequest.setContent(body);
     }

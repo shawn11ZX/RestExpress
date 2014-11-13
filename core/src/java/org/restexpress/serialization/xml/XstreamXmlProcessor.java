@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import org.restexpress.Format;
 import org.restexpress.domain.JsendResultWrapper;
 
@@ -109,11 +109,11 @@ extends XmlSerializationProcessor
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T deserialize(ChannelBuffer xml, Class<T> type)
+	public <T> T deserialize(ByteBuf xml, Class<T> type)
 	{
-		if (!xml.readable()) return null;
+		if (!xml.isReadable()) return null;
 
-		return (T) xstream.fromXML(new ChannelBufferInputStream(xml));
+		return (T) xstream.fromXML(new ByteBufInputStream(xml));
 	}
 
 	private void addAliasIfNecessary(Class<?> type)
