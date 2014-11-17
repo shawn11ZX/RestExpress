@@ -11,6 +11,7 @@ import javax.net.ssl.SSLEngine;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
@@ -113,7 +114,7 @@ implements ChannelPipelineFactory
 		}
 		
 		pipeline.addLast("decoder", new HttpRequestDecoder());
-		pipeline.addLast("aggregator", new HttpChunkAggregator(maxContentLength));
+		pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
 		pipeline.addLast("encoder", new HttpResponseEncoder());
 		pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
 		pipeline.addLast("inflater", new HttpContentDecompressor());
