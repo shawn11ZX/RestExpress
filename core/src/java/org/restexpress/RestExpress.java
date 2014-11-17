@@ -16,21 +16,13 @@
  */
 package org.restexpress;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.SSLContext;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelGroupFuture;
 import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import org.restexpress.domain.metadata.RouteMetadata;
@@ -59,6 +51,14 @@ import org.restexpress.util.Bootstraps;
 import org.restexpress.util.Callback;
 import org.restexpress.util.DefaultShutdownHook;
 
+import javax.net.ssl.SSLContext;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Primary entry point to create a RestExpress service. All that's required is a
  * RouteDeclaration. By default: port is 8081, serialization format is JSON,
@@ -68,7 +68,7 @@ import org.restexpress.util.DefaultShutdownHook;
  */
 public class RestExpress
 {
-	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress");
+	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress", GlobalEventExecutor.INSTANCE);
 
 	public static final String DEFAULT_NAME = "RestExpress";
 	public static final int DEFAULT_PORT = 8081;
