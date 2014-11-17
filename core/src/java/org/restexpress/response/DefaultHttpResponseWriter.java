@@ -62,7 +62,7 @@ implements HttpResponseWriter
 				httpResponse.headers().add(CONNECTION, "Keep-Alive");
 			}
 
-	  		channel.write(httpResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+			channel.write(httpResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
 	  	}
 		else
 		{
