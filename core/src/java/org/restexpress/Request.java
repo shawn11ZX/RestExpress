@@ -19,6 +19,7 @@ package org.restexpress;
 
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -32,7 +33,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.FullHttpRequest;
-import org.jboss.netty.channel.MessageEvent;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
@@ -91,10 +91,10 @@ public class Request
 		determineEffectiveHttpMethod(request);
 	}
 
-	public Request(MessageEvent event, RouteResolver routes, SerializationProvider serializationProvider)
+	public Request(InetSocketAddress socketAddress, FullHttpRequest request, RouteResolver routes, SerializationProvider serializationProvider)
 	{
-		this((HttpRequest) event.getMessage(), routes, serializationProvider);
-		this.remoteAddress = (InetSocketAddress) event.getRemoteAddress();
+		this(request, routes, serializationProvider);
+		this.remoteAddress = socketAddress;
 	}
 
 
