@@ -33,8 +33,6 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.junit.Before;
 import org.junit.Test;
-import org.restexpress.pipeline.DefaultRequestHandler;
-import org.restexpress.pipeline.PipelineBuilder;
 import org.restexpress.response.DefaultHttpResponseWriter;
 import org.restexpress.response.JsendResponseWrapper;
 import org.restexpress.response.StringBufferHttpResponseWriter;
@@ -73,7 +71,7 @@ public class JsendWrappedResponseTest
 		messageHandler.addMessageObserver(observer);
 		httpResponse = new StringBuffer();
 		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(httpResponse));
-		PipelineBuilder pf = new PipelineBuilder()
+		PipelineInitializer pf = new PipelineInitializer()
 			.addRequestHandler(messageHandler);
 	    pl = pf.getPipeline();
 	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();

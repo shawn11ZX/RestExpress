@@ -42,10 +42,6 @@ import org.restexpress.Format;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.exception.BadRequestException;
-import org.restexpress.pipeline.DefaultRequestHandler;
-import org.restexpress.pipeline.MessageObserver;
-import org.restexpress.pipeline.PipelineBuilder;
-import org.restexpress.pipeline.Postprocessor;
 import org.restexpress.response.DefaultHttpResponseWriter;
 import org.restexpress.response.JsendResponseWrapper;
 import org.restexpress.response.RawResponseWrapper;
@@ -91,7 +87,7 @@ public class DefaultRequestHandlerTest
 		responseBody = new StringBuffer();
 		responseHeaders = new HashMap<String, List<String>>();
 		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(responseHeaders, responseBody));
-		PipelineBuilder pf = new PipelineBuilder()
+		PipelineInitializer pf = new PipelineInitializer()
 			.addRequestHandler(messageHandler);
 	    pl = pf.getPipeline();
 	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();

@@ -3,25 +3,22 @@
  */
 package org.restexpress.pipeline;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpContentCompressor;
+import io.netty.handler.codec.http.HttpContentDecompressor;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.stream.ChunkedWriteHandler;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
-import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpContentDecompressor;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
-import org.jboss.netty.handler.execution.ExecutionHandler;
-import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.stream.ChunkedWriteHandler;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides a tiny DSL to define the pipeline features.
@@ -29,8 +26,8 @@ import io.netty.handler.stream.ChunkedWriteHandler;
  * @author toddf
  * @since Aug 27, 2010
  */
-public class PipelineBuilder
-        implements ChannelPipelineFactory {
+public class PipelineInitializer
+        extends ChannelInitializer<SocketChannel> {
     // SECTION: CONSTANTS
 
     private static final int DEFAULT_MAX_CONTENT_LENGTH = 20480;
@@ -47,7 +44,7 @@ public class PipelineBuilder
 
     // SECTION: CONSTRUCTORS
 
-    public PipelineBuilder() {
+    public PipelineInitializer() {
         super();
     }
 
@@ -60,7 +57,7 @@ public class PipelineBuilder
 //		return this;
 //	}
 
-    public PipelineBuilder addRequestHandler(ChannelHandler handler) {
+    public PipelineInitializer addRequestHandler(ChannelHandler handler) {
         if (!requestHandlers.contains(handler)) {
             requestHandlers.add(handler);
         }
@@ -77,12 +74,12 @@ public class PipelineBuilder
      * @param value
      * @return this PipelineBuilder for method chaining.
      */
-    public PipelineBuilder setMaxContentLength(int value) {
+    public PipelineInitializer setMaxContentLength(int value) {
         this.maxContentLength = value;
         return this;
     }
 
-    public PipelineBuilder setSSLContext(SSLContext sslContext) {
+    public PipelineInitializer setSSLContext(SSLContext sslContext) {
         this.sslContext = sslContext;
         return this;
     }
@@ -94,9 +91,9 @@ public class PipelineBuilder
     // SECTION: CHANNEL PIPELINE FACTORY
 
     @Override
-    public ChannelPipeline getPipeline()
+    public void initChannel(SocketChannel ch)
             throws Exception {
-        ChannelPipeline pipeline = Channels.pipeline();
+        ChannelPipeline pipeline = ch.pipeline();
 
         if (null != sslContext) {
             SSLEngine sslEngine = sslContext.createSSLEngine();
@@ -120,7 +117,5 @@ public class PipelineBuilder
         for (ChannelHandler handler : requestHandlers) {
             pipeline.addLast(handler.getClass().getSimpleName(), handler);
         }
-
-        return pipeline;
     }
 }

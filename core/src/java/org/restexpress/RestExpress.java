@@ -30,7 +30,7 @@ import org.restexpress.exception.ExceptionMapping;
 import org.restexpress.exception.ServiceException;
 import org.restexpress.pipeline.DefaultRequestHandler;
 import org.restexpress.pipeline.MessageObserver;
-import org.restexpress.pipeline.PipelineBuilder;
+import org.restexpress.pipeline.PipelineInitializer;
 import org.restexpress.pipeline.Postprocessor;
 import org.restexpress.pipeline.Preprocessor;
 import org.restexpress.plugin.Plugin;
@@ -553,7 +553,7 @@ public class RestExpress
 
         ChannelHandler requestHandler = buildRequestHandler();
 
-		PipelineBuilder pf = new PipelineBuilder()
+		PipelineInitializer pf = new PipelineInitializer()
 		    .addRequestHandler(requestHandler)
 		    .setSSLContext(sslContext)
 		    .setMaxContentLength(serverSettings.getMaxContentSize());
@@ -566,7 +566,7 @@ public class RestExpress
 //			pf.setExecutionHandler(executionHandler);
 //		}
 
-		bootstrap.setPipelineFactory(pf);
+		bootstrap.childHandler(pf);
 		setBootstrapOptions();
 
 		// Bind and start to accept incoming connections.
