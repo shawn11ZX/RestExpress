@@ -19,6 +19,7 @@ package org.restexpress;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelGroupFuture;
@@ -532,12 +533,12 @@ public class RestExpress {
     }
 
     private void setBootstrapOptions() {
-        bootstrap.setOption("child.tcpNoDelay", useTcpNoDelay());
-        bootstrap.setOption("child.keepAlive", serverSettings.isKeepAlive());
-        bootstrap.setOption("reuseAddress", shouldReuseAddress());
-        bootstrap.setOption("child.soLinger", getSoLinger());
-        bootstrap.setOption("connectTimeoutMillis", getConnectTimeoutMillis());
-        bootstrap.setOption("receiveBufferSize", getReceiveBufferSize());
+        bootstrap.option(ChannelOption.TCP_NODELAY, useTcpNoDelay());
+        bootstrap.option(ChannelOption.SO_KEEPALIVE, serverSettings.isKeepAlive());
+        bootstrap.option(ChannelOption.SO_REUSEADDR, shouldReuseAddress());
+        bootstrap.option(ChannelOption.SO_LINGER, getSoLinger());
+        bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeoutMillis());
+        bootstrap.option(ChannelOption.SO_RCVBUF, getReceiveBufferSize());
     }
 
     /**
