@@ -23,8 +23,6 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelGroupFuture;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import org.jboss.netty.handler.execution.ExecutionHandler;
-import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import org.restexpress.domain.metadata.RouteMetadata;
 import org.restexpress.domain.metadata.ServerMetadata;
 import org.restexpress.exception.DefaultExceptionMapper;
@@ -560,12 +558,13 @@ public class RestExpress
 		    .setSSLContext(sslContext)
 		    .setMaxContentLength(serverSettings.getMaxContentSize());
 
-		if (getExecutorThreadCount() > 0)
-		{
-			ExecutionHandler executionHandler = new ExecutionHandler(
-	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
-			pf.setExecutionHandler(executionHandler);
-		}
+		//TODO: May (or may not) need to add in a EventExecutor to get similar behavior from pipeline.
+//		if (getExecutorThreadCount() > 0)
+//		{
+//			ExecutionHandler executionHandler = new ExecutionHandler(
+//	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
+//			pf.setExecutionHandler(executionHandler);
+//		}
 
 		bootstrap.setPipelineFactory(pf);
 		setBootstrapOptions();

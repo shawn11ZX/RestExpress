@@ -25,111 +25,102 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 
 /**
  * Provides a tiny DSL to define the pipeline features.
- * 
+ *
  * @author toddf
  * @since Aug 27, 2010
  */
 public class PipelineBuilder
-implements ChannelPipelineFactory
-{
-	// SECTION: CONSTANTS
+        implements ChannelPipelineFactory {
+    // SECTION: CONSTANTS
 
-	private static final int DEFAULT_MAX_CONTENT_LENGTH = 20480;
+    private static final int DEFAULT_MAX_CONTENT_LENGTH = 20480;
 
 
-	// SECTION: INSTANCE VARIABLES
+    // SECTION: INSTANCE VARIABLES
 
-	private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
-	private ExecutionHandler executionHandler = null;
-	private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
-	private SSLContext sslContext = null;
+    private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
+    //TODO: The executionHandler may (or may not) need to be replaced by a EventExecutorGroup.
+//	private ExecutionHandler executionHandler = null;
+    private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
+    private SSLContext sslContext = null;
 
-	
-	// SECTION: CONSTRUCTORS
 
-	public PipelineBuilder()
-	{
-		super();
-	}
+    // SECTION: CONSTRUCTORS
 
-	
-	// SECTION: BUILDER METHODS
-	
-	public PipelineBuilder setExecutionHandler(ExecutionHandler handler)
-	{
-		this.executionHandler = handler;
-		return this;
-	}
+    public PipelineBuilder() {
+        super();
+    }
 
-	public PipelineBuilder addRequestHandler(ChannelHandler handler)
-	{
-		if (!requestHandlers.contains(handler))
-		{
-			requestHandlers.add(handler);
-		}
 
-		return this;
-	}
-	
-	/**
-	 * Set the maximum length of the aggregated (chunked) content. If the length of the
-	 * aggregated content exceeds this value, a TooLongFrameException will be raised during
-	 * the request, which can be mapped in the RestExpress server to return a
-	 * BadRequestException, if desired.
-	 * 
-	 * @param value
-	 * @return this PipelineBuilder for method chaining.
-	 */
-	public PipelineBuilder setMaxContentLength(int value)
-	{
-		this.maxContentLength = value;
-		return this;
-	}
+    // SECTION: BUILDER METHODS
 
-	public PipelineBuilder setSSLContext(SSLContext sslContext)
-	{
-		this.sslContext = sslContext;
-		return this;
-	}
-	
-	public SSLContext getSSLContext()
-	{
-		return sslContext;
-	}
+//	public PipelineBuilder setExecutionHandler(ExecutionHandler handler)
+//	{
+//		this.executionHandler = handler;
+//		return this;
+//	}
 
-	// SECTION: CHANNEL PIPELINE FACTORY
+    public PipelineBuilder addRequestHandler(ChannelHandler handler) {
+        if (!requestHandlers.contains(handler)) {
+            requestHandlers.add(handler);
+        }
 
-	@Override
-	public ChannelPipeline getPipeline()
-	throws Exception
-	{
-		ChannelPipeline pipeline = Channels.pipeline();
+        return this;
+    }
 
-		if (null != sslContext)
-		{
-			SSLEngine sslEngine = sslContext.createSSLEngine();
-			sslEngine.setUseClientMode(false);
-			SslHandler sslHandler = new SslHandler(sslEngine);
-			pipeline.addLast("ssl", sslHandler);
-		}
-		
-		pipeline.addLast("decoder", new HttpRequestDecoder());
-		pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
-		pipeline.addLast("encoder", new HttpResponseEncoder());
-		pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
-		pipeline.addLast("inflater", new HttpContentDecompressor());
-		pipeline.addLast("deflater", new HttpContentCompressor());
+    /**
+     * Set the maximum length of the aggregated (chunked) content. If the length of the
+     * aggregated content exceeds this value, a TooLongFrameException will be raised during
+     * the request, which can be mapped in the RestExpress server to return a
+     * BadRequestException, if desired.
+     *
+     * @param value
+     * @return this PipelineBuilder for method chaining.
+     */
+    public PipelineBuilder setMaxContentLength(int value) {
+        this.maxContentLength = value;
+        return this;
+    }
 
-		if (executionHandler != null)
-		{
-			pipeline.addLast("executionHandler", executionHandler);
-		}
+    public PipelineBuilder setSSLContext(SSLContext sslContext) {
+        this.sslContext = sslContext;
+        return this;
+    }
 
-		for (ChannelHandler handler : requestHandlers)
-		{
-			pipeline.addLast(handler.getClass().getSimpleName(), handler);
-		}
+    public SSLContext getSSLContext() {
+        return sslContext;
+    }
 
-		return pipeline;
-	}
+    // SECTION: CHANNEL PIPELINE FACTORY
+
+    @Override
+    public ChannelPipeline getPipeline()
+            throws Exception {
+        ChannelPipeline pipeline = Channels.pipeline();
+
+        if (null != sslContext) {
+            SSLEngine sslEngine = sslContext.createSSLEngine();
+            sslEngine.setUseClientMode(false);
+            SslHandler sslHandler = new SslHandler(sslEngine);
+            pipeline.addLast("ssl", sslHandler);
+        }
+
+        pipeline.addLast("decoder", new HttpRequestDecoder());
+        pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
+        pipeline.addLast("encoder", new HttpResponseEncoder());
+        pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
+        pipeline.addLast("inflater", new HttpContentDecompressor());
+        pipeline.addLast("deflater", new HttpContentCompressor());
+
+//		if (executionHandler != null)
+//		{
+//			pipeline.addLast("executionHandler", executionHandler);
+//		}
+
+        for (ChannelHandler handler : requestHandlers) {
+            pipeline.addLast(handler.getClass().getSimpleName(), handler);
+        }
+
+        return pipeline;
+    }
 }
