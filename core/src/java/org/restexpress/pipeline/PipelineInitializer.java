@@ -36,8 +36,6 @@ public class PipelineInitializer
     // SECTION: INSTANCE VARIABLES
 
     private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
-    //TODO: The executionHandler may (or may not) need to be replaced by a EventExecutorGroup.
-//	private ExecutionHandler executionHandler = null;
     private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
     private SSLContext sslContext = null;
 
@@ -50,12 +48,6 @@ public class PipelineInitializer
 
 
     // SECTION: BUILDER METHODS
-
-//	public PipelineBuilder setExecutionHandler(ExecutionHandler handler)
-//	{
-//		this.executionHandler = handler;
-//		return this;
-//	}
 
     public PipelineInitializer addRequestHandler(ChannelHandler handler) {
         if (!requestHandlers.contains(handler)) {
@@ -108,11 +100,6 @@ public class PipelineInitializer
         pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
         pipeline.addLast("inflater", new HttpContentDecompressor());
         pipeline.addLast("deflater", new HttpContentCompressor());
-
-//		if (executionHandler != null)
-//		{
-//			pipeline.addLast("executionHandler", executionHandler);
-//		}
 
         for (ChannelHandler handler : requestHandlers) {
             pipeline.addLast(handler.getClass().getSimpleName(), handler);

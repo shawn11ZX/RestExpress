@@ -19,9 +19,12 @@ package org.restexpress;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelGroupFuture;
 import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.restexpress.domain.metadata.RouteMetadata;
 import org.restexpress.domain.metadata.ServerMetadata;
@@ -61,450 +64,396 @@ import java.util.Map;
  * Primary entry point to create a RestExpress service. All that's required is a
  * RouteDeclaration. By default: port is 8081, serialization format is JSON,
  * supported formats are JSON and XML.
- * 
+ *
  * @author toddf
  */
-public class RestExpress
-{
-	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress", GlobalEventExecutor.INSTANCE);
+public class RestExpress {
+    private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress", GlobalEventExecutor.INSTANCE);
 
-	public static final String DEFAULT_NAME = "RestExpress";
-	public static final int DEFAULT_PORT = 8081;
+    public static final String DEFAULT_NAME = "RestExpress";
+    public static final int DEFAULT_PORT = 8081;
 
-	private static SerializationProvider SERIALIZATION_PROVIDER = null;
+    private static SerializationProvider SERIALIZATION_PROVIDER = null;
 
-	private ServerBootstrap bootstrap;
-	private SocketSettings socketSettings = new SocketSettings();
-	private ServerSettings serverSettings = new ServerSettings();
-	private RouteDefaults routeDefaults = new RouteDefaults();
-	private boolean enforceHttpSpec = false;
-	private boolean useSystemOut;
+    private ServerBootstrap bootstrap;
+    private SocketSettings socketSettings = new SocketSettings();
+    private ServerSettings serverSettings = new ServerSettings();
+    private RouteDefaults routeDefaults = new RouteDefaults();
+    private boolean enforceHttpSpec = false;
+    private boolean useSystemOut;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workerGroup;
 
-	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
-	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
-	private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
-	private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
-	private ExceptionMapping exceptionMap = new DefaultExceptionMapper();
-	private List<Plugin> plugins = new ArrayList<Plugin>();
-	private RouteDeclaration routeDeclarations = new RouteDeclaration();
-	private SSLContext sslContext = null;
-	
-	/**
-	 * Change the default behavior for serialization.
-	 * If no SerializationProcessor is set, default of DefaultSerializationProcessor is used,
-	 * which uses Jackson for JSON, XStream for XML.
-	 * 
-	 * @param provider a SerializationProvider instance.
-	 */
-	public static void setSerializationProvider(SerializationProvider provider)
-	{
-		SERIALIZATION_PROVIDER = provider;
-	}
+    private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
+    private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
+    private List<Postprocessor> postprocessors = new ArrayList<Postprocessor>();
+    private List<Postprocessor> finallyProcessors = new ArrayList<Postprocessor>();
+    private ExceptionMapping exceptionMap = new DefaultExceptionMapper();
+    private List<Plugin> plugins = new ArrayList<Plugin>();
+    private RouteDeclaration routeDeclarations = new RouteDeclaration();
+    private SSLContext sslContext = null;
 
-	public static SerializationProvider getSerializationProvider()
-	{
-		if (SERIALIZATION_PROVIDER == null)
-		{
-			SERIALIZATION_PROVIDER = new DefaultSerializationProvider();
-		}
+    /**
+     * Change the default behavior for serialization.
+     * If no SerializationProcessor is set, default of DefaultSerializationProcessor is used,
+     * which uses Jackson for JSON, XStream for XML.
+     *
+     * @param provider a SerializationProvider instance.
+     */
+    public static void setSerializationProvider(SerializationProvider provider) {
+        SERIALIZATION_PROVIDER = provider;
+    }
 
-		return SERIALIZATION_PROVIDER;
-	}
+    public static SerializationProvider getSerializationProvider() {
+        if (SERIALIZATION_PROVIDER == null) {
+            SERIALIZATION_PROVIDER = new DefaultSerializationProvider();
+        }
 
-	/**
-	 * Create a new RestExpress service. By default, RestExpress uses port 8081.
-	 * Supports JSON, and XML, providing JSEND-style wrapped responses. And
-	 * displays some messages on System.out. These can be altered with the
-	 * setPort(), noJson(), noXml(), noSystemOut(), and useRawResponses() DSL
-	 * modifiers, respectively, as needed.
-	 * 
-	 * <p/>
-	 * The default input and output format for messages is JSON. To change that,
-	 * use the setDefaultFormat(String) DSL modifier, passing the format to use
-	 * by default. Make sure there's a corresponding SerializationProcessor for
-	 * that particular format. The Format class has the basics.
-	 * 
-	 * <p/>
-	 * This DSL was created as a thin veneer on Netty functionality. The bind()
-	 * method simply builds a Netty pipeline and uses this builder class to
-	 * create it. Underneath the covers, RestExpress uses Google GSON for JSON
-	 * handling and XStream for XML processing. However, both of those can be
-	 * swapped out using the putSerializationProcessor(String,
-	 * SerializationProcessor) method, creating your own instance of
-	 * SerializationProcessor as necessary.
-	 * 
-	 * @param routes
-	 *            a RouteDeclaration that declares the URL routes that this
-	 *            service supports.
-	 */
-	public RestExpress()
-	{
-		super();
-		setName(DEFAULT_NAME);
-		useSystemOut();
-	}
+        return SERIALIZATION_PROVIDER;
+    }
 
-	public RestExpress setSSLContext(SSLContext sslContext)
-	{
-		this.sslContext = sslContext;
-		return this;
-	}
-	
-	public SSLContext getSSLContext()
-	{
-		return sslContext;
-	}
-	
-	public String getBaseUrl()
-	{
-		return routeDefaults.getBaseUrl();
-	}
+    /**
+     * Create a new RestExpress service. By default, RestExpress uses port 8081.
+     * Supports JSON, and XML, providing JSEND-style wrapped responses. And
+     * displays some messages on System.out. These can be altered with the
+     * setPort(), noJson(), noXml(), noSystemOut(), and useRawResponses() DSL
+     * modifiers, respectively, as needed.
+     * <p/>
+     * <p/>
+     * The default input and output format for messages is JSON. To change that,
+     * use the setDefaultFormat(String) DSL modifier, passing the format to use
+     * by default. Make sure there's a corresponding SerializationProcessor for
+     * that particular format. The Format class has the basics.
+     * <p/>
+     * <p/>
+     * This DSL was created as a thin veneer on Netty functionality. The bind()
+     * method simply builds a Netty pipeline and uses this builder class to
+     * create it. Underneath the covers, RestExpress uses Google GSON for JSON
+     * handling and XStream for XML processing. However, both of those can be
+     * swapped out using the putSerializationProcessor(String,
+     * SerializationProcessor) method, creating your own instance of
+     * SerializationProcessor as necessary.
+     *
+     * @param routes a RouteDeclaration that declares the URL routes that this
+     *               service supports.
+     */
+    public RestExpress() {
+        super();
+        setName(DEFAULT_NAME);
+        useSystemOut();
+    }
 
-	public RestExpress setBaseUrl(String baseUrl)
-	{
-		routeDefaults.setBaseUrl(baseUrl);
-		return this;
-	}
+    public RestExpress setSSLContext(SSLContext sslContext) {
+        this.sslContext = sslContext;
+        return this;
+    }
 
-	/**
-	 * Get the name of this RestExpress service.
-	 * 
-	 * @return a String representing the name of this service suite.
-	 */
-	public String getName()
-	{
-		return serverSettings.getName();
-	}
+    public SSLContext getSSLContext() {
+        return sslContext;
+    }
 
-	/**
-	 * Set the name of this RestExpress service suite.
-	 * 
-	 * @param name
-	 *            the name.
-	 * @return the RestExpress instance to facilitate DSL-style method chaining.
-	 */
-	public RestExpress setName(String name)
-	{
-		serverSettings.setName(name);
-		return this;
-	}
-	
-	public int getPort()
-	{
-		return serverSettings.getPort();
-	}
+    public String getBaseUrl() {
+        return routeDefaults.getBaseUrl();
+    }
 
-	public RestExpress setPort(int port)
-	{
-		serverSettings.setPort(port);
-		return this;
-	}
+    public RestExpress setBaseUrl(String baseUrl) {
+        routeDefaults.setBaseUrl(baseUrl);
+        return this;
+    }
 
-	public RestExpress addMessageObserver(MessageObserver observer)
-	{
-		if (!messageObservers.contains(observer))
-		{
-			messageObservers.add(observer);
-		}
+    /**
+     * Get the name of this RestExpress service.
+     *
+     * @return a String representing the name of this service suite.
+     */
+    public String getName() {
+        return serverSettings.getName();
+    }
 
-		return this;
-	}
+    /**
+     * Set the name of this RestExpress service suite.
+     *
+     * @param name the name.
+     * @return the RestExpress instance to facilitate DSL-style method chaining.
+     */
+    public RestExpress setName(String name) {
+        serverSettings.setName(name);
+        return this;
+    }
 
-	public List<MessageObserver> getMessageObservers()
-	{
-		return Collections.unmodifiableList(messageObservers);
-	}
+    public int getPort() {
+        return serverSettings.getPort();
+    }
 
-	/**
-	 * Add a Preprocessor instance that gets called before an incoming message
-	 * gets processed. Preprocessors get called in the order in which they are
-	 * added. To break out of the chain, simply throw an exception.
-	 * 
-	 * @param processor
-	 * @return
-	 */
-	public RestExpress addPreprocessor(Preprocessor processor)
-	{
-		if (!preprocessors.contains(processor))
-		{
-			preprocessors.add(processor);
-		}
+    public RestExpress setPort(int port) {
+        serverSettings.setPort(port);
+        return this;
+    }
 
-		return this;
-	}
+    public RestExpress addMessageObserver(MessageObserver observer) {
+        if (!messageObservers.contains(observer)) {
+            messageObservers.add(observer);
+        }
 
-	public List<Preprocessor> getPreprocessors()
-	{
-		return Collections.unmodifiableList(preprocessors);
-	}
+        return this;
+    }
 
-	/**
-	 * Add a Postprocessor instance that gets called after an incoming message is
-	 * processed. A Postprocessor is useful for augmenting or transforming the
-	 * results of a controller or adding headers, etc. Postprocessors get called
-	 * in the order in which they are added.
-	 * Note however, they do NOT get called in the case of an exception or error
-	 * within the route.
-	 * 
-	 * @param processor
-	 * @return
-	 */
-	public RestExpress addPostprocessor(Postprocessor processor)
-	{
-		if (!postprocessors.contains(processor))
-		{
-			postprocessors.add(processor);
-		}
+    public List<MessageObserver> getMessageObservers() {
+        return Collections.unmodifiableList(messageObservers);
+    }
 
-		return this;
-	}
+    /**
+     * Add a Preprocessor instance that gets called before an incoming message
+     * gets processed. Preprocessors get called in the order in which they are
+     * added. To break out of the chain, simply throw an exception.
+     *
+     * @param processor
+     * @return
+     */
+    public RestExpress addPreprocessor(Preprocessor processor) {
+        if (!preprocessors.contains(processor)) {
+            preprocessors.add(processor);
+        }
 
-	public List<Postprocessor> getPostprocessors()
-	{
-		return Collections.unmodifiableList(postprocessors);
-	}
+        return this;
+    }
 
-	/**
-	 * Add a Postprocessor instance that gets called right before the serialized
-	 * message is sent to the client, or in a finally block after the message is
-	 * processed, if an error occurs.  Finally processors are Postprocessor instances
-	 * that are guaranteed to run even if an error is thrown from the controller
-	 * or somewhere else in the route.  A Finally Processor is useful for adding
-	 * headers or transforming results even during error conditions. Finally
-	 * processors get called in the order in which they are added.
-	 * 
-	 * If an exception is thrown during finally processor execution, the finally processors
-	 * following it are executed after printing a stack trace to the System.err stream.
-	 * 
-	 * @param processor
-	 * @return RestExpress for method chaining.
-	 */
-	public RestExpress addFinallyProcessor(Postprocessor processor)
-	{
-		if (!finallyProcessors.contains(processor))
-		{
-			finallyProcessors.add(processor);
-		}
+    public List<Preprocessor> getPreprocessors() {
+        return Collections.unmodifiableList(preprocessors);
+    }
 
-		return this;
-	}
+    /**
+     * Add a Postprocessor instance that gets called after an incoming message is
+     * processed. A Postprocessor is useful for augmenting or transforming the
+     * results of a controller or adding headers, etc. Postprocessors get called
+     * in the order in which they are added.
+     * Note however, they do NOT get called in the case of an exception or error
+     * within the route.
+     *
+     * @param processor
+     * @return
+     */
+    public RestExpress addPostprocessor(Postprocessor processor) {
+        if (!postprocessors.contains(processor)) {
+            postprocessors.add(processor);
+        }
 
-	public List<Postprocessor> getFinallyProcessors()
-	{
-		return Collections.unmodifiableList(finallyProcessors);
-	}
+        return this;
+    }
 
-	public boolean shouldUseSystemOut()
-	{
-		return useSystemOut;
-	}
+    public List<Postprocessor> getPostprocessors() {
+        return Collections.unmodifiableList(postprocessors);
+    }
 
-	public RestExpress setUseSystemOut(boolean useSystemOut)
-	{
-		this.useSystemOut = useSystemOut;
-		return this;
-	}
-	
-	public RestExpress setEnforceHttpSpec(boolean enforceHttpSpec)
-	{
-		this.enforceHttpSpec = enforceHttpSpec;
-		return this;
-	}
+    /**
+     * Add a Postprocessor instance that gets called right before the serialized
+     * message is sent to the client, or in a finally block after the message is
+     * processed, if an error occurs.  Finally processors are Postprocessor instances
+     * that are guaranteed to run even if an error is thrown from the controller
+     * or somewhere else in the route.  A Finally Processor is useful for adding
+     * headers or transforming results even during error conditions. Finally
+     * processors get called in the order in which they are added.
+     * <p/>
+     * If an exception is thrown during finally processor execution, the finally processors
+     * following it are executed after printing a stack trace to the System.err stream.
+     *
+     * @param processor
+     * @return RestExpress for method chaining.
+     */
+    public RestExpress addFinallyProcessor(Postprocessor processor) {
+        if (!finallyProcessors.contains(processor)) {
+            finallyProcessors.add(processor);
+        }
 
-	public RestExpress enforceHttpSpec()
-	{
-		setEnforceHttpSpec(true);
-		return this;
-	}
+        return this;
+    }
 
-	public RestExpress useSystemOut()
-	{
-		setUseSystemOut(true);
-		return this;
-	}
+    public List<Postprocessor> getFinallyProcessors() {
+        return Collections.unmodifiableList(finallyProcessors);
+    }
 
-	public RestExpress noSystemOut()
-	{
-		setUseSystemOut(false);
-		return this;
-	}
+    public boolean shouldUseSystemOut() {
+        return useSystemOut;
+    }
 
-	public boolean useTcpNoDelay()
-	{
-		return socketSettings.useTcpNoDelay();
-	}
+    public RestExpress setUseSystemOut(boolean useSystemOut) {
+        this.useSystemOut = useSystemOut;
+        return this;
+    }
 
-	public RestExpress setUseTcpNoDelay(boolean useTcpNoDelay)
-	{
-		socketSettings.setUseTcpNoDelay(useTcpNoDelay);
-		return this;
-	}
+    public RestExpress setEnforceHttpSpec(boolean enforceHttpSpec) {
+        this.enforceHttpSpec = enforceHttpSpec;
+        return this;
+    }
 
-	public boolean useKeepAlive()
-	{
-		return serverSettings.isKeepAlive();
-	}
+    public RestExpress enforceHttpSpec() {
+        setEnforceHttpSpec(true);
+        return this;
+    }
 
-	public RestExpress setKeepAlive(boolean useKeepAlive)
-	{
-		serverSettings.setKeepAlive(useKeepAlive);
-		return this;
-	}
+    public RestExpress useSystemOut() {
+        setUseSystemOut(true);
+        return this;
+    }
 
-	public boolean shouldReuseAddress()
-	{
-		return serverSettings.isReuseAddress();
-	}
+    public RestExpress noSystemOut() {
+        setUseSystemOut(false);
+        return this;
+    }
 
-	public RestExpress setReuseAddress(boolean reuseAddress)
-	{
-		serverSettings.setReuseAddress(reuseAddress);
-		return this;
-	}
+    public boolean useTcpNoDelay() {
+        return socketSettings.useTcpNoDelay();
+    }
 
-	public int getSoLinger()
-	{
-		return socketSettings.getSoLinger();
-	}
+    public RestExpress setUseTcpNoDelay(boolean useTcpNoDelay) {
+        socketSettings.setUseTcpNoDelay(useTcpNoDelay);
+        return this;
+    }
 
-	public RestExpress setSoLinger(int soLinger)
-	{
-		socketSettings.setSoLinger(soLinger);
-		return this;
-	}
+    public boolean useKeepAlive() {
+        return serverSettings.isKeepAlive();
+    }
 
-	public int getReceiveBufferSize()
-	{
-		return socketSettings.getReceiveBufferSize();
-	}
+    public RestExpress setKeepAlive(boolean useKeepAlive) {
+        serverSettings.setKeepAlive(useKeepAlive);
+        return this;
+    }
 
-	public RestExpress setReceiveBufferSize(int receiveBufferSize)
-	{
-		socketSettings.setReceiveBufferSize(receiveBufferSize);
-		return this;
-	}
+    public boolean shouldReuseAddress() {
+        return serverSettings.isReuseAddress();
+    }
 
-	public int getConnectTimeoutMillis()
-	{
-		return socketSettings.getConnectTimeoutMillis();
-	}
+    public RestExpress setReuseAddress(boolean reuseAddress) {
+        serverSettings.setReuseAddress(reuseAddress);
+        return this;
+    }
 
-	public RestExpress setConnectTimeoutMillis(int connectTimeoutMillis)
-	{
-		socketSettings.setConnectTimeoutMillis(connectTimeoutMillis);
-		return this;
-	}
+    public int getSoLinger() {
+        return socketSettings.getSoLinger();
+    }
 
-	/**
-	 * 
-	 * @param elementName
-	 * @param theClass
-	 * @return
-	 */
-	public RestExpress alias(String elementName, Class<?> theClass)
-	{
-		routeDefaults.addXmlAlias(elementName, theClass);
-		return this;
-	}
+    public RestExpress setSoLinger(int soLinger) {
+        socketSettings.setSoLinger(soLinger);
+        return this;
+    }
 
-	public <T extends Exception, U extends ServiceException> RestExpress mapException(
-	    Class<T> from, Class<U> to)
-	{
-		exceptionMap.map(from, to);
-		return this;
-	}
+    public int getReceiveBufferSize() {
+        return socketSettings.getReceiveBufferSize();
+    }
 
-	public RestExpress setExceptionMap(ExceptionMapping mapping)
-	{
-		this.exceptionMap = mapping;
-		return this;
-	}
+    public RestExpress setReceiveBufferSize(int receiveBufferSize) {
+        socketSettings.setReceiveBufferSize(receiveBufferSize);
+        return this;
+    }
 
-	/**
-	 * Return the number of requested NIO/HTTP-handling worker threads.
-	 * 
-	 * @return the number of requested worker threads.
-	 */
-	public int getIoThreadCount()
-	{
-		return serverSettings.getIoThreadCount();
-	}
+    public int getConnectTimeoutMillis() {
+        return socketSettings.getConnectTimeoutMillis();
+    }
 
-	/**
-	 * Set the number of NIO/HTTP-handling worker threads.  This
-	 * value controls the number of simultaneous connections the
-	 * application can handle.
-	 * 
-	 * The default (if this value is not set, or set to zero) is
-	 * the Netty default, which is 2 times the number of processors
-	 * (or cores).
-	 * 
-	 * @param value the number of desired NIO worker threads.
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress setIoThreadCount(int value)
-	{
-		serverSettings.setIoThreadCount(value);
-		return this;
-	}
-	
-	/**
-	 * Returns the number of background request-handling (executor) threads.
-	 * 
-	 * @return the number of executor threads.
-	 */
-	public int getExecutorThreadCount()
-	{
-		return serverSettings.getExecutorThreadPoolSize();
-	}
-	
-	/**
-	 * Set the number of background request-handling (executor) threads.
-	 * This value controls the number of simultaneous blocking requests that
-	 * the server can handle.  For longer-running requests, a higher number
-	 * may be indicated.
-	 * 
-	 * For VERY short-running requests, a value of zero will cause no
-	 * background threads to be created, causing all processing to occur in
-	 * the NIO (front-end) worker thread.
-	 * 
-	 * @param value the number of executor threads to create.
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress setExecutorThreadCount(int value)
-	{
-		serverSettings.setExecutorThreadPoolSize(value);
-		return this;
-	}
+    public RestExpress setConnectTimeoutMillis(int connectTimeoutMillis) {
+        socketSettings.setConnectTimeoutMillis(connectTimeoutMillis);
+        return this;
+    }
 
-	/**
-	 * Set the maximum length of the content in a request. If the length of the content exceeds this value,
-	 * the server closes the connection immediately without sending a response.
-	 * 
-	 * @param size the maximum size in bytes.
-	 * @return the RestExpress instance.
-	 */
-	public RestExpress setMaxContentSize(int size)
-	{
-		serverSettings.setMaxContentSize(size);
-		return this;
-	}
+    /**
+     * @param elementName
+     * @param theClass
+     * @return
+     */
+    public RestExpress alias(String elementName, Class<?> theClass) {
+        routeDefaults.addXmlAlias(elementName, theClass);
+        return this;
+    }
 
-	/**
-	 * Can be called after routes are defined to augment or get data from
-	 * all the currently-defined routes.
-	 * 
-	 * @param callback a Callback implementor.
-	 */
-	public void iterateRouteBuilders(Callback<RouteBuilder> callback)
-	{
-		routeDeclarations.iterateRouteBuilders(callback);
-	}
+    public <T extends Exception, U extends ServiceException> RestExpress mapException(
+            Class<T> from, Class<U> to) {
+        exceptionMap.map(from, to);
+        return this;
+    }
 
-	public Channel bind()
-	{
-		return bind((getPort() > 0 ? getPort() : DEFAULT_PORT));
-	}
+    public RestExpress setExceptionMap(ExceptionMapping mapping) {
+        this.exceptionMap = mapping;
+        return this;
+    }
+
+    /**
+     * Return the number of requested NIO/HTTP-handling worker threads.
+     *
+     * @return the number of requested worker threads.
+     */
+    public int getIoThreadCount() {
+        return serverSettings.getIoThreadCount();
+    }
+
+    /**
+     * Set the number of NIO/HTTP-handling worker threads.  This
+     * value controls the number of simultaneous connections the
+     * application can handle.
+     * <p/>
+     * The default (if this value is not set, or set to zero) is
+     * the Netty default, which is 2 times the number of processors
+     * (or cores).
+     *
+     * @param value the number of desired NIO worker threads.
+     * @return the RestExpress instance.
+     */
+    public RestExpress setIoThreadCount(int value) {
+        serverSettings.setIoThreadCount(value);
+        return this;
+    }
+
+    /**
+     * Returns the number of background request-handling (executor) threads.
+     *
+     * @return the number of executor threads.
+     */
+    public int getExecutorThreadCount() {
+        return serverSettings.getExecutorThreadPoolSize();
+    }
+
+    /**
+     * Set the number of background request-handling (executor) threads.
+     * This value controls the number of simultaneous blocking requests that
+     * the server can handle.  For longer-running requests, a higher number
+     * may be indicated.
+     * <p/>
+     * For VERY short-running requests, a value of zero will cause no
+     * background threads to be created, causing all processing to occur in
+     * the NIO (front-end) worker thread.
+     *
+     * @param value the number of executor threads to create.
+     * @return the RestExpress instance.
+     */
+    public RestExpress setExecutorThreadCount(int value) {
+        serverSettings.setExecutorThreadPoolSize(value);
+        return this;
+    }
+
+    /**
+     * Set the maximum length of the content in a request. If the length of the content exceeds this value,
+     * the server closes the connection immediately without sending a response.
+     *
+     * @param size the maximum size in bytes.
+     * @return the RestExpress instance.
+     */
+    public RestExpress setMaxContentSize(int size) {
+        serverSettings.setMaxContentSize(size);
+        return this;
+    }
+
+    /**
+     * Can be called after routes are defined to augment or get data from
+     * all the currently-defined routes.
+     *
+     * @param callback a Callback implementor.
+     */
+    public void iterateRouteBuilders(Callback<RouteBuilder> callback) {
+        routeDeclarations.iterateRouteBuilders(callback);
+    }
+
+    public Channel bind() {
+        return bind((getPort() > 0 ? getPort() : DEFAULT_PORT));
+    }
 
     /**
      * Build a default request handler.  Used instead of bind() so it
@@ -512,252 +461,226 @@ public class RestExpress
      *
      * @return ChannelHandler
      */
-	public ChannelHandler buildRequestHandler()
-	{
-		// Set up the event pipeline factory.
-		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
-		    createRouteResolver(), getSerializationProvider(), new DefaultHttpResponseWriter(), enforceHttpSpec);
+    public ChannelHandler buildRequestHandler() {
+        // Set up the event pipeline factory.
+        DefaultRequestHandler requestHandler = new DefaultRequestHandler(
+                createRouteResolver(), getSerializationProvider(), new DefaultHttpResponseWriter(), enforceHttpSpec);
 
-		// Add MessageObservers to the request handler here, if desired...
-		requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));
+        // Add MessageObservers to the request handler here, if desired...
+        requestHandler.addMessageObserver(messageObservers.toArray(new MessageObserver[0]));
 
-		requestHandler.setExceptionMap(exceptionMap);
+        requestHandler.setExceptionMap(exceptionMap);
 
-		// Add pre/post processors to the request handler here...
-		addPreprocessors(requestHandler);
-		addPostprocessors(requestHandler);
-		addFinallyProcessors(requestHandler);
+        // Add pre/post processors to the request handler here...
+        addPreprocessors(requestHandler);
+        addPostprocessors(requestHandler);
+        addFinallyProcessors(requestHandler);
 
-		return requestHandler;
-	}
+        return requestHandler;
+    }
 
-	/**
-	 * The last call in the building of a RestExpress server, bind() causes
-	 * Netty to bind to the listening address and process incoming messages.
-	 * 
-	 * @return Channel
-	 */
-	public Channel bind(int port)
-	{
-		setPort(port);
+    /**
+     * The last call in the building of a RestExpress server, bind() causes
+     * Netty to bind to the listening address and process incoming messages.
+     *
+     * @return Channel
+     */
+    public Channel bind(int port) {
+        setPort(port);
 
-		// Configure the server.
-		if (getIoThreadCount() == 0)
-		{
-			bootstrap = Bootstraps.createServerNioBootstrap();
-		}
-		else
-		{
-			bootstrap = Bootstraps.createServerNioBootstrap(getIoThreadCount());
-		}
+        // Configure the server.
+        bossGroup = getEventExecutorsWithThreadCountOf(getIoThreadCount());
+        workerGroup = getEventExecutorsWithThreadCountOf(getExecutorThreadCount());
+        bootstrap = new ServerBootstrap().group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
 
         ChannelHandler requestHandler = buildRequestHandler();
 
-		PipelineInitializer pf = new PipelineInitializer()
-		    .addRequestHandler(requestHandler)
-		    .setSSLContext(sslContext)
-		    .setMaxContentLength(serverSettings.getMaxContentSize());
+        PipelineInitializer pf = new PipelineInitializer()
+                .addRequestHandler(requestHandler)
+                .setSSLContext(sslContext)
+                .setMaxContentLength(serverSettings.getMaxContentSize());
 
-		//TODO: May (or may not) need to add in a EventExecutor to get similar behavior from pipeline.
-//		if (getExecutorThreadCount() > 0)
-//		{
-//			ExecutionHandler executionHandler = new ExecutionHandler(
-//	             new OrderedMemoryAwareThreadPoolExecutor(getExecutorThreadCount(), 0, 0));
-//			pf.setExecutionHandler(executionHandler);
-//		}
+        bootstrap.childHandler(pf);
 
-		bootstrap.childHandler(pf);
-		setBootstrapOptions();
+        setBootstrapOptions();
 
-		// Bind and start to accept incoming connections.
-		if (shouldUseSystemOut())
-		{
-			System.out.println(getName() + " server listening on port " + port);
-		}
+        // Bind and start to accept incoming connections.
+        if (
 
-		Channel channel = bootstrap.bind(new InetSocketAddress(port));
-		allChannels.add(channel);
-		bindPlugins();
-		return channel;
-	}
+                shouldUseSystemOut()
 
-	private void setBootstrapOptions()
-	{
-		bootstrap.setOption("child.tcpNoDelay", useTcpNoDelay());
-		bootstrap.setOption("child.keepAlive", serverSettings.isKeepAlive());
-		bootstrap.setOption("reuseAddress", shouldReuseAddress());
-		bootstrap.setOption("child.soLinger", getSoLinger());
-		bootstrap.setOption("connectTimeoutMillis", getConnectTimeoutMillis());
-		bootstrap.setOption("receiveBufferSize", getReceiveBufferSize());
-	}
+                )
 
-	/**
-	 * Used in main() to install a default JVM shutdown hook and shut down the
-	 * server cleanly. Calls shutdown() when JVM termination detected. To
-	 * utilize your own shutdown hook(s), install your own shutdown hook(s) and
-	 * call shutdown() instead of awaitShutdown().
-	 */
-	public void awaitShutdown()
-	{
-		Runtime.getRuntime().addShutdownHook(new DefaultShutdownHook(this));
-		boolean interrupted = false;
+        {
+            System.out.println(getName() + " server listening on port " + port);
+        }
 
-		do
-		{
-			try
-			{
-				Thread.sleep(300);
-			}
-			catch (InterruptedException e)
-			{
-				interrupted = true;
-			}
-		}
-		while (!interrupted);
-	}
+        Channel channel = bootstrap.bind(new InetSocketAddress(port));
+        allChannels.add(channel);
 
-	/**
-	 * Releases all resources associated with this server so the JVM can
-	 * shutdown cleanly. Call this method to finish using the server. To utilize
-	 * the default shutdown hook in main() provided by RestExpress, call
-	 * awaitShutdown() instead.
-	 */
-	public void shutdown()
-	{
-		ChannelGroupFuture future = allChannels.close();
-		future.awaitUninterruptibly();
-		shutdownPlugins();
-		bootstrap.getFactory().releaseExternalResources();
-	}
+        bindPlugins();
 
-	/**
-	 * @return
-	 */
-	private RouteResolver createRouteResolver()
-	{
-		return new RouteResolver(routeDeclarations.createRouteMapping(routeDefaults));
-	}
+        return channel;
+    }
 
-	/**
-	 * Retrieve metadata about the routes in this RestExpress server.
-	 * 
-	 * @return ServerMetadata instance.
-	 */
-	public ServerMetadata getRouteMetadata()
-	{
-		ServerMetadata m = new ServerMetadata();
-		m.setName(getName());
-		m.setPort(getPort());
-		//TODO: create a good substitute for this...
+    private static NioEventLoopGroup getEventExecutorsWithThreadCountOf(int nThreads) {
+        if (nThreads > 0) {
+            return new NioEventLoopGroup(nThreads);
+        } else {
+            return new NioEventLoopGroup();
+        }
+    }
+
+    private void setBootstrapOptions() {
+        bootstrap.setOption("child.tcpNoDelay", useTcpNoDelay());
+        bootstrap.setOption("child.keepAlive", serverSettings.isKeepAlive());
+        bootstrap.setOption("reuseAddress", shouldReuseAddress());
+        bootstrap.setOption("child.soLinger", getSoLinger());
+        bootstrap.setOption("connectTimeoutMillis", getConnectTimeoutMillis());
+        bootstrap.setOption("receiveBufferSize", getReceiveBufferSize());
+    }
+
+    /**
+     * Used in main() to install a default JVM shutdown hook and shut down the
+     * server cleanly. Calls shutdown() when JVM termination detected. To
+     * utilize your own shutdown hook(s), install your own shutdown hook(s) and
+     * call shutdown() instead of awaitShutdown().
+     */
+    public void awaitShutdown() {
+        Runtime.getRuntime().addShutdownHook(new DefaultShutdownHook(this));
+        boolean interrupted = false;
+
+        do {
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
+        }
+        while (!interrupted);
+    }
+
+    /**
+     * Releases all resources associated with this server so the JVM can
+     * shutdown cleanly. Call this method to finish using the server. To utilize
+     * the default shutdown hook in main() provided by RestExpress, call
+     * awaitShutdown() instead.
+     */
+    public void shutdown() {
+        ChannelGroupFuture future = allChannels.close();
+        future.awaitUninterruptibly();
+        shutdownPlugins();
+        bootstrap.getFactory().releaseExternalResources();
+    }
+
+    /**
+     * @return
+     */
+    private RouteResolver createRouteResolver() {
+        return new RouteResolver(routeDeclarations.createRouteMapping(routeDefaults));
+    }
+
+    /**
+     * Retrieve metadata about the routes in this RestExpress server.
+     *
+     * @return ServerMetadata instance.
+     */
+    public ServerMetadata getRouteMetadata() {
+        ServerMetadata m = new ServerMetadata();
+        m.setName(getName());
+        m.setPort(getPort());
+        //TODO: create a good substitute for this...
 //		m.setDefaultFormat(getDefaultFormat());
 //		m.addAllSupportedFormats(getResponseProcessors().keySet());
-		m.addAllRoutes(routeDeclarations.getMetadata());
-		return m;
-	}
+        m.addAllRoutes(routeDeclarations.getMetadata());
+        return m;
+    }
 
-	/**
-	 * Retrieve the named routes in this RestExpress server, creating a Map
-	 * of them by name, with the value portion being populated with the URL
-	 * pattern. Any '.{format}' portion of the URL pattern is omitted.
-	 * <p/>
-	 * If the Base URL is set, it is included in the URL pattern.
-	 * <p/>
-	 * Only named routes are included in the output.
-	 * 
-	 * @return a Map of Route Name/URL pairs.
-	 */
-	public Map<String, String> getRouteUrlsByName()
-	{
-		final Map<String, String> urlsByName = new HashMap<String, String>();
+    /**
+     * Retrieve the named routes in this RestExpress server, creating a Map
+     * of them by name, with the value portion being populated with the URL
+     * pattern. Any '.{format}' portion of the URL pattern is omitted.
+     * <p/>
+     * If the Base URL is set, it is included in the URL pattern.
+     * <p/>
+     * Only named routes are included in the output.
+     *
+     * @return a Map of Route Name/URL pairs.
+     */
+    public Map<String, String> getRouteUrlsByName() {
+        final Map<String, String> urlsByName = new HashMap<String, String>();
 
-		iterateRouteBuilders(new Callback<RouteBuilder>()
-		{
-			@Override
-			public void process(RouteBuilder routeBuilder)
-			{
-				RouteMetadata route = routeBuilder.asMetadata();
+        iterateRouteBuilders(new Callback<RouteBuilder>() {
+            @Override
+            public void process(RouteBuilder routeBuilder) {
+                RouteMetadata route = routeBuilder.asMetadata();
 
-				if (route.getName() != null)
-				{
-					urlsByName.put(route.getName(), getBaseUrl()
-						+ route.getUri().getPattern().replace(".{format}", ""));
-				}
-			}
-		});
+                if (route.getName() != null) {
+                    urlsByName.put(route.getName(), getBaseUrl()
+                            + route.getUri().getPattern().replace(".{format}", ""));
+                }
+            }
+        });
 
-		return urlsByName;
-	}
+        return urlsByName;
+    }
 
-	public RestExpress registerPlugin(Plugin plugin)
-	{
-		if (!plugins.contains(plugin))
-		{
-			plugins.add(plugin);
-			plugin.register(this);
-		}
+    public RestExpress registerPlugin(Plugin plugin) {
+        if (!plugins.contains(plugin)) {
+            plugins.add(plugin);
+            plugin.register(this);
+        }
 
-		return this;
-	}
+        return this;
+    }
 
-	private void bindPlugins()
-	{
-		for (Plugin plugin : plugins)
-		{
-			plugin.bind(this);
-		}
-	}
+    private void bindPlugins() {
+        for (Plugin plugin : plugins) {
+            plugin.bind(this);
+        }
+    }
 
-	private void shutdownPlugins()
-	{
-		for (Plugin plugin : plugins)
-		{
-			plugin.shutdown(this);
-		}
-	}
+    private void shutdownPlugins() {
+        for (Plugin plugin : plugins) {
+            plugin.shutdown(this);
+        }
+    }
 
-	/**
-	 * @param requestHandler
-	 */
-	private void addPreprocessors(DefaultRequestHandler requestHandler)
-	{
-		for (Preprocessor processor : getPreprocessors())
-		{
-			requestHandler.addPreprocessor(processor);
-		}
-	}
+    /**
+     * @param requestHandler
+     */
+    private void addPreprocessors(DefaultRequestHandler requestHandler) {
+        for (Preprocessor processor : getPreprocessors()) {
+            requestHandler.addPreprocessor(processor);
+        }
+    }
 
-	/**
-	 * @param requestHandler
-	 */
-	private void addPostprocessors(DefaultRequestHandler requestHandler)
-	{
-		for (Postprocessor processor : getPostprocessors())
-		{
-			requestHandler.addPostprocessor(processor);
-		}
-	}
+    /**
+     * @param requestHandler
+     */
+    private void addPostprocessors(DefaultRequestHandler requestHandler) {
+        for (Postprocessor processor : getPostprocessors()) {
+            requestHandler.addPostprocessor(processor);
+        }
+    }
 
-	/**
-	 * @param requestHandler
-	 */
-	private void addFinallyProcessors(DefaultRequestHandler requestHandler)
-	{
-		for (Postprocessor processor : getFinallyProcessors())
-		{
-			requestHandler.addFinallyProcessor(processor);
-		}
-	}
+    /**
+     * @param requestHandler
+     */
+    private void addFinallyProcessors(DefaultRequestHandler requestHandler) {
+        for (Postprocessor processor : getFinallyProcessors()) {
+            requestHandler.addFinallyProcessor(processor);
+        }
+    }
 
 
-	// SECTION: ROUTE CREATION
+    // SECTION: ROUTE CREATION
 
-	public ParameterizedRouteBuilder uri(String uriPattern, Object controller)
-	{
-		return routeDeclarations.uri(uriPattern, controller, routeDefaults);
-	}
+    public ParameterizedRouteBuilder uri(String uriPattern, Object controller) {
+        return routeDeclarations.uri(uriPattern, controller, routeDefaults);
+    }
 
-	public RegexRouteBuilder regex(String uriPattern, Object controller)
-	{
-		return routeDeclarations.regex(uriPattern, controller, routeDefaults);
-	}
+    public RegexRouteBuilder regex(String uriPattern, Object controller) {
+        return routeDeclarations.regex(uriPattern, controller, routeDefaults);
+    }
 }
