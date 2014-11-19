@@ -49,7 +49,6 @@ import org.restexpress.serialization.SerializationProvider;
 import org.restexpress.settings.RouteDefaults;
 import org.restexpress.settings.ServerSettings;
 import org.restexpress.settings.SocketSettings;
-import org.restexpress.util.Bootstraps;
 import org.restexpress.util.Callback;
 import org.restexpress.util.DefaultShutdownHook;
 
