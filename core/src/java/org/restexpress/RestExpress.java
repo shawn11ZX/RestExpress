@@ -515,7 +515,7 @@ public class RestExpress {
             System.out.println(getName() + " server listening on port " + port);
         }
 
-        Channel channel = bootstrap.bind(new InetSocketAddress(port));
+        Channel channel = bootstrap.bind(new InetSocketAddress(port)).channel();
         allChannels.add(channel);
 
         bindPlugins();
