@@ -122,7 +122,7 @@ public class QueryStringParserTest
 			buf.append('&');
 		}
 		Assert.assertEquals(1024, new QueryStringDecoder(buf.toString())
-		    .getParameters().size());
+		    .parameters().size());
 	}
 
 	@Test
