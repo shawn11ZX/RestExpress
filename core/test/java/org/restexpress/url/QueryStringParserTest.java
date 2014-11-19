@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.restexpress.url.QueryStringParser;
