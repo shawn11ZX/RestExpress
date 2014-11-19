@@ -18,6 +18,7 @@ package org.restexpress.preprocessor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -36,7 +37,7 @@ import org.restexpress.preprocessor.HttpBasicAuthenticationPreprocessor;
 public class HttpBasicAuthenticationPreprocessorTest
 {
 	private Preprocessor p = new HttpBasicAuthenticationPreprocessor("Test Realm");
-	Request r = new Request(new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"), null);
+	Request r = new Request(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/"), null);
 
 	@Test(expected=UnauthorizedException.class)
 	public void shouldThrowUnauthorizedExceptionOnNullHeader()
