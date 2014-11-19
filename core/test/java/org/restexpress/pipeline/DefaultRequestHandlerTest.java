@@ -26,6 +26,8 @@ import java.util.Map;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
 import org.jboss.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.UpstreamMessageEvent;
@@ -460,8 +462,7 @@ public class DefaultRequestHandlerTest
     {
 		try
 		{
-			HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path);
-			request.setContent(Unpooled.copiedBuffer(body, Charset.defaultCharset()));
+			FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path, Unpooled.copiedBuffer(body, Charset.defaultCharset()));
 	
 		    pl.sendUpstream(new UpstreamMessageEvent(
 		    	channel,

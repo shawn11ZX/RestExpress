@@ -23,6 +23,8 @@ import java.nio.charset.Charset;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
 import org.jboss.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.UpstreamMessageEvent;
@@ -475,12 +477,7 @@ public class JsendWrappedResponseTest
 
 	private void sendEvent(HttpMethod method, String path, String body)
     {
-		HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, path);
-		
-		if (body != null)
-		{
-			request.setContent(Unpooled.copiedBuffer(body, Charset.defaultCharset()));
-		}
+		FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, path, Unpooled.copiedBuffer(body, Charset.defaultCharset()));
 
 	    pl.sendUpstream(new UpstreamMessageEvent(
 	    	channel,
