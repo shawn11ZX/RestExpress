@@ -23,9 +23,9 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
-import org.jboss.netty.buffer.ChannelBuffers;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
@@ -234,9 +234,9 @@ public class RequestTest
 		String formValue1 = "http://login.berlin.ecollege-labs.com/google-service/google/sso/callback/google.JSON?successUrl=http%3A%2F%2Fdashboard.berlin.ecollege-labs.com%2Ftransfer.html&failureUrl=http%3A%2F%2Flogin.berlin.ecollege-labs.com&domain=GOOGLE_NON_MARKET_PLACE_DOMAIN";
 		String formValue2 = "https://www.google.com/accounts/o8/id?id=AItOawkHDpeMEfe_xM14z_ge7UATYOSg_QlPeDg";
 		String formValue3 = "https://www.google.com/accounts/o8/id?id=AItOawkHDpeMEfe_xM14z_ge7UATYOSg_QlPeDg";
-		httpRequest.setContent(ChannelBuffers.wrappedBuffer(("openid.return_to=" + URLEncoder.encode(formValue1, ContentType.ENCODING)
-			+ "&openid.identity=" + URLEncoder.encode(formValue2, ContentType.ENCODING)
-			+ "&openid.claimed_id=" + URLEncoder.encode(formValue3, ContentType.ENCODING)).getBytes()));
+		httpRequest.setContent(Unpooled.wrappedBuffer(("openid.return_to=" + URLEncoder.encode(formValue1, ContentType.ENCODING)
+				+ "&openid.identity=" + URLEncoder.encode(formValue2, ContentType.ENCODING)
+				+ "&openid.claimed_id=" + URLEncoder.encode(formValue3, ContentType.ENCODING)).getBytes()));
 		Request formPost = new Request(httpRequest, null);
 		Map<String, List<String>> form = formPost.getBodyFromUrlFormEncoded();
 		assertEquals(3, form.size());

@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelPipeline;
@@ -461,7 +461,7 @@ public class DefaultRequestHandlerTest
 		try
 		{
 			HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path);
-			request.setContent(ChannelBuffers.copiedBuffer(body, Charset.defaultCharset()));
+			request.setContent(Unpooled.copiedBuffer(body, Charset.defaultCharset()));
 	
 		    pl.sendUpstream(new UpstreamMessageEvent(
 		    	channel,

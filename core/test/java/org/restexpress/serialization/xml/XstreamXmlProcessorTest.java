@@ -23,8 +23,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.junit.Before;
 import org.junit.Test;
 import org.restexpress.ContentType;
@@ -107,7 +107,7 @@ public class XstreamXmlProcessorTest
 	@Test
 	public void shouldDeserializeChannelBuffer()
 	{
-		ChannelBuffer buf = ChannelBuffers.copiedBuffer(XML, ContentType.CHARSET);
+		ByteBuf buf = Unpooled.copiedBuffer(XML, ContentType.CHARSET);
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNotNull(o);
 	}
@@ -115,7 +115,7 @@ public class XstreamXmlProcessorTest
 	@Test
 	public void shouldDeserializeEmptyChannelBuffer()
 	{
-		ChannelBuffer buf = ChannelBuffers.EMPTY_BUFFER;
+		ByteBuf buf = Unpooled.EMPTY_BUFFER;
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNull(o);
 	}

@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 
-import org.jboss.netty.buffer.ChannelBuffers;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelPipeline;
@@ -479,7 +479,7 @@ public class JsendWrappedResponseTest
 		
 		if (body != null)
 		{
-			request.setContent(ChannelBuffers.copiedBuffer(body, Charset.defaultCharset()));
+			request.setContent(Unpooled.copiedBuffer(body, Charset.defaultCharset()));
 		}
 
 	    pl.sendUpstream(new UpstreamMessageEvent(
