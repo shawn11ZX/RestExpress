@@ -32,9 +32,9 @@ public class DefaultHttpResponseWriter
         //The DefaultHttpResponseWriter will include the provided response body (if provided),
         // else the default empty body (from the DefaultFullHttpResponse class) will be included.
         FullHttpResponse httpResponse = response.hasBody() && HttpSpecification.isContentAllowed(response) ? new
-                DefaultFullHttpResponse(request.getHttpVersion(), response.getResponseStatus(),
+                DefaultFullHttpResponse(request.getHttpVersion(), getHttpResponseStatusFrom(request, response),
                 getResponseBodyByteBuf(response)) : new DefaultFullHttpResponse(request.getHttpVersion(),
-                response.getResponseStatus());
+                getHttpResponseStatusFrom(request, response));
         addHeaders(response, httpResponse);
 
         if (request.isKeepAlive()) {
@@ -59,15 +59,11 @@ public class DefaultHttpResponseWriter
 
     private ByteBuf getResponseBodyByteBuf(Response response) {
         // If the response body contains a ByteBuf, the DefaultHttpResponseWriter will use it, else it is assumed that the body is a string.
-        return ByteBuf.class.isAssignableFrom(response.getBody().getClass())?Unpooled.wrappedBuffer((ByteBuf) response.getBody()):Unpooled.wrappedBuffer(response.getBody().toString().getBytes(ContentType.CHARSET));
+        return ByteBuf.class.isAssignableFrom(response.getBody().getClass()) ? Unpooled.wrappedBuffer((ByteBuf) response.getBody()) : Unpooled.wrappedBuffer(response.getBody().toString().getBytes(ContentType.CHARSET));
     }
 
-    private HttpResponse createHttpResponse(Request request, Response response) {
-        if (request.getHeader(Parameters.Query.IGNORE_HTTP_STATUS) == null) {
-            return new DefaultHttpResponse(request.getHttpVersion(), response.getResponseStatus());
-        }
-
-        return new DefaultHttpResponse(request.getHttpVersion(), HttpResponseStatus.OK);
+    private HttpResponseStatus getHttpResponseStatusFrom(Request request, Response response) {
+        return request.getHeader(Parameters.Query.IGNORE_HTTP_STATUS) == null ? response.getResponseStatus() : HttpResponseStatus.OK;
     }
 
     /**
