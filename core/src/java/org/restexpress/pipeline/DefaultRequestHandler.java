@@ -136,6 +136,12 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
 		}
 	}
 
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception{
+        ctx.flush();
+        super.channelReadComplete(ctx);
+    }
+
 	private void processRequest(ChannelHandlerContext ctx, MessageContext context)
 	throws Throwable
 	{
