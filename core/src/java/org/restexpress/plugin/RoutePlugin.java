@@ -78,7 +78,7 @@ extends AbstractPlugin
 		return Collections.unmodifiableMap(parameters);
 	}
 
-	void applyFlags(RouteBuilder routeBuilder)
+	protected void applyFlags(RouteBuilder routeBuilder)
 	{
 		for (String flag : flags)
 		{
@@ -86,7 +86,7 @@ extends AbstractPlugin
 		}
 	}
 
-	void applyParameters(RouteBuilder routeBuilder)
+	protected void applyParameters(RouteBuilder routeBuilder)
 	{
 		for (Entry<String, Object> entry : parameters.entrySet())
 		{

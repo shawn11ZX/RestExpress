@@ -17,13 +17,17 @@
 
 package org.restexpress.serialization.xml;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
+import org.restexpress.ContentType;
 import org.restexpress.Format;
+import org.restexpress.common.util.StringUtils;
 import org.restexpress.domain.JsendResultWrapper;
 
 import com.thoughtworks.xstream.XStream;
@@ -39,6 +43,8 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
 public class XstreamXmlProcessor
 extends XmlSerializationProcessor
 {
+	private static final byte[] EMPTY_STRING_BYTES = StringUtils.EMPTY_STRING.getBytes(ContentType.CHARSET);
+
 	private XStream xstream;
 	private Map<Class<?>, String> aliases = new HashMap<Class<?>, String>();
 	private boolean shouldAutoAlias = true;
@@ -86,11 +92,16 @@ extends XmlSerializationProcessor
 	// SECTION: SERIALIZATION PROCESSOR
 
 	@Override
-	public String serialize(Object object)
+	public ByteBuffer serialize(Object object)
 	{
-		if (object == null) return "";
+		if (object == null)
+		{
+			return ByteBuffer.wrap(EMPTY_STRING_BYTES);
+		}
 
-		return xstream.toXML(object);
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		xstream.toXML(object, b);
+		return ByteBuffer.wrap(b.toByteArray());
 	}
 
 	@Override

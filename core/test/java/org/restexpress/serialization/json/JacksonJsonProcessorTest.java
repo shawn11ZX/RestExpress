@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.ByteBuffer;
 import java.util.Calendar;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -29,7 +30,6 @@ import org.junit.Test;
 import org.restexpress.ContentType;
 import org.restexpress.serialization.KnownObject;
 import org.restexpress.serialization.SerializationProcessor;
-import org.restexpress.serialization.json.JacksonJsonProcessor;
 
 /**
  * @author toddf
@@ -45,7 +45,8 @@ public class JacksonJsonProcessorTest
 	@Test
 	public void shouldSerializeObject()
 	{
-		String json = processor.serialize(new KnownObject());
+		ByteBuffer jsonBuf = processor.serialize(new KnownObject());
+		String json = new String(jsonBuf.array(), ContentType.CHARSET);
 //		System.out.println(json);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
@@ -60,8 +61,8 @@ public class JacksonJsonProcessorTest
 	@Test
 	public void shouldSerializeNull()
 	{
-		String json = processor.serialize(null);
-		assertEquals("", json);
+		ByteBuffer jsonBuf = processor.serialize(null);
+		assertEquals("", new String(jsonBuf.array(), ContentType.CHARSET));
 	}
 
 	@Test
@@ -138,7 +139,8 @@ public class JacksonJsonProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.sa = new String[] {"this", "is", "an", "evil", "Json", "<script>alert(\'xss')</script>"};
-		String json = processor.serialize(ko);
+		ByteBuffer jsonBuf = processor.serialize(ko);
+		String json = new String(jsonBuf.array(), ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
@@ -155,7 +157,8 @@ public class JacksonJsonProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.string = "<script>alert('xss')</script>";
-		String json = processor.serialize(ko);
+		ByteBuffer jsonBuf = processor.serialize(ko);
+		String json = new String(jsonBuf.array(), ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
