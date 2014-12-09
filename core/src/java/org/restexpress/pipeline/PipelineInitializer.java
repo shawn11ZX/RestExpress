@@ -95,11 +95,11 @@ public class PipelineInitializer
         }
 
         pipeline.addLast("decoder", new HttpRequestDecoder());
-        pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
         pipeline.addLast("encoder", new HttpResponseEncoder());
         pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
         pipeline.addLast("inflater", new HttpContentDecompressor());
         pipeline.addLast("deflater", new HttpContentCompressor());
+        pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
 
         for (ChannelHandler handler : requestHandlers) {
             pipeline.addLast(handler.getClass().getSimpleName(), handler);
