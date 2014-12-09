@@ -5,9 +5,25 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.InflaterInputStream;
+import java.util.zip.InflaterOutputStream;
 
+import io.netty.buffer.ByteBuf;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -16,6 +32,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -62,11 +79,12 @@ public class RestExpressServerTest
 	private static final String LITTLE_OS_URL = SERVER_HOST + LITTLE_OS_PATH;
 	private static final String PATTERN_EXCEPTION_STRING = "/strings/exception";
 	private static final String PATTERN_EXCEPTION_LITTLE_O = "/objects/exception";
+    private static final String ECHO_PATTERN = "/echo";
 //	private static final String URL_EXCEPTION_STRING = SERVER_HOST + PATTERN_EXCEPTION_STRING;
 	private static final String URL_EXCEPTION_LITTLE_O = SERVER_HOST + PATTERN_EXCEPTION_LITTLE_O;
-
-	private RestExpress server;
+    private static final String URL_ECHO = SERVER_HOST + ECHO_PATTERN;
 	AbstractSerializationProvider serializer;
+	private RestExpress server;
 	private HttpClient http = new DefaultHttpClient();
 
 	@Before
@@ -79,6 +97,7 @@ public class RestExpressServerTest
 		RestExpress.setSerializationProvider(serializer);
 		StringTestController stringTestController = new StringTestController();
 		ObjectTestController objectTestController = new ObjectTestController();
+        EchoTestController echoTestController = new EchoTestController();
 
 		server.uri(URL_PATTERN1, stringTestController);
 		server.uri(URL_PATTERN2, stringTestController);
@@ -95,6 +114,8 @@ public class RestExpressServerTest
 			.action("readAll", HttpMethod.GET);
 		server.uri(PATTERN_EXCEPTION_LITTLE_O, objectTestController)
 			.action("throwException", HttpMethod.GET);
+        server.uri(ECHO_PATTERN, echoTestController)
+                .action("update", HttpMethod.PUT);
 		server.addMessageObserver(new SimpleConsoleLogMessageObserver());
 		
 		server.alias("littleObject", LittleO.class);
@@ -834,6 +855,114 @@ public class RestExpressServerTest
 		request.releaseConnection();
 	}
 
+    @Test
+    public void shouldBeAbleToEncodeGZip()
+            throws Exception
+    {
+        server.bind(SERVER_PORT);
+        HttpGet request = new HttpGet(URL1_PLAIN);
+        request.addHeader(HttpHeaders.Names.ACCEPT_ENCODING,"gzip");
+        HttpResponse response = (HttpResponse) http.execute(request);
+        assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
+
+        BufferedReader contentBuffer = new BufferedReader(new InputStreamReader(new GZIPInputStream(response.getEntity().getContent())));
+
+        String lineIn;
+        String decodedMessageString = "";
+        while ((lineIn = contentBuffer.readLine()) != null) {
+            decodedMessageString += lineIn;
+        }
+
+        HttpEntity entity = response.getEntity();
+        assertEquals("\"read\"", decodedMessageString);
+        assertEquals(ContentType.JSON, entity.getContentType().getValue());
+        assertEquals("gzip", entity.getContentEncoding().getValue());
+        request.releaseConnection();
+    }
+
+    @Test
+    public void shouldBeAbleToEncodeDeflate()
+            throws Exception
+    {
+        server.bind(SERVER_PORT);
+        HttpGet request = new HttpGet(URL1_PLAIN);
+        request.addHeader(HttpHeaders.Names.ACCEPT_ENCODING,"deflate");
+        HttpResponse response = (HttpResponse) http.execute(request);
+        assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
+
+        BufferedReader contentBuffer = new BufferedReader(new InputStreamReader(new InflaterInputStream(response.getEntity().getContent())));
+
+        String lineIn;
+        String decodedMessageString = "";
+        while ((lineIn = contentBuffer.readLine()) != null) {
+            decodedMessageString += lineIn;
+        }
+
+        HttpEntity entity = response.getEntity();
+        assertEquals("\"read\"", decodedMessageString);
+        assertEquals(ContentType.JSON, entity.getContentType().getValue());
+        assertEquals("deflate", entity.getContentEncoding().getValue());
+        request.releaseConnection();
+    }
+
+    @Test
+     public void shouldBeAbleToDecodeGZip()
+        throws Exception
+{
+    server.bind(SERVER_PORT);
+
+    HttpPut request = new HttpPut(URL_ECHO);
+    request.addHeader(HttpHeaders.Names.CONTENT_ENCODING, "gzip");
+
+
+    BasicHttpEntity requestEntity = new BasicHttpEntity();
+
+    ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+    GZIPOutputStream gzipOutput = new GZIPOutputStream(byteArrayOut);
+    gzipOutput.write("STRING".getBytes("UTF-8"));
+    gzipOutput.close();
+
+    requestEntity.setContent(new ByteArrayInputStream(byteArrayOut.toByteArray()));
+
+    request.setEntity(requestEntity);
+    HttpResponse response = (HttpResponse) http.execute(request);
+    assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
+    HttpEntity responseEntity = response.getEntity();
+    assertTrue(responseEntity.getContentLength() > 0l);
+    assertEquals(ContentType.JSON, responseEntity.getContentType().getValue());
+    assertEquals("\"STRING\"", EntityUtils.toString(responseEntity));
+    request.releaseConnection();
+}
+
+    @Test
+    public void shouldBeAbleToDecodeDeflate()
+            throws Exception
+    {
+        server.bind(SERVER_PORT);
+
+        HttpPut request = new HttpPut(URL_ECHO);
+        request.addHeader(HttpHeaders.Names.CONTENT_ENCODING, "deflate");
+
+
+        BasicHttpEntity requestEntity = new BasicHttpEntity();
+
+        ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+        DeflaterOutputStream inflaterOutput = new DeflaterOutputStream(byteArrayOut);
+        inflaterOutput.write("STRING".getBytes("UTF-8"));
+        inflaterOutput.close();
+
+        requestEntity.setContent(new ByteArrayInputStream(byteArrayOut.toByteArray()));
+
+        request.setEntity(requestEntity);
+        HttpResponse response = (HttpResponse) http.execute(request);
+        assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
+        HttpEntity responseEntity = response.getEntity();
+        assertTrue(responseEntity.getContentLength() > 0l);
+        assertEquals(ContentType.JSON, responseEntity.getContentType().getValue());
+        assertEquals("\"STRING\"", EntityUtils.toString(responseEntity));
+        request.releaseConnection();
+    }
+
 	private String extractJson(String string)
     {
 		final String search = "\"data\":";
@@ -896,44 +1025,77 @@ public class RestExpressServerTest
 			throw new NullPointerException(this.getClass().getSimpleName());
 		}
 	}
-	
-	@SuppressWarnings("unused")
-    private class ObjectTestController
-	{
-		public LittleO read(Request request, Response Response)
-		{
-			return newLittleO(3);
-		}
 
-		public void throwException(Request request, Response response)
-		throws Exception
-		{
-			throw new NullPointerException(this.getClass().getSimpleName());
-		}
-		
-		public List<LittleO> readAll(Request request, Response response)
-		{
-			QueryRange range = new QueryRange(0, 3);
-			response.addRangeHeader(range, 3);
-			List<LittleO> l = new ArrayList<LittleO>();
-			l.add(newLittleO(1));
-			l.add(newLittleO(2));
-			l.add(newLittleO(3));
-			return l;
-		}
-		
-		private LittleO newLittleO(int count)
-		{
-			LittleO l = new LittleO();
-			List<LittleO> list = new ArrayList<LittleO>(count);
-			
-			for (int i = 0; i < count; i++)
-			{
-				list.add(new LittleO());
-			}
+    @SuppressWarnings("unused")
+    private class ObjectTestController {
+        public LittleO read(Request request, Response Response) {
+            return newLittleO(3);
+        }
 
-			l.setChildren(list);
-			return l;
-		}
-	}
+        public void throwException(Request request, Response response)
+                throws Exception {
+            throw new NullPointerException(this.getClass().getSimpleName());
+        }
+
+        public List<LittleO> readAll(Request request, Response response) {
+            QueryRange range = new QueryRange(0, 3);
+            response.addRangeHeader(range, 3);
+            List<LittleO> l = new ArrayList<LittleO>();
+            l.add(newLittleO(1));
+            l.add(newLittleO(2));
+            l.add(newLittleO(3));
+            return l;
+        }
+
+        private LittleO newLittleO(int count) {
+            LittleO l = new LittleO();
+            List<LittleO> list = new ArrayList<LittleO>(count);
+
+            for (int i = 0; i < count; i++) {
+                list.add(new LittleO());
+            }
+
+            l.setChildren(list);
+            return l;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private class EchoTestController {
+        public String create(Request request, Response response) {
+            response.setResponseCreated();
+            byte[] b = new byte[request.getBody().capacity()];
+            request.getBody().readBytes(b);
+            return new String(b);
+        }
+
+        public String read(Request request, Response response) {
+            byte[] b = new byte[request.getBody().capacity()];
+            request.getBody().readBytes(b);
+            return new String(b);
+        }
+
+        public String update(Request request, Response response) {
+            byte[] b = new byte[request.getBody().capacity()];
+            request.getBody().readBytes(b);
+            return new String(b);
+        }
+
+        public String delete(Request request, Response response) {
+            byte[] b = new byte[request.getBody().capacity()];
+            request.getBody().readBytes(b);
+            return new String(b);
+        }
+
+        public String readAll(Request request, Response response) {
+            byte[] b = new byte[request.getBody().capacity()];
+            request.getBody().readBytes(b);
+            return new String(b);
+        }
+
+        public void throwException(Request request, Response response)
+                throws Exception {
+            throw new NullPointerException(this.getClass().getSimpleName());
+        }
+    }
 }
