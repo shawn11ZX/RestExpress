@@ -15,27 +15,13 @@
 */
 package org.restexpress.pipeline;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.jboss.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.UpstreamMessageEvent;
-import org.jboss.netty.channel.local.DefaultLocalServerChannelFactory;
-import io.netty.handler.codec.http.DefaultHttpRequest;
+import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,6 +41,14 @@ import org.restexpress.serialization.SerializationProvider;
 import org.restexpress.serialization.json.JacksonJsonProcessor;
 import org.restexpress.serialization.xml.XstreamXmlProcessor;
 import org.restexpress.settings.RouteDefaults;
+
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -89,11 +83,8 @@ public class DefaultRequestHandlerTest
 		responseBody = new StringBuffer();
 		responseHeaders = new HashMap<String, List<String>>();
 		messageHandler.setResponseWriter(new StringBufferHttpResponseWriter(responseHeaders, responseBody));
-		PipelineInitializer pf = new PipelineInitializer()
-			.addRequestHandler(messageHandler);
-	    pl = pf.getPipeline();
-	    ChannelFactory channelFactory = new DefaultLocalServerChannelFactory();
-	    channel = channelFactory.newChannel(pl);
+        channel = new EmbeddedChannel(messageHandler);
+        pl = channel.pipeline();
 	}
 
 	@Test
@@ -447,10 +438,7 @@ public class DefaultRequestHandlerTest
     {
 		try
 		{
-		    pl.sendUpstream(new UpstreamMessageEvent(
-		    	channel,
-		    	new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path),
-		    	new InetSocketAddress(1)));
+		    pl.fireChannelRead(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path));
 		}
 		catch(Throwable t)
 		{
@@ -462,12 +450,7 @@ public class DefaultRequestHandlerTest
     {
 		try
 		{
-			FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path, Unpooled.copiedBuffer(body, Charset.defaultCharset()));
-	
-		    pl.sendUpstream(new UpstreamMessageEvent(
-		    	channel,
-		    	request,
-		    	new InetSocketAddress(1)));
+		    pl.fireChannelRead(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path, Unpooled.copiedBuffer(body, Charset.defaultCharset())));
 		}
 		catch(Throwable t)
 		{
