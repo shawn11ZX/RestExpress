@@ -16,6 +16,7 @@
  */
 package org.restexpress.pipeline;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -424,11 +425,11 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
 			{
 				if (response.isSerialized())
 				{
-					String serialized = settings.serialize(response);
+					ByteBuffer serialized = settings.serialize(response);
 
 					if (serialized != null)
 					{
-						response.setBody(serialized);
+						response.setBody(ChannelBuffers.wrappedBuffer(serialized));
 
 						if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
 						{

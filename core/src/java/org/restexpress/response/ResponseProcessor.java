@@ -15,6 +15,7 @@
 */
 package org.restexpress.response;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.restexpress.Request;
@@ -58,7 +59,7 @@ public class ResponseProcessor
 		return serializer.deserialize(request.getBody(), type);
 	}
 
-	public String serialize(Response response)
+	public ByteBuffer serialize(Response response)
 	{
 		Object wrapped = wrapper.wrap(response);
 		

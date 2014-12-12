@@ -26,7 +26,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.10.4</version>
+			<version>0.10.5</version>
 		</dependency>
 ```
 Development:
@@ -34,7 +34,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.10.5-SNAPSHOT</version>
+			<version>0.10.6-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -80,7 +80,10 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.10.5-SNAPSHOT - in 'master' branch
+Release 0.10.6-SNAPSHOT - in 'master' branch
+------------------------
+
+Release 0.10.5 - 2 Dec 2014
 -----------------------
 * Changed FilterComponent.setValue(String) signature to setValue(Object).
 * Added suite of operators (:<:, :<=:, :>:, :>=:, :=:, :!=:, :*: [as starts-with]) to filter operations.

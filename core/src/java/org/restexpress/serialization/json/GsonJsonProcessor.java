@@ -18,6 +18,7 @@
 package org.restexpress.serialization.json;
 
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
 import java.util.Date;
 
 import io.netty.buffer.ByteBuf;
@@ -45,6 +46,8 @@ import com.strategicgains.util.date.DateAdapterConstants;
 public class GsonJsonProcessor
 extends JsonSerializationProcessor
 {
+	private static final byte[] EMPTY_STRING_BYTES = StringUtils.EMPTY_STRING.getBytes(ContentType.CHARSET);
+
 	private Gson gson;
 
 	public GsonJsonProcessor()
@@ -91,10 +94,17 @@ extends JsonSerializationProcessor
 	}
 
 	@Override
-	public String serialize(Object object)
+	public ByteBuffer serialize(Object object)
 	{
-		if (object == null) return StringUtils.EMPTY_STRING;
+		if (object == null)
+		{
+			return ByteBuffer.wrap(EMPTY_STRING_BYTES);
+		}
 
-		return gson.toJson(object);
+		// TODO: Determine why this doesn't work...
+//		ByteArrayOutputStream b = new ByteArrayOutputStream();
+//		gson.toJson(object, new BufferedWriter(new OutputStreamWriter(b, ContentType.CHARSET)));
+//		return ByteBuffer.wrap(b.toByteArray());
+		return ByteBuffer.wrap(gson.toJson(object).getBytes(ContentType.CHARSET));
 	}
 }

@@ -17,6 +17,7 @@
 
 package org.restexpress.serialization;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.restexpress.contenttype.MediaRange;
@@ -28,7 +29,7 @@ import org.restexpress.contenttype.MediaRange;
  */
 public interface Serializer
 {
-	public String serialize(Object object);
+	public ByteBuffer serialize(Object object);
 	public List<MediaRange> getSupportedMediaRanges();
 	public List<String> getSupportedFormats();
 }

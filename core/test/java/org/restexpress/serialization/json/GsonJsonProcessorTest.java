@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.ByteBuffer;
 import java.util.Calendar;
 
 import io.netty.buffer.ByteBuf;
@@ -29,7 +30,6 @@ import org.junit.Test;
 import org.restexpress.ContentType;
 import org.restexpress.serialization.KnownObject;
 import org.restexpress.serialization.SerializationProcessor;
-import org.restexpress.serialization.json.GsonJsonProcessor;
 
 /**
  * @author toddf
@@ -38,14 +38,15 @@ import org.restexpress.serialization.json.GsonJsonProcessor;
 public class GsonJsonProcessorTest
 {
 	private static final String JSON = "{\"integer\":2,\"string\":\"another string value\",\"date\":\"1963-12-06T12:30:00.000Z\",\"p\":\"good stuff\"}";
-	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"????????????\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
+	private static final String JSON_UTF8 = "{\"integer\":2,\"string\":\"我能吞下\",\"date\":\"1963-12-06T12:30:00.000Z\"}";
 
 	private SerializationProcessor processor = new GsonJsonProcessor();
 
 	@Test
 	public void shouldSerializeObject()
 	{
-		String json = processor.serialize(new KnownObject());
+		ByteBuffer jsonBuf = processor.serialize(new KnownObject());
+		String json = new String(jsonBuf.array(), ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
@@ -59,8 +60,8 @@ public class GsonJsonProcessorTest
 	@Test
 	public void shouldSerializeNull()
 	{
-		String json = processor.serialize(null);
-		assertEquals("", json);
+		ByteBuffer jsonBuf = processor.serialize(null);
+		assertEquals("", new String(jsonBuf.array(), ContentType.CHARSET));
 	}
 
 	@Test
@@ -124,7 +125,7 @@ public class GsonJsonProcessorTest
 		assertNotNull(o);
 		assertTrue(o.getClass().isAssignableFrom(KnownObject.class));
 		assertEquals(2, o.integer);
-		assertEquals("????????????", o.string);
+		assertEquals("我能吞下", o.string);
 		Calendar c = Calendar.getInstance();
 		c.setTime(o.date);
 		assertEquals(11, c.get(Calendar.MONTH));
@@ -137,7 +138,8 @@ public class GsonJsonProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.sa = new String[] {"this", "is", "an", "evil", "Json", "<script>alert(\'xss')</script>"};
-		String json = processor.serialize(ko);
+		ByteBuffer jsonBuf = processor.serialize(ko);
+		String json = new String(jsonBuf.array(), ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
@@ -154,7 +156,8 @@ public class GsonJsonProcessorTest
 	{
 		KnownObject ko = new KnownObject();
 		ko.string = "<script>alert('xss')</script>";
-		String json = processor.serialize(ko);
+		ByteBuffer jsonBuf = processor.serialize(ko);
+		String json = new String(jsonBuf.array(), ContentType.CHARSET);
 		assertNotNull(json);
 		assertTrue(json.startsWith("{"));
 		assertTrue(json.contains("\"integer\":1"));
