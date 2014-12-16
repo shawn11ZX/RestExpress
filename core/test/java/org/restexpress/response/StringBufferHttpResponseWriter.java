@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.netty.buffer.ChannelBuffer;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import org.restexpress.ContentType;
 import org.restexpress.Request;
@@ -65,9 +65,9 @@ implements HttpResponseWriter
 			return;
 		}
 
-		if (ChannelBuffer.class.isAssignableFrom(response.getBody().getClass()))
+		if (ByteBuf.class.isAssignableFrom(response.getBody().getClass()))
 		{
-			ChannelBuffer buf = (ChannelBuffer) response.getBody();
+            ByteBuf buf = (ByteBuf) response.getBody();
 			body.append(buf.toString(ContentType.CHARSET));
 			return;
 		}

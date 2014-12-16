@@ -94,11 +94,16 @@ public class PipelineInitializer
             pipeline.addLast("ssl", sslHandler);
         }
 
+        // Inbound handlers
         pipeline.addLast("decoder", new HttpRequestDecoder());
+        pipeline.addLast("inflater", new HttpContentDecompressor());
+
+        // Outbound handlers
         pipeline.addLast("encoder", new HttpResponseEncoder());
         pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
-        pipeline.addLast("inflater", new HttpContentDecompressor());
         pipeline.addLast("deflater", new HttpContentCompressor());
+
+        // Aggregator MUST be added last, otherwise results are not correct
         pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
 
         for (ChannelHandler handler : requestHandlers) {

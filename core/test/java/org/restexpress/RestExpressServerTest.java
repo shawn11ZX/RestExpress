@@ -117,7 +117,7 @@ public class RestExpressServerTest
         server.uri(ECHO_PATTERN, echoTestController)
                 .action("update", HttpMethod.PUT);
 		server.addMessageObserver(new SimpleConsoleLogMessageObserver());
-		
+
 		server.alias("littleObject", LittleO.class);
 //		server.alias("list", ArrayList.class);
 	}
@@ -136,7 +136,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -152,7 +152,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpPut request = new HttpPut(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -168,7 +168,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpPost request = new HttpPost(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.CREATED.code(), response.getStatusLine().getStatusCode());
@@ -184,7 +184,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpDelete request = new HttpDelete(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -200,7 +200,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL4_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -216,7 +216,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpDelete request = new HttpDelete(URL3_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED.code(), response.getStatusLine().getStatusCode());
@@ -235,7 +235,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpDelete request = new HttpDelete(URL3_PLAIN + "?" + Parameters.Query.IGNORE_HTTP_STATUS + "=true");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -254,7 +254,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpDelete request = new HttpDelete(SERVER_HOST + "/x/y/z.json");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.NOT_FOUND.code(), response.getStatusLine().getStatusCode());
@@ -270,7 +270,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_XML);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -286,7 +286,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -303,7 +303,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_XML);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -320,7 +320,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_JSON);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -352,7 +352,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_PLAIN + ".wjson");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -393,7 +393,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_PLAIN + ".wxml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -415,7 +415,7 @@ public class RestExpressServerTest
 	{
 		serializer.setDefaultFormat(Format.WRAPPED_XML);
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -438,7 +438,7 @@ public class RestExpressServerTest
 		server.uri("/unserialized", new StringTestController())
 			.noSerialization();
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(SERVER_HOST + "/unserialized");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -454,7 +454,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_PLAIN + ".xyz");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.getStatusLine().getStatusCode());
@@ -470,7 +470,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL1_PLAIN);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/nogood");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -487,7 +487,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".json");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -504,7 +504,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".json");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -524,7 +524,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_OS_URL);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "no-good/no-good");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -542,7 +542,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".wjson");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -563,7 +563,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".wjson");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -587,7 +587,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -604,7 +604,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -626,7 +626,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_O_URL + ".wxml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -646,7 +646,7 @@ public class RestExpressServerTest
 	throws Exception
 	{
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".wxml");
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.OK.code(), response.getStatusLine().getStatusCode());
@@ -672,7 +672,7 @@ public class RestExpressServerTest
 		serializer.add(jsonProc, new ErrorResponseWrapper());
 		RestExpress.setSerializationProvider(serializer);
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_OS_URL);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/hal+json");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -699,7 +699,7 @@ public class RestExpressServerTest
 		serializer.add(xmlProc, new ErrorResponseWrapper());
 		RestExpress.setSerializationProvider(serializer);
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_OS_URL);
 		request.addHeader(HttpHeaders.Names.ACCEPT, "application/hal+xml");
 		HttpResponse response = (HttpResponse) http.execute(request);
@@ -726,7 +726,7 @@ public class RestExpressServerTest
 		RestExpress.setSerializationProvider(serializer);
 		server.addPreprocessor(new ErrorPreprocessor());
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_OS_URL);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.getStatusLine().getStatusCode());
@@ -754,7 +754,7 @@ public class RestExpressServerTest
 		server.addPreprocessor(new ErrorPreprocessor());
 		server.mapException(RuntimeException.class, BadRequestException.class);
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(LITTLE_OS_URL);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.getStatusLine().getStatusCode());
@@ -780,7 +780,7 @@ public class RestExpressServerTest
 		serializer.add(jsonProc, new ErrorResponseWrapper(), true);
 		RestExpress.setSerializationProvider(serializer);
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL_EXCEPTION_LITTLE_O);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.getStatusLine().getStatusCode());
@@ -807,7 +807,7 @@ public class RestExpressServerTest
 		RestExpress.setSerializationProvider(serializer);
 		server.mapException(NullPointerException.class, BadRequestException.class);
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL_EXCEPTION_LITTLE_O);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.getStatusLine().getStatusCode());
@@ -831,7 +831,7 @@ public class RestExpressServerTest
     	TestPostprocessor postprocessor = new TestPostprocessor();
     	server.addFinallyProcessor(postprocessor);
 		server.bind(SERVER_PORT);
-		
+
 		HttpGet request = new HttpGet(URL_EXCEPTION_LITTLE_O);
 		HttpResponse response = (HttpResponse) http.execute(request);
 		assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.getStatusLine().getStatusCode());
@@ -1003,17 +1003,17 @@ public class RestExpressServerTest
 		{
 			return "read";
 		}
-		
+
 		public String update(Request request, Response response)
 		{
 			return "update";
 		}
-		
+
 		public String delete(Request request, Response response)
 		{
 			return "delete";
 		}
-		
+
 		public String readAll(Request request, Response response)
 		{
 			return "readAll";

@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -429,7 +430,7 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
 
 					if (serialized != null)
 					{
-						response.setBody(ChannelBuffers.wrappedBuffer(serialized));
+                        response.setBody(Unpooled.wrappedBuffer(serialized));
 
 						if (!response.hasHeader(HttpHeaders.Names.CONTENT_TYPE))
 						{
