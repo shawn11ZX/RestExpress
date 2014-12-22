@@ -221,7 +221,7 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
 
 			if (messageContext != null)
 			{
-				messageContext.setException(throwable.getCause());
+				messageContext.setException(throwable.getCause()!=null?throwable.getCause():throwable);
 				notifyException(messageContext);
 			}
 		}
