@@ -493,14 +493,10 @@ public class RestExpress {
         workerGroup = getEventExecutorsWithThreadCountOf(getExecutorThreadCount());
         bootstrap = new ServerBootstrap().group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
 
-        ChannelHandler requestHandler = buildRequestHandler();
-
-        PipelineInitializer pf = new PipelineInitializer()
-                .addRequestHandler(requestHandler)
+        bootstrap.childHandler(new PipelineInitializer()
+                .addRequestHandler(buildRequestHandler())
                 .setSSLContext(sslContext)
-                .setMaxContentLength(serverSettings.getMaxContentSize());
-
-        bootstrap.childHandler(pf);
+                .setMaxContentLength(serverSettings.getMaxContentSize()));
 
         setBootstrapOptions();
 
