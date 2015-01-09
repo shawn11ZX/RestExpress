@@ -26,7 +26,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.10.5</version>
+			<version>0.11.0</version>
 		</dependency>
 ```
 Development:
@@ -34,7 +34,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.10.6-SNAPSHOT</version>
+			<version>0.11.1-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -80,8 +80,17 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.10.6-SNAPSHOT - in 'master' branch
+Release 0.11.1-SNAPSHOT - in 'master' branch
 ------------------------
+
+Release 0.11.0-SNAPSHOT - 09 Jan 2015
+-----------------------
+* Upgraded Netty version from 3.9.5.Final to 4.0.24.Final
+* Refactored Pipeline to accommodate Netty upgrade.
+* Refactored Bootstrap to accommodate Netty upgrade.
+* Added in Unit Tests to test RestExpress' ability to compress and decompress data.
+
+* KNOWN ISSUE - Controllers cannot return ReferenceCounted objects that also exist in the Request object.  This will cause the transaction to fail with an IllegalReferenceCountException.  If a ReferenceCounted object needs to be returned, a separate copy of the object will need to be made (some classes, such as ByteBuf, have a .copy() method to facilitate this).
 
 Release 0.10.5 - 2 Dec 2014
 -----------------------
