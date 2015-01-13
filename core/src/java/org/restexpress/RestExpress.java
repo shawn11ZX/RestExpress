@@ -627,9 +627,9 @@ public class RestExpress
 	public void shutdown()
 	{
 		ChannelGroupFuture future = allChannels.close();
+		bossGroup.shutdownGracefully(); //.awaitUninterruptibly();
+		workerGroup.shutdownGracefully(); //.awaitUninterruptibly();
 		future.awaitUninterruptibly();
-		bossGroup.shutdownGracefully().awaitUninterruptibly();
-		workerGroup.shutdownGracefully().awaitUninterruptibly();
 		shutdownPlugins();
 	}
 
