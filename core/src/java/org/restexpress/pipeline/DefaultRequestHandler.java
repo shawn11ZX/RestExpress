@@ -243,10 +243,6 @@ extends SimpleChannelUpstreamHandler
     }
 
 
-    /**
-     * @param request
-     * @param response
-     */
     private void notifyReceived(MessageContext context)
     {
     	for (MessageObserver observer : messageObservers)
@@ -255,10 +251,6 @@ extends SimpleChannelUpstreamHandler
     	}
     }
 
-	/**
-     * @param request
-     * @param response
-     */
     private void notifyComplete(MessageContext context)
     {
     	for (MessageObserver observer : messageObservers)
@@ -269,11 +261,6 @@ extends SimpleChannelUpstreamHandler
 
 	// SECTION: UTILITY -- PRIVATE
 
-	/**
-     * @param exception
-     * @param request
-     * @param response
-     */
     private void notifyException(MessageContext context)
     {
     	Throwable exception = context.getException();
@@ -284,10 +271,6 @@ extends SimpleChannelUpstreamHandler
     	}
     }
 
-	/**
-     * @param request
-     * @param response
-     */
     private void notifySuccess(MessageContext context)
     {
     	for (MessageObserver observer : messageObservers)
@@ -369,28 +352,16 @@ extends SimpleChannelUpstreamHandler
 		return exceptionMap.getExceptionFor(cause);
     }
 
-	/**
-     * @param request
-     * @return
-     */
     private Request createRequest(MessageEvent event, ChannelHandlerContext context)
     {
     	return new Request(event, routeResolver, serializationProvider);
     }
 
-	/**
-     * @param request
-     * @return
-     */
     private Response createResponse()
     {
     	return new Response();
     }
 
-    /**
-     * @param message
-     * @return
-     */
     private void writeResponse(ChannelHandlerContext ctx, MessageContext context)
     {
     	getResponseWriter().write(ctx, context.getRequest(), context.getResponse());

@@ -39,7 +39,7 @@ extends RouteBuilder
 	/**
 	 * @param uri
 	 * @param controller
-	 * @param routeType
+	 * @param defaults
 	 */
 	public ParameterizedRouteBuilder(String uri, Object controller,
 	    RouteDefaults defaults)
