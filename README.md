@@ -12,12 +12,7 @@ Born to be simple, only three things are required to wire up a service:
 3) Service implementation(s), which is/are a simple POJO--no interface or super class
    implementation.
 
-See: examples/kickstart directory to get started (there is a README there).
-
-RestExpress supports both JSEND-style and raw responses.  Meaning that it can wrap responses so
-AJAX clients can always process the responses easily.  Or it can simply marshal the service return
-value directly into JSON or XML.  For more information on JSEND-style responses, see:
-http://labs.omniti.com/labs/jsend
+See: https://github.com/RestExpress/RestExpress-Archetype to get started (there is a README there).
 
 Maven Usage
 ===========
@@ -26,7 +21,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.11.0</version>
+			<version>0.10.5</version>
 		</dependency>
 ```
 Development:
@@ -61,7 +56,7 @@ Note that to use the SNAPSHOT version, you must enable snapshots and a repositor
 ===================================================================================================
 ## A quick tutorial:
 
-Please see the Kickstart application in examples/kickstart for a complete, running example.
+Please see the Maven Archetypes at https://github.com/RestExpress/RestExpress-Archetype for kick-starting your API.
 
 * HTTP Methods, if not changed in the fluent (DSL) interface, map to the following:
 	* GET --> read(Request, Response)
@@ -71,29 +66,23 @@ Please see the Kickstart application in examples/kickstart for a complete, runni
 
 * You can choose to return objects from the methods, if desired, which will be returned to the client in the body of the response.  The object will be marshaled into JSON or XML, depending on the default or based on the format in the request (e.g. '.xml' or '?format=xml').
 
-* If you choose to not return a value from the method (void methods) and using raw responses, then call response.setResponseNoContent() before returning to set the response HTTP status code to 204 (no content).  Wrapped responses (JSEND style) are the default.  So if you're using wrapped responses, there will always be a response returned to the client--therefore, you don't need to set the response.setResponseNoContent().  Just return your objects--or not.  RestExpress will handle things on your behalf!
+* If you choose to not return a value from the method (void methods) and using raw responses, then call response.setResponseNoContent() before returning to set the response HTTP status code to 204 (no content).
 
 * On successful creation, call response.setResponseCreated() to set the returning HTTP status code to 201.
 
-* For more real-world examples, see the examples/ directory which contains additional projects that setup RestExpress services.  Simply do '**ant run**' to run them.  Then to see what's available perform a GET on the route: '/routes/metadata' to get a list of all the routes (or endpoints) available (e.g. localhost:8000/routes/metadata in the browser).
+* For more real-world examples, see the https://github.com/RestExpress/RestExpress-Examples repo which contains additional projects that setup RestExpress services.  Simply do '**mvn exec:java**' to run them.  Then to see what's available perform a GET on the route: '/routes/metadata' to get a list of all the routes (or endpoints) available (e.g. localhost:8081/routes/metadata in the browser).
 
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.11.1-SNAPSHOT - in 'master' branch
-------------------------
-
-Release 0.11.0-SNAPSHOT - 09 Jan 2015
------------------------
-* Upgraded Netty version from 3.9.5.Final to 4.0.24.Final
-* Refactored Pipeline to accommodate Netty upgrade.
-* Refactored Bootstrap to accommodate Netty upgrade.
-* Added in Unit Tests to test RestExpress' ability to compress and decompress data.
-
+Release 0.11.0-SNAPSHOT - in 'master' branch
+--------------------------------------------
+* Upgraded Netty version from 3.9.5.Final to 4.0.25.Final (from Thomas Colwell and Mathew Leigh).
+* Added Unit Tests to test RestExpress' ability to compress responses and decompress requests.
 * KNOWN ISSUE - Controllers cannot return ReferenceCounted objects that also exist in the Request object.  This will cause the transaction to fail with an IllegalReferenceCountException.  If a ReferenceCounted object needs to be returned, a separate copy of the object will need to be made (some classes, such as ByteBuf, have a .copy() method to facilitate this).
 
 Release 0.10.5 - 2 Dec 2014
------------------------
+---------------------------
 * Changed FilterComponent.setValue(String) signature to setValue(Object).
 * Added suite of operators (:<:, :<=:, :>:, :>=:, :=:, :!=:, :*: [as starts-with]) to filter operations.
 * Added UnsupportedMediaTypeException which returns 415 HTTP status code.
