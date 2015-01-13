@@ -20,13 +20,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.nio.ByteBuffer;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Before;
 import org.junit.Test;
 import org.restexpress.ContentType;
@@ -112,7 +112,7 @@ public class GsonJsonProcessorTest
 	@Test
 	public void shouldDeserializeChannelBuffer()
 	{
-		ChannelBuffer buf = ChannelBuffers.copiedBuffer(JSON, ContentType.CHARSET);
+		ByteBuf buf = Unpooled.copiedBuffer(JSON, ContentType.CHARSET);
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNotNull(o);
 	}
@@ -120,7 +120,7 @@ public class GsonJsonProcessorTest
 	@Test
 	public void shouldDeserializeEmptyChannelBuffer()
 	{
-		ChannelBuffer buf = ChannelBuffers.EMPTY_BUFFER;
+		ByteBuf buf = Unpooled.EMPTY_BUFFER;
 		Object o = processor.deserialize(buf, KnownObject.class);
 		assertNull(o);
 	}
@@ -128,7 +128,7 @@ public class GsonJsonProcessorTest
 	@Test
 	public void shouldDeserializeUTF8ChannelBuffer()
 	{
-		KnownObject o = processor.deserialize(ChannelBuffers.wrappedBuffer(JSON_UTF8.getBytes(ContentType.CHARSET)), KnownObject.class);
+		KnownObject o = processor.deserialize(Unpooled.wrappedBuffer(JSON_UTF8.getBytes(ContentType.CHARSET)), KnownObject.class);
 		assertNotNull(o);
 		assertTrue(o.getClass().isAssignableFrom(KnownObject.class));
 		assertEquals(2, o.integer);
