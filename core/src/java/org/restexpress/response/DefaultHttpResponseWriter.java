@@ -12,6 +12,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.restexpress.ContentType;
@@ -62,11 +63,19 @@ implements HttpResponseWriter
 				httpResponse.headers().add(CONNECTION, "Keep-Alive");
 			}
 
+		    // Clear out the content for HEAD calls
+		    if (request.getHttpMethod() == HttpMethod.HEAD)
+			    httpResponse.setContent(null);
+
 			channel.write(httpResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
 	  	}
 		else
 		{
 			httpResponse.headers().set(CONNECTION, "close");
+
+			// Clear out the content for HEAD calls
+			if (request.getHttpMethod() == HttpMethod.HEAD)
+				httpResponse.setContent(null);
 
 			// Close the connection as soon as the message is sent.
 			channel.write(httpResponse).addListener(ChannelFutureListener.CLOSE);
