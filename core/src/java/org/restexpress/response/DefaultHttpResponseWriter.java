@@ -63,19 +63,13 @@ implements HttpResponseWriter
 				httpResponse.headers().add(CONNECTION, "Keep-Alive");
 			}
 
-		    // Clear out the content for HEAD calls
-		    if (request.getHttpMethod() == HttpMethod.HEAD)
-			    httpResponse.setContent(null);
-
+		    enforceEmptyHeadResponseBody(request, httpResponse);
 			channel.write(httpResponse).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
 	  	}
 		else
 		{
 			httpResponse.headers().set(CONNECTION, "close");
-
-			// Clear out the content for HEAD calls
-			if (request.getHttpMethod() == HttpMethod.HEAD)
-				httpResponse.setContent(null);
+			enforceEmptyHeadResponseBody(request, httpResponse);
 
 			// Close the connection as soon as the message is sent.
 			channel.write(httpResponse).addListener(ChannelFutureListener.CLOSE);
@@ -105,5 +99,19 @@ implements HttpResponseWriter
     			httpResponse.headers().add(name, value);
     		}
     	}
+    }
+
+    /**
+     *  Clear out the content for HEAD calls.
+     *  
+     * @param request
+     * @param httpResponse
+     */
+	private void enforceEmptyHeadResponseBody(Request request, HttpResponse httpResponse)
+    {
+	    if (request.getHttpMethod() == HttpMethod.HEAD)
+	    {
+	    	httpResponse.setContent(null);
+	    }
     }
 }

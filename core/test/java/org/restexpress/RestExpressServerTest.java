@@ -14,6 +14,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -83,7 +84,9 @@ public class RestExpressServerTest
 		server.uri(URL_PATTERN1, stringTestController);
 		server.uri(URL_PATTERN2, stringTestController);
 		server.uri(URL_PATTERN3, stringTestController)
-			.method(HttpMethod.GET, HttpMethod.POST);
+			.method(HttpMethod.GET, HttpMethod.POST)
+			.action("read", HttpMethod.HEAD);
+
 		server.uri(PATTERN_EXCEPTION_STRING, stringTestController)
 			.action("throwException", HttpMethod.GET);
 		server.uri(URL_PATTERN4, stringTestController)	// Collection route.
@@ -123,6 +126,21 @@ public class RestExpressServerTest
 		assertTrue(entity.getContentLength() > 0l);
 		assertEquals(ContentType.JSON, entity.getContentType().getValue());
 		assertEquals("\"read\"", EntityUtils.toString(entity));
+		request.releaseConnection();
+	}
+
+	@Test
+	public void shouldHandleHeadRequests()
+	throws Exception
+	{
+		server.bind(SERVER_PORT);
+		
+		HttpHead request = new HttpHead(URL3_PLAIN);
+		HttpResponse response = (HttpResponse) http.execute(request);
+		assertEquals(HttpResponseStatus.OK.getCode(), response.getStatusLine().getStatusCode());
+		assertEquals(String.valueOf("\"read\"".length()), response.getFirstHeader(HttpHeaders.Names.CONTENT_LENGTH).getValue());
+		assertEquals(ContentType.JSON, response.getFirstHeader(HttpHeaders.Names.CONTENT_TYPE).getValue());
+		assertNull(response.getEntity());
 		request.releaseConnection();
 	}
 
