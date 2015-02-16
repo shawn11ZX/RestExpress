@@ -6,9 +6,10 @@ RestExpress is a thin wrapper on the JBOSS Netty HTTP stack to provide a simple 
 create RESTful services in Java that support massive Internet Scale and performance.
 
 Born to be simple, only three things are required to wire up a service:
-1) The main class which utilizes the RestExpress DSL to create a server instance.
-2) Use a DSL for the declaration of supported URLs and HTTP methods of the service(s) (much like routes.rb in a Rails app).
-3) Service implementation(s), which is/are a simple POJO--no interface or super class implementation.
+
+1. The main class which utilizes the RestExpress DSL to create a server instance.
+2. Use a DSL for the declaration of supported URLs and HTTP methods of the service(s) (much like routes.rb in a Rails app).
+3. Service implementation(s), which is/are a simple POJO--no interface or super class implementation.
 
 See: https://github.com/RestExpress/RestExpress-Archetype to get started (there is a README there).
 
