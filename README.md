@@ -76,9 +76,9 @@ Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.11.0-SNAPSHOT - in 'master' branch
 --------------------------------------------
+* **Bug Fix** Strip the response body from HEAD requests to conform to [RFC 2616](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4)(HTTP spec). (from Codey Whitt)
 * Upgraded Netty version from 3.9.5.Final to 4.0.25.Final (from Thomas Colwell and Mathew Leigh).
 * Added Unit Tests to test RestExpress' ability to compress responses and decompress requests.
-* **Bug Fix** Strip the response body from HEAD requests to conform to [RFC 2616](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4)(HTTP spec). (from Codey Whitt)
 * KNOWN ISSUE - Controllers cannot return ReferenceCounted objects that also exist in the Request object.  This will cause the transaction to fail with an IllegalReferenceCountException.  If a ReferenceCounted object needs to be returned, a separate copy of the object will need to be made (some classes, such as ByteBuf, have a .copy() method to facilitate this).
 
 Release 0.10.6-SNAPSHOT - in '0.10.6' branch
