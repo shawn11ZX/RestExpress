@@ -99,4 +99,18 @@ public class ResponseTest
 		assertEquals(416, r.getResponseStatus().code());
 		assertEquals("items 0-2/3", r.getHeader(HttpHeaders.Names.CONTENT_RANGE));
 	}
+
+	@Test
+	public void shouldSetStar()
+	{
+		Response r = new Response();
+		r.setCollectionResponse(new QueryRange(1l, 1), 1, -1);
+		assertEquals(200, r.getResponseStatus().code());
+		assertEquals("items 1-1/*", r.getHeader(HttpHeaders.Names.CONTENT_RANGE));
+
+		r = new Response();
+		r.setCollectionResponse(new QueryRange(0l, 1), 1, -1);
+		assertEquals(200, r.getResponseStatus().code());
+		assertEquals("items 0-0/*", r.getHeader(HttpHeaders.Names.CONTENT_RANGE));
+	}
 }

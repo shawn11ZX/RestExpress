@@ -156,7 +156,13 @@ public class Response
 	public void setCollectionResponse(QueryRange queryRange, int size, long count)
 	{
 		QueryRange range = queryRange.clone();
-		
+
+		if (count < 0)
+		{
+			addRangeHeader(range, count);
+			return;
+		}
+
 		if (range.isOutside(size, count))
 		{
 			setResponseCode(416);
