@@ -20,7 +20,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.10.5</version>
+			<version>0.11.0</version>
 		</dependency>
 ```
 Development:
@@ -28,7 +28,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>0.11.1-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -74,12 +74,13 @@ Please see the Maven Archetypes at https://github.com/RestExpress/RestExpress-Ar
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
-Release 0.11.0-SNAPSHOT - in 'master' branch
---------------------------------------------
+Release 0.11.0 - 12 Mar 2015
+----------------------------
 * **Bug Fix** Strip the response body from HEAD requests to conform to [RFC 2616](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4)(HTTP spec). (from Codey Whitt)
 * Upgraded Netty version from 3.9.5.Final to 4.0.25.Final (from Thomas Colwell and Mathew Leigh).
 * Enhanced QueryRange.asContentRange() and Response.setCollectionResponse() to support output of '*' as max items in range header for count < 0. 
 * Added Unit Tests to test RestExpress' ability to compress responses and decompress requests.
+* Added Environment.load(String[], Class) to eliminate the need for Main.loadEnvironments() in all archetype projects.
 * KNOWN ISSUE - Controllers cannot return ReferenceCounted objects that also exist in the Request object.  This will cause the transaction to fail with an IllegalReferenceCountException.  If a ReferenceCounted object needs to be returned, a separate copy of the object will need to be made (some classes, such as ByteBuf, have a .copy() method to facilitate this).
 
 Release 0.10.6-SNAPSHOT - in '0.10.6' branch
