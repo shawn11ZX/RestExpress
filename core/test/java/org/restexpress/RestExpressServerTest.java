@@ -120,7 +120,7 @@ public class RestExpressServerTest
 	@After
 	public void shutdownServer()
 	{
-		server.shutdown();
+		server.shutdown(true);
 	}
 
 

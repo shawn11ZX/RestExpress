@@ -45,8 +45,6 @@ public class RestExpressTest
 	private static final int TEST_PORT = 8901;
 	private static final String TEST_URL = "http://localhost:" + TEST_PORT + TEST_PATH;
 
-	private RestExpress server = new RestExpress();
-
 //	@Test
 //	public void shouldUseDefaults()
 //	{
@@ -143,8 +141,9 @@ public class RestExpressTest
 	@Test
 	public void shouldNotUseSystemOut()
 	{
-		server.noSystemOut();
-		assertFalse(server.shouldUseSystemOut());
+		RestExpress re = new RestExpress();
+		re.noSystemOut();
+		assertFalse(re.shouldUseSystemOut());
 	}
 
 	@Test

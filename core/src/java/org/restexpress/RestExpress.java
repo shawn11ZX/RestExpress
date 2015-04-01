@@ -26,7 +26,18 @@ import io.netty.channel.group.ChannelGroupFuture;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.net.ssl.SSLContext;
+
 import org.restexpress.domain.metadata.RouteMetadata;
 import org.restexpress.domain.metadata.ServerMetadata;
 import org.restexpress.exception.DefaultExceptionMapper;
@@ -51,14 +62,6 @@ import org.restexpress.settings.ServerSettings;
 import org.restexpress.settings.SocketSettings;
 import org.restexpress.util.Callback;
 import org.restexpress.util.DefaultShutdownHook;
-
-import javax.net.ssl.SSLContext;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Primary entry point to create a RestExpress service. All that's required is a
@@ -623,13 +626,35 @@ public class RestExpress
 	 * shutdown cleanly. Call this method to finish using the server. To utilize
 	 * the default shutdown hook in main() provided by RestExpress, call
 	 * awaitShutdown() instead.
+	 * <p/>
+	 * Same as shutdown(false);
 	 */
 	public void shutdown()
 	{
-		ChannelGroupFuture future = allChannels.close();
-		bossGroup.shutdownGracefully(); //.awaitUninterruptibly();
-		workerGroup.shutdownGracefully(); //.awaitUninterruptibly();
-		future.awaitUninterruptibly();
+		shutdown(false);
+	}
+
+	/**
+	 * Releases all resources associated with this server so the JVM can
+	 * shutdown cleanly. Call this method to finish using the server. To utilize
+	 * the default shutdown hook in main() provided by RestExpress, call
+	 * awaitShutdown() instead.
+	 * 
+	 * @param shouldWait true if shutdown() should wait for the shutdown of each thread group.
+	 */
+	public void shutdown(boolean shouldWait)
+	{
+		ChannelGroupFuture channelFuture = allChannels.close();
+		Future<?> bossFuture = bossGroup.shutdownGracefully();
+		Future<?> workerFuture = workerGroup.shutdownGracefully();
+
+		if (shouldWait)
+		{
+			bossFuture.awaitUninterruptibly();
+			workerFuture.awaitUninterruptibly();
+		}
+
+		channelFuture.awaitUninterruptibly();
 		shutdownPlugins();
 	}
 
