@@ -15,7 +15,10 @@
 */
 package org.restexpress.serialization;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * @author toddf
@@ -26,14 +29,20 @@ public class KnownObject
 	public static final String CONSTANT = "i hope you don't see this";
 	@SuppressWarnings("unused")
     private static final String INTERNAL = "or this";
+	private static final Calendar KNOWN_CALENDAR = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+	
+	static
+	{
+		KNOWN_CALENDAR.set(1964, Calendar.DECEMBER, 17, 23, 30, 0);
+		KNOWN_CALENDAR.set(Calendar.MILLISECOND, 0);
+	}
 
 	public int integer = 1;
 	public String string = "string value";
-	@SuppressWarnings("deprecation")
-    public Date date = new Date(64, 11, 17, 23, 30);
+    public Date date = KNOWN_CALENDAR.getTime();
 	private String p = "something private";
 	public String[] sa;
-	
+
 	public String getP()
 	{
 		return p;

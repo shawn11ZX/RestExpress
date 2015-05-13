@@ -53,7 +53,6 @@ public class XstreamXmlProcessorTest
 		ByteBuffer xmlBuf = processor.serialize(new KnownObject());
 		String xml = new String(xmlBuf.array(), ContentType.CHARSET);
 		assertNotNull(xml);
-//		System.out.println(xml);
 		assertTrue(xml.startsWith("<KnownObject>"));
 		assertTrue(xml.contains("<integer>1</integer>"));
 		assertTrue(xml.contains("<string>string value</string>"));
