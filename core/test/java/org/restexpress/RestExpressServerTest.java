@@ -428,8 +428,12 @@ public class RestExpressServerTest
 			HttpEntity entity = response.getEntity();
 			assertTrue(entity.getContentLength() > 0l);
 			assertEquals(ContentType.JSON, entity.getContentType().getValue());
-			assertEquals("\"Requested representation format not supported: JSON. Supported formats: json, wxml, wjson, xml\"",
-			    EntityUtils.toString(entity));
+			String json = EntityUtils.toString(entity);
+			assertTrue(json.startsWith("\"Requested representation format not supported: JSON. Supported formats: "));
+			assertTrue(json.contains("json"));
+			assertTrue(json.contains("wxml"));
+			assertTrue(json.contains("wjson"));
+			assertTrue(json.contains("xml"));
 		}
 		finally
 		{
@@ -569,9 +573,12 @@ public class RestExpressServerTest
 			HttpEntity entity = response.getEntity();
 			assertTrue(entity.getContentLength() > 0l);
 			assertEquals(ContentType.JSON, entity.getContentType().getValue());
-			assertEquals(
-			    "\"Requested representation format not supported: xyz. Supported formats: json, wxml, wjson, xml\"",
-			    EntityUtils.toString(entity));
+			String json = EntityUtils.toString(entity);
+			assertTrue(json.startsWith("\"Requested representation format not supported: xyz. Supported formats: "));
+			assertTrue(json.contains("json"));
+			assertTrue(json.contains("wxml"));
+			assertTrue(json.contains("wjson"));
+			assertTrue(json.contains("xml"));
 		}
 		finally
 		{

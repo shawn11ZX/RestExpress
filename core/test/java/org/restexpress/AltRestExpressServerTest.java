@@ -451,7 +451,9 @@ public class AltRestExpressServerTest
 			assertNotNull(json);
 			assertTrue(json.startsWith("{\"errorId\":"));
 			assertTrue(json.contains("\"httpStatus\":400"));
-			assertTrue(json.contains("\"message\":\"Requested representation format not supported: JSON. Supported formats: json, xml\""));
+			assertTrue(json.contains("\"message\":\"Requested representation format not supported: JSON. Supported formats: "));
+			assertTrue(json.contains("json"));
+			assertTrue(json.contains("xml"));
 			assertTrue(json.contains("\"errorType\":\"BadRequestException\""));
 		}
 		finally
@@ -495,7 +497,9 @@ public class AltRestExpressServerTest
 			String json = EntityUtils.toString(entity);
 			assertTrue(json.startsWith("{\"errorId\":"));
 			assertTrue(json.contains("\"httpStatus\":400"));
-			assertTrue(json.contains("\"message\":\"Requested representation format not supported: xyz. Supported formats: json, xml\""));
+			assertTrue(json.contains("\"message\":\"Requested representation format not supported: xyz. Supported formats: "));
+			assertTrue(json.contains("json"));
+			assertTrue(json.contains("xml"));
 			assertTrue(json.contains("\"errorType\":\"BadRequestException\""));
 		}
 		finally
