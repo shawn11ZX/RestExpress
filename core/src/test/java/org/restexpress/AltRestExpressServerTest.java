@@ -286,7 +286,7 @@ public class AltRestExpressServerTest
 			assertTrue(entity.getContentLength() > 0l);
 			assertEquals(ContentType.JSON, entity.getContentType().getValue());
 			String json = EntityUtils.toString(entity);
-			assertTrue(json.startsWith("{\"errorId\":"));
+			assertTrue(json.startsWith("{\"id\":"));
 			assertTrue(json.contains("\"httpStatus\":405"));
 			assertTrue(json.contains("\"message\":\"" + URL3_PLAIN + "\""));
 			assertTrue(json.contains("\"errorType\":\"MethodNotAllowedException\""));
@@ -315,7 +315,7 @@ public class AltRestExpressServerTest
 			assertEquals(ContentType.JSON, entity.getContentType().getValue());
 			String json = EntityUtils.toString(entity);
 			assertNotNull(json);
-			assertTrue(json.startsWith("{\"errorId\":"));
+			assertTrue(json.startsWith("{\"id\":"));
 			assertTrue(json.contains("\"httpStatus\":405"));
 			assertTrue(json.contains("\"message\":\"" + URL3_PLAIN + "?_ignore_http_status=true\""));
 			assertTrue(json.contains("\"errorType\":\"MethodNotAllowedException\""));
@@ -342,7 +342,7 @@ public class AltRestExpressServerTest
 			assertTrue(entity.getContentLength() > 0l);
 			assertEquals(ContentType.JSON, entity.getContentType().getValue());
 			String json = EntityUtils.toString(entity);
-			assertTrue(json.startsWith("{\"errorId\":"));
+			assertTrue(json.startsWith("{\"id\":"));
 			assertTrue(json.contains("\"httpStatus\":404"));
 			assertTrue(json.contains("\"message\":\"Unresolvable URL: " + SERVER_HOST + "/x/y/z.json\""));
 			assertTrue(json.contains("\"errorType\":\"NotFoundException\""));
@@ -449,7 +449,7 @@ public class AltRestExpressServerTest
 			assertEquals(ContentType.JSON, entity.getContentType().getValue());
 			String json = EntityUtils.toString(entity);
 			assertNotNull(json);
-			assertTrue(json.startsWith("{\"errorId\":"));
+			assertTrue(json.startsWith("{\"id\":"));
 			assertTrue(json.contains("\"httpStatus\":400"));
 			assertTrue(json.contains("\"message\":\"Requested representation format not supported: JSON. Supported formats: "));
 			assertTrue(json.contains("json"));
@@ -495,7 +495,7 @@ public class AltRestExpressServerTest
 			assertTrue(entity.getContentLength() > 0l);
 			assertEquals(ContentType.JSON, entity.getContentType().getValue());
 			String json = EntityUtils.toString(entity);
-			assertTrue(json.startsWith("{\"errorId\":"));
+			assertTrue(json.startsWith("{\"id\":"));
 			assertTrue(json.contains("\"httpStatus\":400"));
 			assertTrue(json.contains("\"message\":\"Requested representation format not supported: xyz. Supported formats: "));
 			assertTrue(json.contains("json"));
@@ -523,7 +523,7 @@ public class AltRestExpressServerTest
 			assertEquals(ContentType.JSON, entity.getContentType().getValue());
 			String json = EntityUtils.toString(entity);
 			assertNotNull(json);
-			assertTrue(json.startsWith("{\"errorId\":"));
+			assertTrue(json.startsWith("{\"id\":"));
 			assertTrue(json.contains("\"httpStatus\":406"));
 			assertTrue(json.contains("\"message\":\"Supported Media Types: application/json; charset=UTF-8, application/javascript; charset=UTF-8, text/javascript; charset=UTF-8, application/hal+json; charset=UTF-8, application/xml; charset=UTF-8, text/xml; charset=UTF-8, application/hal+xml; charset=UTF-8\""));
 			assertTrue(json.contains("\"errorType\":\"NotAcceptableException\""));
@@ -599,7 +599,7 @@ public class AltRestExpressServerTest
 			assertNull(response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE));
 			String json = EntityUtils.toString(entity);
 			assertNotNull(json);
-			assertTrue(json.startsWith("{\"errorId\":"));
+			assertTrue(json.startsWith("{\"id\":"));
 			assertTrue(json.contains("\"httpStatus\":406"));
 			assertTrue(json.contains("\"message\":\"Supported Media Types: application/json; charset=UTF-8, application/javascript; charset=UTF-8, text/javascript; charset=UTF-8, application/hal+json; charset=UTF-8, application/xml; charset=UTF-8, text/xml; charset=UTF-8, application/hal+xml; charset=UTF-8\""));
 			assertTrue(json.contains("\"errorType\":\"NotAcceptableException\""));
@@ -727,7 +727,7 @@ public class AltRestExpressServerTest
 			assertNull(response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE));
 			String entityString = EntityUtils.toString(entity);
 			assertNotNull(entityString);
-			assertTrue(entityString.contains("\"errorId\":\""));
+			assertTrue(entityString.contains("\"id\":\""));
 			assertTrue(entityString.contains("\"httpStatus\":500"));
 			assertTrue(entityString.contains("\"message\":\"ErrorPreprocessor\""));
 			assertTrue(entityString.contains("\"errorType\":\"RuntimeException\""));
@@ -789,7 +789,7 @@ public class AltRestExpressServerTest
 			assertNull(response.getFirstHeader(HttpHeaders.Names.CONTENT_RANGE));
 			String entityString = EntityUtils.toString(entity);
 			assertNotNull(entityString);
-			assertTrue(entityString.contains("\"errorId\":\""));
+			assertTrue(entityString.contains("\"id\":\""));
 			assertTrue(entityString.contains("\"httpStatus\":500"));
 			assertTrue(entityString.contains("\"message\":\"ObjectTestController\""));
 			assertTrue(entityString.contains("\"errorType\":\"NullPointerException\""));
@@ -859,7 +859,7 @@ public class AltRestExpressServerTest
 			assertEquals(1, POSTPROCESSOR.callCount());
 			String entityString = EntityUtils.toString(response.getEntity());
 			assertNotNull(entityString);
-			assertTrue(entityString.contains("\"errorId\":\""));
+			assertTrue(entityString.contains("\"id\":\""));
 			assertTrue(entityString.contains("\"httpStatus\":500"));
 			assertTrue(entityString.contains("\"message\":\"ErrorPreprocessor\""));
 			assertTrue(entityString.contains("\"errorType\":\"RuntimeException\""));

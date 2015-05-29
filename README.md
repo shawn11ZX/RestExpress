@@ -86,6 +86,7 @@ Release 0.11.0 - 12 Mar 2015
 Release 1.0.0-SNAPSHOT - in 'RestExpress-1.0' branch
 ----------------------------------------------------
 * Deprecated JSEND support.
+* Renamed ErrorResult.errorId to 'id'. WILL BREAK CONSUMER CONTRACT, if consumers are using that property.
 
 Release 0.10.6-SNAPSHOT - in '0.10.6' branch
 --------------------------------------------
