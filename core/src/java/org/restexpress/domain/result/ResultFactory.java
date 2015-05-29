@@ -17,12 +17,14 @@ package org.restexpress.domain.result;
 
 import org.restexpress.Response;
 import org.restexpress.exception.ServiceException;
+import org.restexpress.response.ErrorResponseWrapper;
 
 /**
  * Generates JSEND-style results for a given response.
  * 
  * @author toddf
  * @since Jan 11, 2011
+ * @deprecated Use {@link ErrorResponseWrapper}
  */
 public class ResultFactory
 {

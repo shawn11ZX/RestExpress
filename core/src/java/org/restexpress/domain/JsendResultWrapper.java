@@ -18,6 +18,7 @@ package org.restexpress.domain;
 import org.restexpress.Response;
 import org.restexpress.exception.ExceptionUtils;
 import org.restexpress.exception.ServiceException;
+import org.restexpress.response.ErrorResponseWrapper;
 
 /**
  * Generic JSEND-style wrapper for responses.  Differs from the JSEND recommendation as follows:</br>
@@ -28,6 +29,7 @@ import org.restexpress.exception.ServiceException;
  * 
  * @author toddf
  * @since Jan 11, 2011
+ * @deprecated Use {@link ErrorResponseWrapper}
  */
 public class JsendResultWrapper
 {

@@ -1,11 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<name>RestExpress</name>
+	<name>RestExpress Core</name>
 	<description>Internet scale, high-performance RESTful Services in Java</description>
 	<url>https://github.com/RestExpress/RestExpress</url>
-	<groupId>com.strategicgains</groupId>
-	<artifactId>RestExpress</artifactId>
+	<artifactId>restexpress-core</artifactId>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -17,7 +16,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.strategicgains</groupId>
-			<artifactId>RestExpress-Common</artifactId>
+			<artifactId>restexpress-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

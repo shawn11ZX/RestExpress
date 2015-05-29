@@ -22,6 +22,7 @@ import org.restexpress.exception.ServiceException;
  *
  * @author toddf
  * @since Mar 22, 2011
+ * @deprecated Use {@link org.restexpress.domain.ErrorResult}
  */
 public class ErrorResult
 extends MessageResult

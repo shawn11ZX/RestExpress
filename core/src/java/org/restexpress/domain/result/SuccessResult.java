@@ -15,6 +15,7 @@
 */
 package org.restexpress.domain.result;
 
+import org.restexpress.response.ErrorResponseWrapper;
 import org.restexpress.serialization.Deserializer;
 
 
@@ -23,6 +24,7 @@ import org.restexpress.serialization.Deserializer;
  * 
  * @author toddf
  * @since Mar 22, 2011
+ * @deprecated Use {@link ErrorResponseWrapper}
  */
 public class SuccessResult
 extends Result

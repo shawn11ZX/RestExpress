@@ -21,6 +21,7 @@ package org.restexpress.domain.result;
  * 
  * @author toddf
  * @since Jan 11, 2011
+ * @deprecated Use {@link org.restexpress.domain.ErrorResult}
  */
 public abstract class Result
 {

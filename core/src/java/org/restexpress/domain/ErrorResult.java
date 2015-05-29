@@ -29,15 +29,15 @@ import org.restexpress.exception.ServiceException;
  */
 public class ErrorResult
 {
-	private String errorId;
+	private String id;
 	private int httpStatus;
 	private String message;
 	private String errorType;
 
-	public ErrorResult(UUID errorId, int httpResponseCode, String errorMessage, String errorType)
+	public ErrorResult(UUID id, int httpResponseCode, String errorMessage, String errorType)
 	{
 		super();
-		this.errorId = (errorId == null ? null : errorId.toString());
+		this.id = (id == null ? null : id.toString());
 		this.httpStatus = httpResponseCode;
 		this.message = errorMessage;
 		this.errorType = errorType;
@@ -53,9 +53,9 @@ public class ErrorResult
 		return message;
 	}
 
-	public String getErrorId()
+	public String getId()
 	{
-		return errorId;
+		return id;
 	}
 
 	public String getErrorType()

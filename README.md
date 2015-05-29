@@ -28,7 +28,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.11.1-SNAPSHOT</version>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -82,6 +82,10 @@ Release 0.11.0 - 12 Mar 2015
 * Added Unit Tests to test RestExpress' ability to compress responses and decompress requests.
 * Added Environment.load(String[], Class) to eliminate the need for Main.loadEnvironments() in all archetype projects.
 * KNOWN ISSUE - Controllers cannot return ReferenceCounted objects that also exist in the Request object.  This will cause the transaction to fail with an IllegalReferenceCountException.  If a ReferenceCounted object needs to be returned, a separate copy of the object will need to be made (some classes, such as ByteBuf, have a .copy() method to facilitate this).
+
+Release 1.0.0-SNAPSHOT - in 'RestExpress-1.0' branch
+----------------------------------------------------
+* Deprecated JSEND support.
 
 Release 0.10.6-SNAPSHOT - in '0.10.6' branch
 --------------------------------------------

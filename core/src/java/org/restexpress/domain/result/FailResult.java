@@ -21,6 +21,7 @@ package org.restexpress.domain.result;
  * 
  * @author toddf
  * @since Mar 22, 2011
+ * @deprecated Use {@link org.restexpress.domain.ErrorResult}
  */
 public class FailResult
 extends MessageResult
