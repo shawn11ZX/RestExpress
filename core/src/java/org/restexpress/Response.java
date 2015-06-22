@@ -171,7 +171,13 @@ public class Response
 		}
 		else if (range.extendsBeyond(size, count))
 		{
-			range.setLimitViaEnd((count > 1 ? count - 1 : 0));
+		    	if (count == 0 && range.getOffset() > 0) {
+		    	    setResponseCode(416);
+		    	    range.setOffset(0);
+		    	    range.setLimitViaEnd(0);
+		    	} else {
+		    	    range.setLimitViaEnd((count > 1 ? count - 1 : 0));
+		    	}
 			
 			if (count > 0 && !range.spans(size, count))
 			{
