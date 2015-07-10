@@ -546,13 +546,16 @@ public class RestExpress
 		setPort(port);
 
 		// Configure the server.
-		bossGroup = getEventExecutorsWithThreadCountOf(getIoThreadCount());
-		workerGroup = getEventExecutorsWithThreadCountOf(getExecutorThreadCount());
-		bootstrap = new ServerBootstrap().group(bossGroup, workerGroup)
+		bossGroup = new NioEventLoopGroup();
+		workerGroup = new NioEventLoopGroup(getIoThreadCount());
+		bootstrap = new ServerBootstrap()
+			.group(bossGroup, workerGroup)
 		    .channel(NioServerSocketChannel.class);
 
 		bootstrap.childHandler(new PipelineInitializer()
-		    .addRequestHandler(buildRequestHandler()).setSSLContext(sslContext)
+			.setExecutorThreadCount(getExecutorThreadCount())
+		    .addRequestHandler(buildRequestHandler())
+		    .setSSLContext(sslContext)
 		    .setMaxContentLength(serverSettings.getMaxContentSize()));
 
 		setBootstrapOptions();
@@ -571,24 +574,10 @@ public class RestExpress
 		return channel;
 	}
 
-	private static NioEventLoopGroup getEventExecutorsWithThreadCountOf(
-	    int nThreads)
-	{
-		if (nThreads > 0)
-		{
-			return new NioEventLoopGroup(nThreads);
-		}
-		else
-		{
-			return new NioEventLoopGroup();
-		}
-	}
-
 	private void setBootstrapOptions()
 	{
 		bootstrap.option(ChannelOption.TCP_NODELAY, useTcpNoDelay());
-		bootstrap.option(ChannelOption.SO_KEEPALIVE,
-		    serverSettings.isKeepAlive());
+		bootstrap.option(ChannelOption.SO_KEEPALIVE, serverSettings.isKeepAlive());
 		bootstrap.option(ChannelOption.SO_REUSEADDR, shouldReuseAddress());
 		bootstrap.option(ChannelOption.SO_LINGER, getSoLinger());
 		bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,

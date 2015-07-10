@@ -14,9 +14,12 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,87 +30,117 @@ import java.util.List;
  * @since Aug 27, 2010
  */
 public class PipelineInitializer
-        extends ChannelInitializer<SocketChannel> {
-    // SECTION: CONSTANTS
+extends ChannelInitializer<SocketChannel>
+{
+	// SECTION: CONSTANTS
 
-    private static final int DEFAULT_MAX_CONTENT_LENGTH = 20480;
+	private static final int DEFAULT_MAX_CONTENT_LENGTH = 20480;
 
+	// SECTION: INSTANCE VARIABLES
 
-    // SECTION: INSTANCE VARIABLES
+	private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
+	private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
+	private int executorThreadCount = 0;
+	private SSLContext sslContext = null;
 
-    private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
-    private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
-    private SSLContext sslContext = null;
+	// SECTION: CONSTRUCTORS
 
+	public PipelineInitializer()
+	{
+		super();
+	}
 
-    // SECTION: CONSTRUCTORS
+	// SECTION: BUILDER METHODS
 
-    public PipelineInitializer() {
-        super();
-    }
+	public PipelineInitializer addRequestHandler(ChannelHandler handler)
+	{
+		if (!requestHandlers.contains(handler))
+		{
+			requestHandlers.add(handler);
+		}
 
+		return this;
+	}
 
-    // SECTION: BUILDER METHODS
+	public PipelineInitializer setExecutorThreadCount(int count)
+	{
+		this.executorThreadCount = count;
+		return this;
+	}
 
-    public PipelineInitializer addRequestHandler(ChannelHandler handler) {
-        if (!requestHandlers.contains(handler)) {
-            requestHandlers.add(handler);
-        }
+	/**
+	 * Set the maximum length of the aggregated (chunked) content. If the length
+	 * of the aggregated content exceeds this value, a TooLongFrameException
+	 * will be raised during the request, which can be mapped in the RestExpress
+	 * server to return a BadRequestException, if desired.
+	 *
+	 * @param value
+	 * @return this PipelineBuilder for method chaining.
+	 */
+	public PipelineInitializer setMaxContentLength(int value)
+	{
+		this.maxContentLength = value;
+		return this;
+	}
 
-        return this;
-    }
+	public PipelineInitializer setSSLContext(SSLContext sslContext)
+	{
+		this.sslContext = sslContext;
+		return this;
+	}
 
-    /**
-     * Set the maximum length of the aggregated (chunked) content. If the length of the
-     * aggregated content exceeds this value, a TooLongFrameException will be raised during
-     * the request, which can be mapped in the RestExpress server to return a
-     * BadRequestException, if desired.
-     *
-     * @param value
-     * @return this PipelineBuilder for method chaining.
-     */
-    public PipelineInitializer setMaxContentLength(int value) {
-        this.maxContentLength = value;
-        return this;
-    }
+	public SSLContext getSSLContext()
+	{
+		return sslContext;
+	}
 
-    public PipelineInitializer setSSLContext(SSLContext sslContext) {
-        this.sslContext = sslContext;
-        return this;
-    }
+	// SECTION: CHANNEL PIPELINE FACTORY
 
-    public SSLContext getSSLContext() {
-        return sslContext;
-    }
+	@Override
+	public void initChannel(SocketChannel ch) throws Exception
+	{
+		ChannelPipeline pipeline = ch.pipeline();
 
-    // SECTION: CHANNEL PIPELINE FACTORY
+		if (null != sslContext)
+		{
+			SSLEngine sslEngine = sslContext.createSSLEngine();
+			sslEngine.setUseClientMode(false);
+			SslHandler sslHandler = new SslHandler(sslEngine);
+			pipeline.addLast("ssl", sslHandler);
+		}
 
-    @Override
-    public void initChannel(SocketChannel ch)
-            throws Exception {
-        ChannelPipeline pipeline = ch.pipeline();
+		// Inbound handlers
+		pipeline.addLast("decoder", new HttpRequestDecoder());
+		pipeline.addLast("inflater", new HttpContentDecompressor());
 
-        if (null != sslContext) {
-            SSLEngine sslEngine = sslContext.createSSLEngine();
-            sslEngine.setUseClientMode(false);
-            SslHandler sslHandler = new SslHandler(sslEngine);
-            pipeline.addLast("ssl", sslHandler);
-        }
+		// Outbound handlers
+		pipeline.addLast("encoder", new HttpResponseEncoder());
+		pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
+		pipeline.addLast("deflater", new HttpContentCompressor());
 
-        // Inbound handlers
-        pipeline.addLast("decoder", new HttpRequestDecoder());
-        pipeline.addLast("inflater", new HttpContentDecompressor());
+		// Aggregator MUST be added last, otherwise results are not correct
+		pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
 
-        // Outbound handlers
-        pipeline.addLast("encoder", new HttpResponseEncoder());
-        pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
-        pipeline.addLast("deflater", new HttpContentCompressor());
+		addAllHandlers(pipeline);
+	}
 
-        // Aggregator MUST be added last, otherwise results are not correct
-        pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
+	private void addAllHandlers(ChannelPipeline pipeline)
+    {
+		if (executorThreadCount > 0)
+		{
+			EventExecutorGroup group = new DefaultEventExecutorGroup(executorThreadCount);
 
-        for (ChannelHandler handler : requestHandlers) {
-            pipeline.addLast(handler.getClass().getSimpleName(), handler);
-        }
+			for (ChannelHandler handler : requestHandlers)
+			{
+				pipeline.addLast(group, handler.getClass().getSimpleName(), handler);
+			}
+		}
+		else
+		{
+		    for (ChannelHandler handler : requestHandlers)
+			{
+				pipeline.addLast(handler.getClass().getSimpleName(), handler);
+			}
+		}
     }
 }
