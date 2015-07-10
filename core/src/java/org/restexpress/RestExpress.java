@@ -17,16 +17,17 @@
 package org.restexpress;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelGroupFuture;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.util.concurrent.Future;
+import io.netty.util.ResourceLeakDetector;
+import io.netty.util.ResourceLeakDetector.Level;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.net.InetSocketAddress;
@@ -72,21 +73,24 @@ import org.restexpress.util.DefaultShutdownHook;
  */
 public class RestExpress
 {
-	private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress", GlobalEventExecutor.INSTANCE);
+	static
+	{
+		ResourceLeakDetector.setLevel(Level.DISABLED);
+	}
+
+    private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress", GlobalEventExecutor.INSTANCE);
 
 	public static final String DEFAULT_NAME = "RestExpress";
 	public static final int DEFAULT_PORT = 8081;
 
 	private static SerializationProvider SERIALIZATION_PROVIDER = null;
 
-	private ServerBootstrap bootstrap;
 	private SocketSettings socketSettings = new SocketSettings();
 	private ServerSettings serverSettings = new ServerSettings();
 	private RouteDefaults routeDefaults = new RouteDefaults();
 	private boolean enforceHttpSpec = false;
 	private boolean useSystemOut;
-	private EventLoopGroup bossGroup;
-	private EventLoopGroup workerGroup;
+	private ServerBootstrapFactory bootstrapFactory = new ServerBootstrapFactory();
 
 	private List<MessageObserver> messageObservers = new ArrayList<MessageObserver>();
 	private List<Preprocessor> preprocessors = new ArrayList<Preprocessor>();
@@ -545,20 +549,14 @@ public class RestExpress
 	{
 		setPort(port);
 
-		// Configure the server.
-		bossGroup = new NioEventLoopGroup();
-		workerGroup = new NioEventLoopGroup(getIoThreadCount());
-		bootstrap = new ServerBootstrap()
-			.group(bossGroup, workerGroup)
-		    .channel(NioServerSocketChannel.class);
-
+		ServerBootstrap bootstrap = bootstrapFactory.newServerBootstrap(getIoThreadCount());
 		bootstrap.childHandler(new PipelineInitializer()
-			.setExecutorThreadCount(getExecutorThreadCount())
+			.setExecutionHandler(initializeExecutorGroup())
 		    .addRequestHandler(buildRequestHandler())
 		    .setSSLContext(sslContext)
 		    .setMaxContentLength(serverSettings.getMaxContentSize()));
 
-		setBootstrapOptions();
+		setBootstrapOptions(bootstrap);
 
 		// Bind and start to accept incoming connections.
 		if (shouldUseSystemOut())
@@ -574,15 +572,32 @@ public class RestExpress
 		return channel;
 	}
 
-	private void setBootstrapOptions()
+	private EventExecutorGroup initializeExecutorGroup()
+    {
+		if (getExecutorThreadCount() > 0)
+		{
+			return new DefaultEventExecutorGroup(getExecutorThreadCount());
+		}
+
+		return null;
+    }
+
+	private void setBootstrapOptions(ServerBootstrap bootstrap)
 	{
-		bootstrap.option(ChannelOption.TCP_NODELAY, useTcpNoDelay());
+		bootstrap.option(ChannelOption.SO_KEEPALIVE, useKeepAlive());
+		bootstrap.option(ChannelOption.SO_BACKLOG, 1024);
+	    bootstrap.option(ChannelOption.TCP_NODELAY, useTcpNoDelay());
 		bootstrap.option(ChannelOption.SO_KEEPALIVE, serverSettings.isKeepAlive());
 		bootstrap.option(ChannelOption.SO_REUSEADDR, shouldReuseAddress());
 		bootstrap.option(ChannelOption.SO_LINGER, getSoLinger());
-		bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-		    getConnectTimeoutMillis());
+		bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getConnectTimeoutMillis());
 		bootstrap.option(ChannelOption.SO_RCVBUF, getReceiveBufferSize());
+		bootstrap.option(ChannelOption.MAX_MESSAGES_PER_READ, Integer.MAX_VALUE);
+
+		bootstrap.childOption(ChannelOption.ALLOCATOR, new PooledByteBufAllocator(true));
+	    bootstrap.childOption(ChannelOption.MAX_MESSAGES_PER_READ, Integer.MAX_VALUE);
+		bootstrap.childOption(ChannelOption.SO_RCVBUF, getReceiveBufferSize());
+		bootstrap.childOption(ChannelOption.SO_REUSEADDR, shouldReuseAddress());
 	}
 
 	/**
@@ -634,15 +649,7 @@ public class RestExpress
 	public void shutdown(boolean shouldWait)
 	{
 		ChannelGroupFuture channelFuture = allChannels.close();
-		Future<?> bossFuture = bossGroup.shutdownGracefully();
-		Future<?> workerFuture = workerGroup.shutdownGracefully();
-
-		if (shouldWait)
-		{
-			bossFuture.awaitUninterruptibly();
-			workerFuture.awaitUninterruptibly();
-		}
-
+		bootstrapFactory.shutdownGracefully(shouldWait);
 		channelFuture.awaitUninterruptibly();
 		shutdownPlugins();
 	}

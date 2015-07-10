@@ -14,14 +14,13 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 
 /**
  * Provides a tiny DSL to define the pipeline features.
@@ -40,7 +39,7 @@ extends ChannelInitializer<SocketChannel>
 
 	private List<ChannelHandler> requestHandlers = new ArrayList<ChannelHandler>();
 	private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
-	private int executorThreadCount = 0;
+	private EventExecutorGroup eventExecutorGroup = null;
 	private SSLContext sslContext = null;
 
 	// SECTION: CONSTRUCTORS
@@ -62,9 +61,9 @@ extends ChannelInitializer<SocketChannel>
 		return this;
 	}
 
-	public PipelineInitializer setExecutorThreadCount(int count)
+	public PipelineInitializer setExecutionHandler(EventExecutorGroup executorGroup)
 	{
-		this.executorThreadCount = count;
+		this.eventExecutorGroup = executorGroup;
 		return this;
 	}
 
@@ -126,13 +125,11 @@ extends ChannelInitializer<SocketChannel>
 
 	private void addAllHandlers(ChannelPipeline pipeline)
     {
-		if (executorThreadCount > 0)
+		if (eventExecutorGroup != null)
 		{
-			EventExecutorGroup group = new DefaultEventExecutorGroup(executorThreadCount);
-
 			for (ChannelHandler handler : requestHandlers)
 			{
-				pipeline.addLast(group, handler.getClass().getSimpleName(), handler);
+				pipeline.addLast(eventExecutorGroup, handler.getClass().getSimpleName(), handler);
 			}
 		}
 		else
