@@ -365,7 +365,14 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
 
     private Request createRequest(FullHttpRequest request, ChannelHandlerContext context)
     {
-    	return new Request((InetSocketAddress) context.channel().remoteAddress(), request, routeResolver, serializationProvider);
+    	try
+    	{
+	    	return new Request((InetSocketAddress) context.channel().remoteAddress(), request, routeResolver, serializationProvider);
+    	}
+    	catch(Throwable t)
+    	{
+        	return new Request(request, routeResolver, serializationProvider);
+    	}
     }
 
     private Response createResponse()

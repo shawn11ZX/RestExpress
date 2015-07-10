@@ -90,7 +90,7 @@ public class Request
 	 * @param routeResolver
 	 * @param serializationProvider
 	 */
-	protected Request(FullHttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
+	public Request(FullHttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
 	{
 		super();
 		this.httpRequest = request;
