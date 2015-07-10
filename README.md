@@ -74,6 +74,13 @@ Please see the Maven Archetypes at https://github.com/RestExpress/RestExpress-Ar
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+Release 0.11.1-SNAPSHOT - in 'master' branch
+--------------------------------------------
+* Fixed issue #110 - too many files open error.
+* Enhanced to use EPoll if it's available on the underlying OS.
+* Added support for ':in:' operator on query-string in filter operations (e.g. ?filter=name:in:a,b,c).
+* Introduced RestExpress.shutdown(boolean) to enable tests to optionally wait for a complete shutdown.
+
 Release 0.11.0 - 12 Mar 2015
 ----------------------------
 * **Bug Fix** Strip the response body from HEAD requests to conform to [RFC 2616](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4)(HTTP spec). (from Codey Whitt)
