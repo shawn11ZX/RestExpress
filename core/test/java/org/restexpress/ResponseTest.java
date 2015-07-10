@@ -98,7 +98,7 @@ public class ResponseTest
 		r.setCollectionResponse(new QueryRange(75l, 100), 0, 3);
 		assertEquals(416, r.getResponseStatus().code());
 		assertEquals("items 0-2/3", r.getHeader(HttpHeaders.Names.CONTENT_RANGE));
-		
+
 		r = new Response();
 		r.setCollectionResponse(new QueryRange(1l, 5), 0, 0);
 		assertEquals(416, r.getResponseStatus().code());
