@@ -16,18 +16,20 @@
  */
 package org.restexpress.pipeline;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.util.AttributeKey;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.AttributeKey;
+
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.restexpress.ContentType;
 import org.restexpress.Request;
 import org.restexpress.Response;
@@ -363,7 +365,7 @@ extends SimpleChannelInboundHandler<FullHttpRequest>
 
     private Request createRequest(FullHttpRequest request, ChannelHandlerContext context)
     {
-    	return new Request(request, routeResolver, serializationProvider);
+    	return new Request((InetSocketAddress) context.channel().remoteAddress(), request, routeResolver, serializationProvider);
     }
 
     private Response createResponse()

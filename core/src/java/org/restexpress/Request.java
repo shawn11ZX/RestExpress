@@ -17,9 +17,17 @@
 
 package org.restexpress;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.QueryStringDecoder;
+
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -30,14 +38,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.QueryStringDecoder;
 import org.restexpress.exception.BadRequestException;
 import org.restexpress.route.Route;
 import org.restexpress.route.RouteResolver;
@@ -72,12 +72,25 @@ public class Request
 	
 	// SECTION: CONSTRUCTOR
 
+	/**
+	 * For testing only.
+	 * 
+	 * @param request
+	 * @param routeResolver
+	 */
 	public Request(FullHttpRequest request, RouteResolver routeResolver)
 	{
 		this(request, routeResolver, null);
 	}
 
-	public Request(FullHttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
+	/**
+	 * For testing only.
+	 * 
+	 * @param request
+	 * @param routeResolver
+	 * @param serializationProvider
+	 */
+	protected Request(FullHttpRequest request, RouteResolver routeResolver, SerializationProvider serializationProvider)
 	{
 		super();
 		this.httpRequest = request;

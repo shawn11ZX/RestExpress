@@ -81,6 +81,7 @@ Release 0.11.1-SNAPSHOT - in 'master' branch
 * Added support for ':in:' operator on query-string in filter operations (e.g. ?filter=name:in:a,b,c).
 * Introduced RestExpress.shutdown(boolean) to enable tests to optionally wait for a complete shutdown.
 * Fix for returning 416 when offset is requested for an empty resultset (from Chamal Nanayakkara).
+* Fixed issue #108 - request.getRemoteAddress() always returns null.
 
 Release 0.11.0 - 12 Mar 2015
 ----------------------------
