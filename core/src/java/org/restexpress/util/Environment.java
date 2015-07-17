@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.restexpress.common.exception.ConfigurationException;
@@ -76,14 +77,15 @@ public abstract class Environment
 	throws ConfigurationException;
 
 	protected Properties readProperties(String environmentFile)
-	throws FileNotFoundException,
-	    IOException
+	throws FileNotFoundException, IOException
 	{
 		FileInputStream fis = null;
+		Properties properties = new Properties();
+		boolean wasLoadedFromClasspath = loadFromClasspath(environmentFile, properties);
+
 		try
 		{
 			File envFile = new File(environmentFile);
-			Properties properties = new Properties();
 			fis = new FileInputStream(envFile);
 			properties.load(fis);
 			return properties;
@@ -91,7 +93,12 @@ public abstract class Environment
 		catch (FileNotFoundException e)
 		{
 //			log.error("could not find properties file: " + e.getLocalizedMessage());
-			throw e;
+			if (!wasLoadedFromClasspath)
+			{
+				throw e;
+			}
+
+			return properties;
 		}
 		catch (IOException e)
 		{
@@ -105,6 +112,38 @@ public abstract class Environment
 				if (fis != null)
 				{
 					fis.close();
+				}
+			}
+			catch (IOException e)
+			{
+				// too late to care at this point
+			}
+		}
+	}
+
+	private boolean loadFromClasspath(String environmentFile, Properties properties)
+	throws IOException
+	{
+		String packagized = environmentFile.replace('/', '.');
+		InputStream cpis = ClassLoader.getSystemResourceAsStream(packagized);
+
+		try
+		{
+			if (cpis != null)
+			{
+				properties.load(cpis);
+				return true;
+			}
+	
+			return false;
+		}
+		finally
+		{
+			try
+			{
+				if (cpis != null)
+				{
+					cpis.close();
 				}
 			}
 			catch (IOException e)
