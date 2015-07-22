@@ -79,9 +79,9 @@ public abstract class Environment
 	protected Properties readProperties(String environmentFile)
 	throws FileNotFoundException, IOException
 	{
-		FileInputStream fis = null;
 		Properties properties = new Properties();
 		boolean wasLoadedFromClasspath = loadFromClasspath(environmentFile, properties);
+		FileInputStream fis = null;
 
 		try
 		{
@@ -124,8 +124,8 @@ public abstract class Environment
 	private boolean loadFromClasspath(String environmentFile, Properties properties)
 	throws IOException
 	{
-		String packagized = environmentFile.replace('/', '.');
-		InputStream cpis = ClassLoader.getSystemResourceAsStream(packagized);
+		String modified = (environmentFile.startsWith("/") ? environmentFile : "/" + environmentFile);
+		InputStream cpis = getClass().getResourceAsStream(modified);
 
 		try
 		{
