@@ -24,8 +24,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelGroupFuture;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.util.ResourceLeakDetector;
-import io.netty.util.ResourceLeakDetector.Level;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -73,17 +71,17 @@ import org.restexpress.util.DefaultShutdownHook;
  */
 public class RestExpress
 {
-	static
-	{
-		ResourceLeakDetector.setLevel(Level.DISABLED);
-	}
+//	static
+//	{
+//		ResourceLeakDetector.setLevel(Level.DISABLED);
+//	}
 
     private static final ChannelGroup allChannels = new DefaultChannelGroup("RestExpress", GlobalEventExecutor.INSTANCE);
 
 	public static final String DEFAULT_NAME = "RestExpress";
 	public static final int DEFAULT_PORT = 8081;
 
-	private static SerializationProvider SERIALIZATION_PROVIDER = null;
+	private static SerializationProvider DEFAULT_SERIALIZATION_PROVIDER = null;
 
 	private SocketSettings socketSettings = new SocketSettings();
 	private ServerSettings serverSettings = new ServerSettings();
@@ -100,6 +98,7 @@ public class RestExpress
 	private List<Plugin> plugins = new ArrayList<Plugin>();
 	private RouteDeclaration routeDeclarations = new RouteDeclaration();
 	private SSLContext sslContext = null;
+	private SerializationProvider serializationProvider = null;
 
 	/**
 	 * Change the default behavior for serialization.
@@ -107,20 +106,78 @@ public class RestExpress
 	 * which uses Jackson for JSON, XStream for XML.
 	 * 
 	 * @param provider a SerializationProvider instance.
+	 * @deprecated use setDefaultSerializationProvider()
 	 */
 	public static void setSerializationProvider(SerializationProvider provider)
 	{
-		SERIALIZATION_PROVIDER = provider;
+		setDefaultSerializationProvider(provider);
 	}
 
+	/**
+	 * @return the default serialization provider.
+	 * @deprecated Use getDefaultSerializationProvider()
+	 */
 	public static SerializationProvider getSerializationProvider()
 	{
-		if (SERIALIZATION_PROVIDER == null)
+		return getDefaultSerializationProvider();
+	}
+
+	/**
+	 * Change the default behavior for serialization.
+	 * If no SerializationProvider is set, default of DefaultSerializationProvider is used,
+	 * which uses Jackson for JSON, XStream for XML.
+	 * 
+	 * @param provider a SerializationProvider instance.
+	 */
+	public static void setDefaultSerializationProvider(SerializationProvider provider)
+	{
+		DEFAULT_SERIALIZATION_PROVIDER = provider;
+	}
+
+	/**
+	 * Get the default serialization provider for RestExpress. If the value is
+	 * unset DefaultSerializationProcessor is set as the default and returned.
+	 * Otherwise, the previously-set value for the default is returned.
+	 * 
+	 * @return the default serialization provider.
+	 */
+	public static SerializationProvider getDefaultSerializationProvider()
+	{
+		if (DEFAULT_SERIALIZATION_PROVIDER == null)
 		{
-			SERIALIZATION_PROVIDER = new DefaultSerializationProvider();
+			DEFAULT_SERIALIZATION_PROVIDER = new DefaultSerializationProvider();
 		}
 
-		return SERIALIZATION_PROVIDER;
+		return DEFAULT_SERIALIZATION_PROVIDER;
+	}
+
+	/**
+	 * Change the serialization provider for this server instance.
+	 * If no SerializationProcessor is set, default of DefaultSerializationProcessor is used,
+	 * which uses Jackson for JSON, XStream for XML.
+	 * 
+	 * @param provider a SerializationProvider instance.
+	 */
+	public void serializationProvider(SerializationProvider provider)
+	{
+		this.serializationProvider = provider;
+	}
+
+	/**
+	 * Get the serialization provider for this server instance. If none has
+	 * been set, it is set to the default serialization processor and returned.
+	 * Otherwise, the setting for this server is returned.
+	 * 
+	 * @return the SerializationProvider for this instance, or the default.
+	 */
+	public SerializationProvider serializationProvider()
+	{
+		if (serializationProvider == null)
+		{
+			serializationProvider(getDefaultSerializationProvider());
+		}
+
+		return serializationProvider;
 	}
 
 	/**
@@ -523,7 +580,7 @@ public class RestExpress
 	{
 		// Set up the event pipeline factory.
 		DefaultRequestHandler requestHandler = new DefaultRequestHandler(
-		    createRouteResolver(), getSerializationProvider(),
+		    createRouteResolver(), serializationProvider(),
 		    new DefaultHttpResponseWriter(), enforceHttpSpec);
 
 		// Add MessageObservers to the request handler here, if desired...
