@@ -81,6 +81,7 @@ Release 0.11.1-SNAPSHOT - in 'master' branch
 * Fixed issue #94 - Load configuration properties from classpath (if available) and override with those loaded from file system.
 * Fixed issue #106 - Deprecated RestExpress.setSerializationProvider() and RestExpress.getSerializationProvider() in favor of RestExpress.setDefaultSerializationProvider() and RestExpress.getDefaultSerializationProvider(). Also added new instance methods
 serializationProvider() to set and get the instance's serialization provider.
+* Fixed issue #89 - Made RouteBuilder.determineActionMethod() protected so subclasses can override.
 * Enhanced to use EPoll if it's available on the underlying OS.
 * Added support for ':in:' operator on query-string in filter operations (e.g. ?filter=name:in:a,b,c).
 * Introduced RestExpress.shutdown(boolean) to enable tests to optionally wait for a complete shutdown.

@@ -333,7 +333,7 @@ public abstract class RouteBuilder
 	 * @return a Method instance referring to the action on the controller.
 	 * @throws ConfigurationException if an error occurs.
 	 */
-	private Method determineActionMethod(Object controller, String actionName)
+	protected Method determineActionMethod(Object controller, String actionName)
 	{
 		try
 		{
