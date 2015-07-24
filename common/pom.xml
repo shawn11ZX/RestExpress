@@ -13,9 +13,4 @@
 		<artifactId>restexpress-parent</artifactId>
 		<version>0.11.1-SNAPSHOT</version>
 	</parent>
-
-	<build>
-		<sourceDirectory>src/java</sourceDirectory>
-		<testSourceDirectory>test/java</testSourceDirectory>
-	</build>
 </project>
