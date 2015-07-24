@@ -11,6 +11,6 @@
 	<parent>
 		<groupId>com.strategicgains</groupId>
 		<artifactId>restexpress-parent</artifactId>
-		<version>0.11.1-SNAPSHOT</version>
+		<version>0.11.1</version>
 	</parent>
 </project>
