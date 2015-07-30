@@ -75,6 +75,14 @@ Please see the Maven Archetypes at https://github.com/RestExpress/RestExpress-Ar
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 
+Release 0.11.3-SNAPSHOT in branch 'master'
+------------------------------------------
+* Changed signature of RestExpress.serializationProvider(SerializationProvider) to return the RestExpress server instance to facilitate method chaining.
+
+Release 0.11.2 - 26 Jul 2015
+----------------------------
+* Reduced Java source and target to 1.7
+
 Release 0.11.1 - 24 Jul 2015
 ----------------------------
 * Fixed issue #110 - too many files open error.

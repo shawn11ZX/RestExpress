@@ -157,10 +157,12 @@ public class RestExpress
 	 * which uses Jackson for JSON, XStream for XML.
 	 * 
 	 * @param provider a SerializationProvider instance.
+	 * @return this RestExpress server instance.
 	 */
-	public void serializationProvider(SerializationProvider provider)
+	public RestExpress serializationProvider(SerializationProvider provider)
 	{
 		this.serializationProvider = provider;
+		return this;
 	}
 
 	/**
