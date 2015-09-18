@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.restexpress.domain.metadata.RouteMetadata;
+import org.restexpress.exception.NoRoutesDefinedException;
 import org.restexpress.route.parameterized.ParameterizedRouteBuilder;
 import org.restexpress.route.regex.RegexRouteBuilder;
 import org.restexpress.settings.RouteDefaults;
@@ -76,9 +77,13 @@ public class RouteDeclaration
 
 	/**
 	 * Generate a RouteMapping (utilized by RouteResolver) from the declared routes.
+	 * 
+	 * @throws NoRoutesDefinedException if there are no defined routes for the server.
 	 */
 	public RouteMapping createRouteMapping(RouteDefaults defaults)
 	{
+		if (routeBuilders.isEmpty()) throw new NoRoutesDefinedException("No routes defined for server");
+
 		final RouteMapping results = new RouteMapping();
 
 		iterateRouteBuilders(new Callback<RouteBuilder>()

@@ -78,6 +78,7 @@ Change History/Release Notes:
 Release 0.11.3-SNAPSHOT in branch 'master'
 ------------------------------------------
 * Changed signature of RestExpress.serializationProvider(SerializationProvider) to return the RestExpress server instance to facilitate method chaining.
+* Issue #38 - Produce error on no routes defined for server. Now throws NoRoutesDefinedException on bind() if no routes are defined.
 
 Release 0.11.2 - 26 Jul 2015
 ----------------------------

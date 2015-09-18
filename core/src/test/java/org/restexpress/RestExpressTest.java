@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.RestExpress;
+import org.restexpress.exception.NoRoutesDefinedException;
 
 
 /**
@@ -235,6 +236,22 @@ public class RestExpressTest
 		delete.releaseConnection();
 
 		re.shutdown();
+	}
+
+	@Test(expected=NoRoutesDefinedException.class)
+	public void shouldThrowNoRoutesDefinedException()
+	{
+		RestExpress re = null;
+
+		try
+		{
+			re = new RestExpress();
+			re.bind(TEST_PORT);
+		}
+		finally
+		{
+			re.shutdown();
+		}
 	}
 
 	public class NoopController
