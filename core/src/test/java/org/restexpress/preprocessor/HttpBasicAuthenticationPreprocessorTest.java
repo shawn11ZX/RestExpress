@@ -18,17 +18,16 @@ package org.restexpress.preprocessor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.DefaultHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpVersion;
 import org.junit.Test;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.exception.UnauthorizedException;
 import org.restexpress.pipeline.Preprocessor;
-import org.restexpress.preprocessor.HttpBasicAuthenticationPreprocessor;
+
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
 
 /**
  * @author toddf
@@ -46,12 +45,14 @@ public class HttpBasicAuthenticationPreprocessorTest
 	}
 
 	@Test
-	public void shouldSetRequestHeadersOnSuccess()
+	public void shouldSetRequestAttachmentsOnSuccess()
 	{
 		r.addHeader(HttpHeaders.Names.AUTHORIZATION, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
 		p.process(r);
 		assertEquals("Aladdin", r.getHeader(HttpBasicAuthenticationPreprocessor.X_AUTHENTICATED_USER));
 		assertEquals("open sesame", r.getHeader(HttpBasicAuthenticationPreprocessor.X_AUTHENTICATED_PASSWORD));
+		assertEquals("Aladdin", r.getAttachment(HttpBasicAuthenticationPreprocessor.X_AUTHENTICATED_USER));
+		assertEquals("open sesame", r.getAttachment(HttpBasicAuthenticationPreprocessor.X_AUTHENTICATED_PASSWORD));
 	}
 
 	@Test

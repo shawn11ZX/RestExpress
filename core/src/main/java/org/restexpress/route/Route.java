@@ -18,6 +18,7 @@ package org.restexpress.route;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,7 +38,7 @@ import org.restexpress.url.UrlMatcher;
 
 /**
  * A Route is an immutable relationship between a URL pattern and a REST
- * service.
+ * controller.
  * 
  * @author toddf
  * @since May 4, 2010
@@ -82,22 +83,76 @@ public abstract class Route
 		this.parameters.putAll(parameters);
 		this.baseUrl = baseUrl;
 	}
-	
+
+	/**
+	 * Answer whether the route contains the given flag.
+	 * 
+	 * @param flag
+	 * @return true if the route contains the given flag.
+	 */
 	public boolean isFlagged(String flag)
 	{
+		if (flag == null) return false;
+
 		return flags.contains(flag);
 	}
-	
+
+	/**
+	 * Answer whether the route contains all the given flags.
+	 * 
+	 * @param flags
+	 * @return true if the route contains all the given flags.
+	 */
+	public boolean containsAllFlags(String[] flags)
+	{
+		if (flags == null) return false;
+
+		return this.flags.containsAll(Arrays.asList(flags));
+	}
+
+	/**
+	 * Answer whether the route contains any of the given flags.
+	 * 
+	 * @param flags
+	 * @return true if the route contains any of the given flags.
+	 */
+	public boolean containsAnyFlags(String[] flags)
+	{
+		if (flags == null) return false;
+
+		for (String flag : flags)
+		{
+			if (isFlagged(flag))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Answer whether the route contains the given parameter.
+	 * 
+	 * @param name
+	 * @return true if the route contains the given parameter. Otherwise false.
+	 */
 	public boolean hasParameter(String name)
 	{
 		return (getParameter(name) != null);
 	}
 
+	/**
+	 * Retrieve a parameter value by name from the route.
+	 * 
+	 * @param name
+	 * @return the parameter value or null if the name is not found.
+	 */
 	public Object getParameter(String name)
 	{
 		return parameters.get(name);
 	}
-	
+
 	public Method getAction()
 	{
 		return action;
@@ -153,16 +208,25 @@ public abstract class Route
 		return shouldSerializeResponse;
 	}
 
+	/**
+	 * @deprecated
+	 */
     public Collection<String> getSupportedFormats()
     {
 	    return Collections.unmodifiableList(supportedFormats);
     }
 	
+	/**
+	 * @deprecated
+	 */
 	public boolean hasSupportedFormats()
 	{
 		return (!supportedFormats.isEmpty());
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public void addAllSupportedFormats(List<String> formats)
 	{
 		supportedFormats.addAll(formats);
@@ -176,16 +240,25 @@ public abstract class Route
 		}
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public boolean supportsFormat(String format)
 	{
 		return supportedFormats.contains(format);
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public String getDefaultFormat()
 	{
 		return defaultFormat;
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public boolean hasDefaultFormat()
 	{
 		return defaultFormat != null;

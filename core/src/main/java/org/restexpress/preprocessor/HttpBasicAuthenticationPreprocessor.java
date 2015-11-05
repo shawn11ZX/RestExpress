@@ -34,6 +34,11 @@ import org.restexpress.route.Route;
  * </code>
  * <p/>
  * Once this preprocessor completes successfully, it places the username and
+ * password in the request as attachments, X-AuthenticatedUser and
+ * X-AuthenticatedPassword, respectively.
+ * <p/>
+ * <b>Deprecated:</b><br>
+ * Once this preprocessor completes successfully, it places the username and
  * password in the request as headers, X-AuthenticatedUser and
  * X-AuthenticatedPassword, respectively.
  * <p/>
@@ -42,7 +47,7 @@ import org.restexpress.route.Route;
  * to 'Basic realm=<provided realm>' where <provided realm> is the arbitrary realm
  * name passed in on instantiation.
  * <p/>
- * Use of this preprocessor assumes you'll implement an authorization
+ * Use of this preprocessor assumes you'll implement a downstream authorization
  * preprocessor that validates the username and password.
  * 
  * @author toddf
@@ -57,17 +62,39 @@ implements Preprocessor
 	private String realm;
 
 	/**
+	 * If a route is flagged with ANY of these, this preprocessor will be skipped.
+	 */
+	private String[] skipFlags;
+
+	/**
 	 * Utilize HTTP Basic Authentication with the given realm returned on an
 	 * unauthenticated request.
 	 * 
-	 * @param realm
-	 *            any value to identify the secure area and may used by HTTP
-	 *            clients to manage passwords.
+	 * @param realm any value to identify the secure area and may used by HTTP 
+	 * clients to manage passwords.
 	 */
 	public HttpBasicAuthenticationPreprocessor(String realm)
 	{
+		this(realm, (String[]) null);
+	}
+
+	/**
+	 * Utilize HTTP Basic Authentication with the given realm returned on an
+	 * unauthenticated request.
+	 * 
+	 * @param realm any value to identify the secure area and may used by HTTP 
+	 * clients to manage passwords.
+	 * @param flags is a string array containing any route flags that cause the skipping of basic authentication. Possibly null.
+	 */
+	public HttpBasicAuthenticationPreprocessor(String realm, String... flags)
+	{
 		super();
 		this.realm = realm;
+
+		if (flags != null && flags.length > 0)
+		{
+			this.skipFlags = flags.clone();
+		}
 	}
 
 	@Override
@@ -76,7 +103,8 @@ implements Preprocessor
 		Route route = request.getResolvedRoute();
 
 		if (route != null && (route.isFlagged(Flags.Auth.PUBLIC_ROUTE)
-			|| route.isFlagged(Flags.Auth.NO_AUTHENTICATION)))
+			|| route.isFlagged(Flags.Auth.NO_AUTHENTICATION)
+			|| route.containsAnyFlags(skipFlags)))
 		{
 			return;
 		}
@@ -100,6 +128,8 @@ implements Preprocessor
 
 		request.addHeader(X_AUTHENTICATED_USER, parts[0]);
 		request.addHeader(X_AUTHENTICATED_PASSWORD, parts[1]);
+		request.putAttachment(X_AUTHENTICATED_USER, parts[0]);
+		request.putAttachment(X_AUTHENTICATED_PASSWORD, parts[1]);
 	}
 
 	private void throwUnauthorizedException()
