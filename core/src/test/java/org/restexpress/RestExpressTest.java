@@ -25,15 +25,17 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpOptions;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
-import io.netty.handler.codec.http.HttpHeaders;
 import org.junit.Test;
-import org.restexpress.Request;
-import org.restexpress.Response;
-import org.restexpress.RestExpress;
 import org.restexpress.exception.NoRoutesDefinedException;
+
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 
 
 /**
@@ -164,6 +166,9 @@ public class RestExpressTest
 		assertEquals(0, controller.create);
 		assertEquals(0, controller.update);
 		assertEquals(0, controller.delete);
+		assertEquals(0, controller.options);
+		assertEquals(0, controller.head);
+		assertEquals(0, controller.patch);
 		get.releaseConnection();
 		
 		HttpPost post = new HttpPost(TEST_URL);
@@ -173,6 +178,9 @@ public class RestExpressTest
 		assertEquals(1, controller.read);
 		assertEquals(0, controller.update);
 		assertEquals(0, controller.delete);
+		assertEquals(0, controller.options);
+		assertEquals(0, controller.head);
+		assertEquals(0, controller.patch);
 		post.releaseConnection();
 
 		HttpPut put = new HttpPut(TEST_URL);
@@ -182,6 +190,9 @@ public class RestExpressTest
 		assertEquals(1, controller.read);
 		assertEquals(1, controller.create);
 		assertEquals(0, controller.delete);
+		assertEquals(0, controller.options);
+		assertEquals(0, controller.head);
+		assertEquals(0, controller.patch);
 		put.releaseConnection();
 
 		HttpDelete delete = new HttpDelete(TEST_URL);
@@ -191,7 +202,115 @@ public class RestExpressTest
 		assertEquals(1, controller.read);
 		assertEquals(1, controller.create);
 		assertEquals(1, controller.update);
+		assertEquals(0, controller.options);
+		assertEquals(0, controller.head);
+		assertEquals(0, controller.patch);
 		delete.releaseConnection();
+
+		HttpOptions options = new HttpOptions(TEST_URL);
+		response = (HttpResponse) client.execute(options);
+		assertEquals(405, response.getStatusLine().getStatusCode());
+		options.releaseConnection();
+
+		re.shutdown();
+	}
+
+	@Test
+	public void shouldCallAltMethods()
+	throws ClientProtocolException, IOException
+	{
+		RestExpress re = new RestExpress();
+		NoopController controller = new NoopController();
+		re.uri(TEST_PATH, controller)
+			.method(HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.PATCH);
+		re.bind(TEST_PORT);
+		
+		HttpClient client = new DefaultHttpClient();
+		HttpGet get = new HttpGet(TEST_URL);
+		HttpResponse response = (HttpResponse) client.execute(get);
+		assertEquals(405, response.getStatusLine().getStatusCode());
+		get.releaseConnection();
+
+		HttpOptions options = new HttpOptions(TEST_URL);
+		response = (HttpResponse) client.execute(options);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(0, controller.delete);
+		assertEquals(0, controller.read);
+		assertEquals(0, controller.create);
+		assertEquals(0, controller.update);
+		assertEquals(1, controller.options);
+		assertEquals(0, controller.head);
+		assertEquals(0, controller.patch);
+		options.releaseConnection();
+
+		HttpHead head = new HttpHead(TEST_URL);
+		response = (HttpResponse) client.execute(head);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(0, controller.delete);
+		assertEquals(0, controller.read);
+		assertEquals(0, controller.create);
+		assertEquals(0, controller.update);
+		assertEquals(1, controller.options);
+		assertEquals(1, controller.head);
+		assertEquals(0, controller.patch);
+		head.releaseConnection();
+
+		HttpPatch patch = new HttpPatch(TEST_URL);
+		response = (HttpResponse) client.execute(patch);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(0, controller.delete);
+		assertEquals(0, controller.read);
+		assertEquals(0, controller.create);
+		assertEquals(0, controller.update);
+		assertEquals(1, controller.options);
+		assertEquals(1, controller.head);
+		assertEquals(1, controller.patch);
+		patch.releaseConnection();
+
+		re.shutdown();
+	}
+
+	@Test
+	public void shouldCallAltNamedMethods()
+	throws ClientProtocolException, IOException
+	{
+		RestExpress re = new RestExpress();
+		AltController controller = new AltController();
+		re.uri(TEST_PATH, controller)
+			.action("altHead", HttpMethod.HEAD)
+			.action("altOptions", HttpMethod.OPTIONS)
+			.action("altPatch", HttpMethod.PATCH);
+		re.bind(TEST_PORT);
+		
+		HttpClient client = new DefaultHttpClient();
+		HttpGet get = new HttpGet(TEST_URL);
+		HttpResponse response = (HttpResponse) client.execute(get);
+		assertEquals(405, response.getStatusLine().getStatusCode());
+		get.releaseConnection();
+
+		HttpOptions options = new HttpOptions(TEST_URL);
+		response = (HttpResponse) client.execute(options);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(1, controller.options);
+		assertEquals(0, controller.head);
+		assertEquals(0, controller.patch);
+		options.releaseConnection();
+
+		HttpHead head = new HttpHead(TEST_URL);
+		response = (HttpResponse) client.execute(head);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(1, controller.options);
+		assertEquals(1, controller.head);
+		assertEquals(0, controller.patch);
+		head.releaseConnection();
+
+		HttpPatch patch = new HttpPatch(TEST_URL);
+		response = (HttpResponse) client.execute(patch);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertEquals(1, controller.options);
+		assertEquals(1, controller.head);
+		assertEquals(1, controller.patch);
+		patch.releaseConnection();
 
 		re.shutdown();
 	}
@@ -256,7 +375,7 @@ public class RestExpressTest
 
 	public class NoopController
     {
-		int create, read, update, delete = 0;
+		int create, read, update, delete, options, head, patch = 0;
 		String outputMediaType;
 
 		public void create(Request req, Response res)
@@ -282,6 +401,42 @@ public class RestExpressTest
 		{
 			++delete;
 			outputMediaType = res.getSerializationSettings().getMediaType();
+		}
+
+		public void options(Request req, Response res)
+		{
+			++options;
+		}
+
+		public void head(Request req, Response res)
+		{
+			++head;
+		}
+
+		public void patch(Request req, Response res)
+		{
+			++patch;
+		}
+    }
+
+	public class AltController
+    {
+		int options, head, patch = 0;
+		String outputMediaType;
+
+		public void altOptions(Request req, Response res)
+		{
+			++options;
+		}
+
+		public void altHead(Request req, Response res)
+		{
+			++head;
+		}
+
+		public void altPatch(Request req, Response res)
+		{
+			++patch;
 		}
     }
 }

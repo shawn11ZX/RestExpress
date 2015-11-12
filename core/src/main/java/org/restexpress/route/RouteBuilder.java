@@ -2,8 +2,6 @@ package org.restexpress.route;
 
 import static io.netty.handler.codec.http.HttpMethod.DELETE;
 import static io.netty.handler.codec.http.HttpMethod.GET;
-import static io.netty.handler.codec.http.HttpMethod.HEAD;
-import static io.netty.handler.codec.http.HttpMethod.OPTIONS;
 import static io.netty.handler.codec.http.HttpMethod.POST;
 import static io.netty.handler.codec.http.HttpMethod.PUT;
 
@@ -16,13 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
 import org.restexpress.Response;
 import org.restexpress.common.exception.ConfigurationException;
 import org.restexpress.domain.metadata.RouteMetadata;
 import org.restexpress.domain.metadata.UriMetadata;
 import org.restexpress.settings.RouteDefaults;
+
+import io.netty.handler.codec.http.HttpMethod;
 
 /**
  * Builds a route for a single URI.  If a URI is given with no methods or actions, the builder
@@ -39,8 +38,6 @@ public abstract class RouteBuilder
 	static final String GET_ACTION_NAME = "read";
 	static final String POST_ACTION_NAME = "create";
 	static final String PUT_ACTION_NAME = "update";
-	static final String HEAD_ACTION_NAME = "headers";
-	static final String OPTION_ACTION_NAME = "options";
 	static final List<HttpMethod> DEFAULT_HTTP_METHODS = Arrays.asList(new HttpMethod[] {GET, POST, PUT, DELETE});
 	static final Map<HttpMethod, String> ACTION_MAPPING = new HashMap<HttpMethod, String>();
 
@@ -50,8 +47,6 @@ public abstract class RouteBuilder
 		ACTION_MAPPING.put(GET, GET_ACTION_NAME);
 		ACTION_MAPPING.put(POST, POST_ACTION_NAME);
 		ACTION_MAPPING.put(PUT, PUT_ACTION_NAME);
-		ACTION_MAPPING.put(HEAD, HEAD_ACTION_NAME);
-		ACTION_MAPPING.put(OPTIONS, OPTION_ACTION_NAME);
 	}
 
 	
@@ -122,7 +117,7 @@ public abstract class RouteBuilder
 	}
 	
 	/**
-	 * Defines HTTP methods that the route will support (e.g. GET, PUT, POST, DELETE, OPTIONS, HEAD).
+	 * Defines HTTP methods that the route will support (e.g. GET, PUT, POST, DELETE, OPTIONS, HEAD, PATCH).
 	 * This utilizes the default HTTP method to service action mapping (e.g. GET maps to read(), PUT to update(), etc.).
 	 * 
 	 * @param methods the HTTP methods supported by the route.
@@ -178,7 +173,13 @@ public abstract class RouteBuilder
 		this.name = name;
 		return this;
 	}
-	
+
+	/**
+	 * 
+	 * @param format
+	 * @return
+	 * @deprecated
+	 */
 	public RouteBuilder format(String format)
 	{
 		if (!supportedFormats.contains(format))
@@ -188,7 +189,13 @@ public abstract class RouteBuilder
 		
 		return this;
 	}
-	
+
+	/**
+	 * 
+	 * @param format
+	 * @return
+	 * @deprecated
+	 */
 	public RouteBuilder defaultFormat(String format)
 	{
 		this.defaultFormat = format;
@@ -226,12 +233,24 @@ public abstract class RouteBuilder
 		return this;
 	}
 
+	/**
+	 * NOT IMPLEMENTED.
+	 * 
+	 * @return
+	 * @deprecated
+	 */
 	public RouteBuilder useStreamingMultipartUpload()
 	{
 		// TODO: complete supportMultipart()
 		return this;
 	}
 	
+	/**
+	 * NOT IMPLEMENTED.
+	 * 
+	 * @return
+	 * @deprecated
+	 */
 	public RouteBuilder useStreamingDownload()
 	{
 		// TODO: complete useStreamingdownload()
@@ -263,6 +282,11 @@ public abstract class RouteBuilder
 			if (actionName == null)
 			{
 				actionName = ACTION_MAPPING.get(method);
+
+				if (actionName == null)
+				{
+					actionName = method.name().toLowerCase();
+				}
 			}
 			
 			Method action = determineActionMethod(controller, actionName);

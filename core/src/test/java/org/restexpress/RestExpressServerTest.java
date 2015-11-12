@@ -93,7 +93,7 @@ public class RestExpressServerTest
 	public RestExpress createServer()
 	{
 		RestExpress server = new RestExpress();
-		RestExpress.setSerializationProvider(DEFAULT_SERIALIZER);
+		RestExpress.setDefaultSerializationProvider(DEFAULT_SERIALIZER);
 		StringTestController stringTestController = new StringTestController();
 		ObjectTestController objectTestController = new ObjectTestController();
 		EchoTestController echoTestController = new EchoTestController();

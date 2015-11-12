@@ -178,7 +178,15 @@ public class RouteMapping
 	 */
 	public void addRoute(Route route)
 	{
-		routes.get(route.getMethod()).add(route);
+		List<Route> list = routes.get(route.getMethod());
+
+		if (list == null)
+		{
+			list = new ArrayList<Route>();
+			routes.put(route.getMethod(), list);
+		}
+
+		list.add(route);
 		addByPattern(route);
 
 		if (route.hasName())
