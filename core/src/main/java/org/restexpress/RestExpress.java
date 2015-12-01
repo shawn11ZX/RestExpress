@@ -267,6 +267,26 @@ public class RestExpress
 		return this;
 	}
 
+	public String getHostname()
+	{
+		return serverSettings.getHostname();
+	}
+
+	public boolean hasHostname()
+	{
+		return serverSettings.hasHostname();
+	}
+
+	/**
+	 * Set the hostname or IP address that the server will listen on.
+	 * 
+	 * @param hostname hostname or IP address.
+	 */
+	public void setHostname(String hostname)
+	{
+		serverSettings.setHostname(hostname);
+	}
+
 	public RestExpress addMessageObserver(MessageObserver observer)
 	{
 		if (!messageObservers.contains(observer))
@@ -608,6 +628,29 @@ public class RestExpress
 	{
 		setPort(port);
 
+		if (hasHostname())
+		{
+			return bind(new InetSocketAddress(getHostname(), port));
+		}
+
+		return bind(new InetSocketAddress(port));
+	}
+
+	/**
+	 * Bind to a particular hostname or IP address and port.
+	 * 
+	 * @param hostname
+	 * @param port
+	 * @return
+	 */
+	public Channel bind(String hostname, int port)
+	{
+		setPort(port);
+		return bind(new InetSocketAddress(hostname, port));
+	}
+
+	public Channel bind(InetSocketAddress ipAddress)
+	{
 		ServerBootstrap bootstrap = bootstrapFactory.newServerBootstrap(getIoThreadCount());
 		bootstrap.childHandler(new PipelineInitializer()
 			.setExecutionHandler(initializeExecutorGroup())
@@ -620,14 +663,13 @@ public class RestExpress
 		// Bind and start to accept incoming connections.
 		if (shouldUseSystemOut())
 		{
-			System.out.println(getName() + " server listening on port " + port);
+			System.out.println(getName() + " server listening on port " + ipAddress.toString());
 		}
 
-		Channel channel = bootstrap.bind(new InetSocketAddress(port)).channel();
+		Channel channel = bootstrap.bind(ipAddress).channel();
 		allChannels.add(channel);
 
 		bindPlugins();
-
 		return channel;
 	}
 
