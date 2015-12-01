@@ -27,6 +27,7 @@ public class ServerSettings
 
 	private String name;
 	private int port;
+	private String hostname;
 	private boolean keepAlive = true;
 	private boolean reuseAddress = true;
 	private int maxContentSize = DEFAULT_MAX_CONTENT_SIZE;
@@ -90,7 +91,22 @@ public class ServerSettings
 	{
 		this.executorThreadPoolSize = executorThreadCount;
 	}
-	
+
+	public String getHostname()
+	{
+		return hostname;
+	}
+
+	public boolean hasHostname()
+	{
+		return (hostname != null);
+	}
+
+	public void setHostname(String hostname)
+	{
+		this.hostname = hostname;
+	}
+
 	public int getPort()
 	{
 		return port;
