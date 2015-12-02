@@ -81,6 +81,7 @@ Release 0.11.3-SNAPSHOT in branch 'master'
 * Issue #38 - Produce error on no routes defined for server. Now throws NoRoutesDefinedException on bind() if no routes are defined.
 * Issue #122 - Listen on prescribed local IP address.
 * Issue #123 - Routes Exception when using PATCH method.
+* Upgraded to jackson-databind 2.6.0 (from 2.4.2).
 
 
 Release 0.11.2 - 26 Jul 2015
