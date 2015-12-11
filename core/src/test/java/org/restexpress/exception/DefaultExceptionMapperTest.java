@@ -24,6 +24,28 @@ public class DefaultExceptionMapperTest
 	}
 
 	@Test
+	public void shouldMapCause()
+	{
+		mapping.map(ArrayIndexOutOfBoundsException.class, ServiceException.class);
+		Throwable t = new RuntimeException(new ArrayIndexOutOfBoundsException("Important information here"));
+		Throwable u = mapping.getExceptionFor(t);
+		assertNotNull(u);
+		assertEquals("Important information here", u.getMessage());
+		assertTrue(t == u.getCause());
+	}
+
+	@Test
+	public void shouldNotMapCause()
+	{
+		mapping.map(IndexOutOfBoundsException.class, ServiceException.class);
+		Throwable t = new IndexOutOfBoundsException("Important information here");
+		Throwable u = mapping.getExceptionFor(t);
+		assertNotNull(u);
+		assertEquals("Important information here", u.getMessage());
+		assertTrue(t == u.getCause());
+	}
+
+	@Test
 	public void shouldMapToNull()
 	{
 		mapping.map(ArrayIndexOutOfBoundsException.class, ServiceException.class);

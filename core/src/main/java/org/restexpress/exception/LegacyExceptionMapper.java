@@ -25,8 +25,9 @@ import java.util.Map;
  * 
  * @author toddf
  * @since Oct 13, 2010
+ * @deprecated Use DefaultExceptionMapper
  */
-public class DefaultExceptionMapper
+public class LegacyExceptionMapper
 implements ExceptionMapping
 {
 	private Map<Class<? extends Throwable>, Class<? extends ServiceException>> exceptions =
@@ -39,15 +40,14 @@ implements ExceptionMapping
 
 	public ServiceException getExceptionFor(Throwable throwable)
 	{
-		Throwable from = getMappableThrowable(throwable);
-		Class<?> mapped = exceptions.get(from.getClass());
+		Class<?> mapped = exceptions.get(throwable.getClass());
 		
 		if (mapped != null)
 		{
 			try
             {
 	            Constructor<?> constructor = mapped.getConstructor(String.class, Throwable.class);
-	            return (ServiceException) constructor.newInstance(from.getMessage(), throwable);
+	            return (ServiceException) constructor.newInstance(throwable.getMessage(), throwable);
             }
             catch (Exception e)
             {
@@ -56,22 +56,5 @@ implements ExceptionMapping
 		}
 		
 		return null;
-	}
-
-	private Throwable getMappableThrowable(Throwable throwable)
-	{
-		Throwable mappable = throwable;
-
-		if (RuntimeException.class.equals(throwable.getClass()))
-		{
-			Throwable cause = throwable.getCause();
-
-			if (cause != null)
-			{
-				mappable = cause;
-			}
-		}
-
-		return mappable;
 	}
 }
