@@ -119,6 +119,24 @@ public class MediaTypeParser
 			this.rank = rank;
 		}
 
+		@Override
+		public boolean equals(Object that)
+		{
+			if (that == null) return false;
+
+			if (this.getClass().isAssignableFrom(that.getClass()))
+			{
+				return (compareTo((WeightedMatch) that) == 0);
+			}
+
+			return false;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return getClass().hashCode() + rank + mediaRange.hashCode();
+		}
 		/**
 		 * Reverse-rank natural ordering.
 		 */

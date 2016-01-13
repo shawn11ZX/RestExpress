@@ -259,9 +259,11 @@ implements SerializationProvider
     {
 		if (Aliasable.class.isAssignableFrom(processor.getClass()))
 		{
+			Aliasable p = (Aliasable) processor;
+
 			for (Alias a : aliases)
 			{
-				((Aliasable) processor).alias(a.name, a.type);
+				p.alias(a.name, a.type);
 			}
 		}
     }
@@ -282,7 +284,7 @@ implements SerializationProvider
 
 	// SECTION: INNER CLASS
 
-	private class Alias
+	private static class Alias
 	{
 		private String name;
 		private Class<?> type;
@@ -297,17 +299,32 @@ implements SerializationProvider
 		@Override
 		public boolean equals(Object that)
 		{
-			return equals((Alias) that);
+			if (that == null) return false;
+
+			if (this.getClass().isAssignableFrom(that.getClass()))
+			{
+				return equals((Alias) that);
+			}
+
+			return false;
 		}
 		
-		private boolean equals(Alias that)
+		public boolean equals(Alias that)
 		{
+			if (that == null) return false;
+
 			if (this.name.equals(that.name) && this.type.equals(that.type))
 			{
 				return true;
 			}
 
 			return false;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return this.getClass().hashCode() + name.hashCode() + type.hashCode();
 		}
 	}
 }

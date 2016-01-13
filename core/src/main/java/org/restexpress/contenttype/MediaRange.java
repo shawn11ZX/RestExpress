@@ -152,11 +152,20 @@ public class MediaRange
 	@Override
 	public boolean equals(Object that)
 	{
-		return equals((MediaRange) that);
+		if (that == null) return false;
+
+		if (this.getClass().isAssignableFrom(that.getClass()))
+		{
+			return equals((MediaRange) that);
+		}
+
+		return false;
 	}
 
 	public boolean equals(MediaRange that)
 	{
+		if (that == null) return false;
+
 		boolean result = (name.equals(that.name) && type.equals(that.type) && subtype.equals(that.subtype));
 		
 		if (!result) return false;
@@ -169,6 +178,6 @@ public class MediaRange
 	@Override
 	public int hashCode()
 	{
-		return 31 + name.hashCode() + parameters.hashCode() + (int) (qvalue * 10.0);
+		return this.getClass().hashCode() + name.hashCode() + parameters.hashCode() + (int) (qvalue * 10.0);
 	}
 }

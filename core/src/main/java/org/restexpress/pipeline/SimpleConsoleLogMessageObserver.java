@@ -90,7 +90,7 @@ extends MessageObserver
 	
 	// SECTION: INNER CLASS
 	
-	private class Timer
+	private static class Timer
 	{
 		private long startMillis = 0;
 		private long stopMillis = 0;

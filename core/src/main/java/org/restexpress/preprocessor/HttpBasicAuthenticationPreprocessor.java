@@ -18,6 +18,8 @@ package org.restexpress.preprocessor;
 import javax.xml.bind.DatatypeConverter;
 
 import io.netty.handler.codec.http.HttpHeaders;
+
+import org.restexpress.ContentType;
 import org.restexpress.Flags;
 import org.restexpress.Request;
 import org.restexpress.exception.UnauthorizedException;
@@ -118,7 +120,7 @@ implements Preprocessor
 
 		String[] pieces = authorization.split(" ");
 		byte[] bytes = DatatypeConverter.parseBase64Binary(pieces[1]);
-		String credentials = new String(bytes);
+		String credentials = new String(bytes, ContentType.CHARSET);
 		String[] parts = credentials.split(":");
 
 		if (parts.length < 2)

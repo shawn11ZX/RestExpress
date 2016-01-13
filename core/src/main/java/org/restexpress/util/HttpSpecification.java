@@ -58,6 +58,7 @@ public final class HttpSpecification
 					break;
 				case 405:
 					enforce405(response);
+					break;
 				default:
 					break;
 			}

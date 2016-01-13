@@ -59,6 +59,8 @@ implements Plugin
 	@Override
 	public boolean equals(Object other)
 	{
+		if (other == null) return false;
+
 		if (AbstractPlugin.class.isAssignableFrom(other.getClass()))
 		{
 			return equals((AbstractPlugin) other);
@@ -69,6 +71,8 @@ implements Plugin
 	
 	public boolean equals(AbstractPlugin plugin)
 	{
+		if (plugin == null) return false;
+
 		return this.getClass().getSimpleName().equals(plugin.getClass().getSimpleName());
 	}
 
