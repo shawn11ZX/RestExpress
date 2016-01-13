@@ -81,9 +81,9 @@ Release 0.11.3-SNAPSHOT in branch 'master'
 * Issue #38 - Produce error on no routes defined for server. Now throws NoRoutesDefinedException on bind() if no routes are defined.
 * Issue #122 - Listen on prescribed local IP address.
 * Issue #123 - Routes Exception when using PATCH method.
+* Issue #125 - Changed DefaultExceptionMapper to map cause for RuntimeException (not sub-classes) so all exceptions get mapped correctly from the mapping settings. Left a version, LegacyExceptionMapper, for old behavior. If you want legacy behavior, simply call server.setExceptionMapping(new LegacyExceptionMapper());
 * Upgraded to jackson-databind 2.6.0 (from 2.4.2).
 * Minor fixes due to FindBugs report. There were 11 easily fixable issues reported by FindBugs: primarily equals(), hashCode() and compareTo() implementations.
-
 
 Release 0.11.2 - 26 Jul 2015
 ----------------------------
