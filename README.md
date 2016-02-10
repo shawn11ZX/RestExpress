@@ -20,7 +20,7 @@ Stable:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.11.2</version>
+			<version>0.11.3</version>
 		</dependency>
 ```
 Development:
@@ -28,7 +28,7 @@ Development:
 		<dependency>
 			<groupId>com.strategicgains</groupId>
 			<artifactId>RestExpress</artifactId>
-			<version>0.11.3-SNAPSHOT</version>
+			<version>0.11.4-SNAPSHOT</version>
 		</dependency>
 ```
 Or download the jar directly from: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22RestExpress%22
@@ -75,8 +75,8 @@ Please see the Maven Archetypes at https://github.com/RestExpress/RestExpress-Ar
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 
-Release 0.11.3-SNAPSHOT in branch 'master'
-------------------------------------------
+Release 0.11.3 - 10 Feb 2016
+----------------------------
 * Changed signature of RestExpress.serializationProvider(SerializationProvider) to return the RestExpress server instance to facilitate method chaining.
 * Issue #38 - Produce error on no routes defined for server. Now throws NoRoutesDefinedException on bind() if no routes are defined.
 * Issue #122 - Listen on prescribed local IP address.
@@ -85,6 +85,7 @@ Release 0.11.3-SNAPSHOT in branch 'master'
 * Upgraded to jackson-databind 2.6.0 (from 2.4.2).
 * Minor fixes due to FindBugs report. There were 11 easily fixable issues reported by FindBugs: primarily equals(), hashCode() and compareTo() implementations.
 * Added UnprocessableEntityException (for 422 status code).
+* Upgraded to: Netty 4.0.34.Final, XStream 1.4.8, OWasp Encoder 1.2, Jackson Databind 2.7.1-1, HTTP Client (test) 4.5.1
 
 Release 0.11.2 - 26 Jul 2015
 ----------------------------
