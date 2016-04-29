@@ -42,6 +42,9 @@ public class ServerSettings
 	// this is the number of blocking requests the application can process simultaneously.
 	private int executorThreadPoolSize = DEFAULT_EXECUTOR_THREAD_POOL_SIZE;
 
+	// Controls whether the server uses GZIP compression for responses.
+	private boolean useCompression = true;
+
 	public String getName()
 	{
 		return name;
@@ -126,4 +129,14 @@ public class ServerSettings
     {
 	    this.maxContentSize = maxContentSize;
     }
+
+	public void setUseCompression(boolean value)
+	{
+		this.useCompression = value;
+	}
+
+	public boolean shouldUseCompression()
+	{
+		return useCompression;
+	}
 }

@@ -74,6 +74,9 @@ Please see the Maven Archetypes at https://github.com/RestExpress/RestExpress-Ar
 ===================================================================================================
 Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
+Release 0.11.4-SNAPSHOT (in master)
+-----------------------------------
+* Issue #126 - Introduced RestExpress.noCompression() to turns off resopnse GZip and deflate encoding support (the Netty HttpContentCompressor is not put in the pipeline) for speed optimization of small payloads.
 
 Release 0.11.3 - 10 Feb 2016
 ----------------------------
@@ -109,7 +112,7 @@ Release 0.11.0 - 12 Mar 2015
 ----------------------------
 * **Bug Fix** Strip the response body from HEAD requests to conform to [RFC 2616](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4)(HTTP spec). (from Codey Whitt)
 * Upgraded Netty version from 3.9.5.Final to 4.0.25.Final (from Thomas Colwell and Mathew Leigh).
-* Enhanced QueryRange.asContentRange() and Response.setCollectionResponse() to support output of '*' as max items in range header for count < 0. 
+* Enhanced QueryRange.asContentRange() and Response.setCollectionResponse() to support output of '*' as max items in range header for count < 0.
 * Added Unit Tests to test RestExpress' ability to compress responses and decompress requests.
 * Added Environment.load(String[], Class) to eliminate the need for Main.loadEnvironments() in all archetype projects.
 * KNOWN ISSUE - Controllers cannot return ReferenceCounted objects that also exist in the Request object.  This will cause the transaction to fail with an IllegalReferenceCountException.  If a ReferenceCounted object needs to be returned, a separate copy of the object will need to be made (some classes, such as ByteBuf, have a .copy() method to facilitate this).
@@ -195,7 +198,7 @@ Release 0.10.0 - 3 Jan 2014
   class into a SerializationProvider implementor.
 * ** Breaking Change ** Removed RestExpress.putResponseProcessor(), .supportJson(), .supportXml(),
   .supportTxt(), .noJson(), .noXml(), noTxt() as this is all implemented in the SerializationProvider.
-* Implemented content-type negotiation using Content-Type header for serialization (e.g. 
+* Implemented content-type negotiation using Content-Type header for serialization (e.g.
   Request.getBodyAs(type)) and Accept header for deserialization. Implementation still
   favors .{format}, but uses content-type negotiation if format not supplied.
 * Added RestExpress.enforceHttpSpec() and .setEnforceHttpSpec(boolean) to enable setting
@@ -261,7 +264,7 @@ Release 0.9.1 - 4 Mar 2013
 * **BREAKING CHANGE:** Removed LoggingHandler from the Netty pipeline and related setter methods.
 * Added HttpBasicAuthenticationPreprocessor to facilitate HTTP Basic Authentication. Added
   Flags.Auth.PUBLIC_ROUTE, NO_AUTHENTICATION, and NO_AUTHORIZATION to support configuration
-  of HttpBasicAuthenticationPreprocessor (and other authentication/authorization 
+  of HttpBasicAuthenticationPreprocessor (and other authentication/authorization
   related routes).
 
 Release 0.8.2 - 19 Feb 2013
@@ -291,7 +294,7 @@ Release 0.8.0 - 09 Jan 2013
 * Changed to support multiple response types with wrapping or not, etc. Now can support wrapped
   JSON (.wjson) and XML (.wxml) as well as un-wrapped JSON (.json) and XML (.xml) depending on the
   format specifier.
-* Now throws BadRequestException (400) if the specified format (e.f. .json) isn't supported by the 
+* Now throws BadRequestException (400) if the specified format (e.f. .json) isn't supported by the
   service suite.
 * Now throws MethodNotAllowedException (405) if the requested URL matches a route but not for the
   requested HTTP method.  Sets the HTTP Allow header to a comma-delimited list of accepted methods.
@@ -335,10 +338,10 @@ Release 0.7.2 - 14 May 2012
 * Introduced CacheHeaderPostprocessor which support Cache-Control and other caching-related
   response header best-practices by setting Parameters.Cache.MAX_AGE or Flags.Cache.DONT_CACHE on
   a route.
-* Changed to use QueryStringParser over StringUtils for query-string and QueryStringDecoder for 
+* Changed to use QueryStringParser over StringUtils for query-string and QueryStringDecoder for
   body parsing. This mitigates HashDoS attacks, since the query-string is parsed before a request
   is accepted.
-* Deprecated StringUtils in favor of using Netty's QueryStringDecoder or 
+* Deprecated StringUtils in favor of using Netty's QueryStringDecoder or
   RestExpress's QueryStringParser.
 * Refactored so SerializationProcessor.resolve(Request) is only called once at the end of the
   request cycle (performance enhancement).

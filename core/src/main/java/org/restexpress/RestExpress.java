@@ -449,6 +449,30 @@ public class RestExpress
 		return this;
 	}
 
+	/**
+	 * Turns off the Netty HttpContentCompressor on binding so that output GZip and deflate encodings are not possible.
+	 * This is a speed optimization, per Issue #126
+	 * 
+	 * By default, compression is supported. Use this to turn it off.
+	 * 
+	 * @return this RestExpress instance.
+	 */
+	public RestExpress noCompression()
+	{
+		serverSettings.setUseCompression(false);
+		return this;
+	}
+
+	/**
+	 * Answers whether the service is setup to use response compression via the Netty HttpContentCompressor.
+	 * 
+	 * @return true if the RestExpress server is configured to use response compression. Otherwise, false.
+	 */
+	public boolean isUsingCompression()
+	{
+		return serverSettings.shouldUseCompression();
+	}
+
 	public int getSoLinger()
 	{
 		return socketSettings.getSoLinger();
@@ -656,7 +680,8 @@ public class RestExpress
 			.setExecutionHandler(initializeExecutorGroup())
 		    .addRequestHandler(buildRequestHandler())
 		    .setSSLContext(sslContext)
-		    .setMaxContentLength(serverSettings.getMaxContentSize()));
+		    .setMaxContentLength(serverSettings.getMaxContentSize())
+		    .setUseCompression(serverSettings.shouldUseCompression()));
 
 		setBootstrapOptions(bootstrap);
 

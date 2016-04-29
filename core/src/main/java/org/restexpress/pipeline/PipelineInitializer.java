@@ -41,6 +41,7 @@ extends ChannelInitializer<SocketChannel>
 	private int maxContentLength = DEFAULT_MAX_CONTENT_LENGTH;
 	private EventExecutorGroup eventExecutorGroup = null;
 	private SSLContext sslContext = null;
+	private boolean useCompression = true;
 
 	// SECTION: CONSTRUCTORS
 
@@ -115,7 +116,11 @@ extends ChannelInitializer<SocketChannel>
 		// Outbound handlers
 		pipeline.addLast("encoder", new HttpResponseEncoder());
 		pipeline.addLast("chunkWriter", new ChunkedWriteHandler());
-		pipeline.addLast("deflater", new HttpContentCompressor());
+
+		if (useCompression)
+		{
+			pipeline.addLast("deflater", new HttpContentCompressor());
+		}
 
 		// Aggregator MUST be added last, otherwise results are not correct
 		pipeline.addLast("aggregator", new HttpObjectAggregator(maxContentLength));
@@ -140,4 +145,10 @@ extends ChannelInitializer<SocketChannel>
 			}
 		}
     }
+
+	public ChannelHandler setUseCompression(boolean shouldUseCompression)
+	{
+		this.useCompression = shouldUseCompression;
+		return this;
+	}
 }

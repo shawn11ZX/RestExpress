@@ -4,9 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -45,6 +42,10 @@ import org.restexpress.serialization.AbstractSerializationProvider;
 import org.restexpress.serialization.DefaultSerializationProvider;
 import org.restexpress.serialization.json.JacksonJsonProcessor;
 import org.restexpress.serialization.xml.XstreamXmlProcessor;
+
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 public class RestExpressServerTest
 {
@@ -812,6 +813,7 @@ public class RestExpressServerTest
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void shouldSerializeListAsWrappedXml() throws Exception
 	{
 		HttpGet request = new HttpGet(LITTLE_OS_URL + ".wxml");
@@ -838,6 +840,7 @@ public class RestExpressServerTest
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void shouldSerializeApplicationHalXml() throws Exception
 	{
 		HttpGet request = new HttpGet(LITTLE_OS_URL);
