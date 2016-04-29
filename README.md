@@ -76,7 +76,9 @@ Change History/Release Notes:
 ---------------------------------------------------------------------------------------------------
 Release 0.11.4-SNAPSHOT (in master)
 -----------------------------------
-* Issue #126 - Introduced RestExpress.noCompression() to turns off resopnse GZip and deflate encoding support (the Netty HttpContentCompressor is not put in the pipeline) for speed optimization of small payloads.
+* Issue #126 - Introduced RestExpress.noCompression() to turns off response GZip and deflate encoding support (the Netty HttpContentCompressor is not put in the pipeline) for speed optimization (e.g. for small payloads).
+* Upgraded Jackson Databind to 2.7.4
+* Upgraded Netty to 4.0.36.final
 
 Release 0.11.3 - 10 Feb 2016
 ----------------------------
