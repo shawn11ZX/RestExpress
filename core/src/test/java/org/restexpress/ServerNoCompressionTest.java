@@ -7,16 +7,17 @@ import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.AfterClass;
@@ -38,7 +39,7 @@ public class ServerNoCompressionTest
 	private static final String ECHO_PATTERN = "/echo";
 	private static final String URL_ECHO = SERVER_HOST + ECHO_PATTERN;
 
-	private static final HttpClient CLIENT = new DefaultHttpClient();
+	private static final CloseableHttpClient CLIENT = new DefaultHttpClient();
 //	private static final HttpClient CLIENT = HttpClientBuilder.create().useSystemProperties().build();
 
 	private static RestExpress SERVER;
@@ -62,17 +63,21 @@ public class ServerNoCompressionTest
 
 	@Before
 	public void ensureServerRunning()
+	throws InterruptedException
 	{
 		if (SERVER == null)
 		{
 			SERVER = createServer();
 			SERVER.bind(DEFAULT_PORT);
+
+			Thread.sleep(500L);
 		}
 	}
 
 	@AfterClass
-	public static void shutdownServer()
+	public static void shutdownServer() throws IOException
 	{
+		CLIENT.close();
 		SERVER.shutdown(true);
 	}
 

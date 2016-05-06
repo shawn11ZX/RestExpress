@@ -4,7 +4,6 @@
 	<name>RestExpress</name>
 	<description>Internet scale, high-performance RESTful Services in Java</description>
 	<url>https://github.com/RestExpress/RestExpress</url>
-	<groupId>com.strategicgains</groupId>
 	<artifactId>RestExpress</artifactId>
 	<packaging>jar</packaging>
 

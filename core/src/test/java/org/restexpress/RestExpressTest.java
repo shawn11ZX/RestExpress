@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -30,7 +29,9 @@ import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.restexpress.exception.NoRoutesDefinedException;
 
@@ -44,103 +45,20 @@ import io.netty.handler.codec.http.HttpMethod;
  */
 public class RestExpressTest
 {
+	private static final CloseableHttpClient CLIENT = new DefaultHttpClient();
 	private static final String TEST_PATH = "/restexpress/test1";
 	private static final int TEST_PORT = 8901;
-	private static final String TEST_URL = "http://localhost:" + TEST_PORT + TEST_PATH;
+	private static final String TEST_URL_PATTERN = "http://localhost:%s" + TEST_PATH;
 
-//	@Test
-//	public void shouldUseDefaults()
-//	{
-//		assertEquals(Format.JSON, server.getDefaultFormat());
-//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-//		assertEquals(2, server.getResponseProcessors().size());
-//
-//		assertEquals(0, server.getPort());
-//		assertTrue(server.getMessageObservers().isEmpty());
-//		assertTrue(server.getPostprocessors().isEmpty());
-//		assertTrue(server.getPreprocessors().isEmpty());
-//		assertTrue(server.shouldUseSystemOut());
-//	}
+	private static int nextPort = TEST_PORT;
 
-//	@Test
-//	public void shouldDisableJson()
-//	{
-//		server.noJson();
-//		assertEquals(Format.JSON, server.getDefaultFormat());
-//		assertFalse(server.getResponseProcessors().containsKey(Format.JSON));
-//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-//		assertEquals(1, server.getResponseProcessors().size());
-//	}
-	
-//	@Test
-//	public void shouldDisableXml()
-//	{
-//		server.noXml();
-//		assertEquals(Format.JSON, server.getDefaultFormat());
-//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-//		assertFalse(server.getResponseProcessors().containsKey(Format.XML));
-//		assertEquals(1, server.getResponseProcessors().size());
-//	}
-	
-//	@Test
-//	public void shouldMakeXmlDefault()
-//	{
-//		server.supportXml(true);
-//		assertEquals(Format.XML, server.getDefaultFormat());
-//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-//		assertEquals(2, server.getResponseProcessors().size());
-//	}
+	@AfterClass
+	public static void afterTest()
+	throws IOException
+	{
+		CLIENT.close();
+	}
 
-//	@Test
-//	public void shouldCustomizeJsonSerializer()
-//	{
-//		server.putResponseProcessor(Format.JSON, provider.newProcessor(Format.JSON));
-//		assertEquals(Format.JSON, server.getDefaultFormat());
-//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-//		assertEquals(2, server.getResponseProcessors().size());
-//	}
-
-//	@Test
-//	public void shouldCustomizeXmlSerializer()
-//	{
-//		server.putResponseProcessor(Format.XML, provider.newProcessor(Format.XML));
-//		assertEquals(Format.JSON, server.getDefaultFormat());
-//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-//		assertEquals(2, server.getResponseProcessors().size());
-//	}
-
-//	@Test
-//	public void shouldNotUpdateJsonSerializer()
-//	{
-//		ResponseProcessor rp = provider.newProcessor(Format.JSON);
-//		server.putResponseProcessor(Format.JSON, rp);
-//		server.supportJson(true);
-//		assertEquals(Format.JSON, server.getDefaultFormat());
-//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-//		assertEquals(2, server.getResponseProcessors().size());
-//		
-//		assertTrue(rp == server.getResponseProcessors().get(Format.JSON));
-//	}
-
-//	@Test
-//	public void shouldNotUpdateXmlSerializer()
-//	{
-//		ResponseProcessor rp = provider.newProcessor(Format.XML);
-//		server.putResponseProcessor(Format.XML, rp);
-//		server.supportXml(true);
-//		assertEquals(Format.XML, server.getDefaultFormat());
-//		assertTrue(server.getResponseProcessors().containsKey(Format.JSON));
-//		assertTrue(server.getResponseProcessors().containsKey(Format.XML));
-//		assertEquals(2, server.getResponseProcessors().size());
-//		
-//		assertTrue(rp == server.getResponseProcessors().get(Format.XML));
-//	}
-	
 	@Test
 	public void shouldNotUseSystemOut()
 	{
@@ -153,206 +71,319 @@ public class RestExpressTest
 	public void shouldCallDefaultMethods()
 	throws ClientProtocolException, IOException
 	{
+		int port = nextPort();
+		String testUrl = createUrl(TEST_URL_PATTERN, port);
 		RestExpress re = new RestExpress();
 		NoopController controller = new NoopController();
 		re.uri(TEST_PATH, controller);
-		re.bind(TEST_PORT);
+		re.bind(port);
+
+		waitForStartup();
+
+		HttpGet get = new HttpGet(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(get);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(1, controller.read);
+			assertEquals(0, controller.create);
+			assertEquals(0, controller.update);
+			assertEquals(0, controller.delete);
+			assertEquals(0, controller.options);
+			assertEquals(0, controller.head);
+			assertEquals(0, controller.patch);
+		}
+		finally
+		{
+			get.releaseConnection();
+		}
 		
-		HttpClient client = new DefaultHttpClient();
-		HttpGet get = new HttpGet(TEST_URL);
-		HttpResponse response = (HttpResponse) client.execute(get);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(1, controller.read);
-		assertEquals(0, controller.create);
-		assertEquals(0, controller.update);
-		assertEquals(0, controller.delete);
-		assertEquals(0, controller.options);
-		assertEquals(0, controller.head);
-		assertEquals(0, controller.patch);
-		get.releaseConnection();
-		
-		HttpPost post = new HttpPost(TEST_URL);
-		response = (HttpResponse) client.execute(post);
-		assertEquals(201, response.getStatusLine().getStatusCode());
-		assertEquals(1, controller.create);
-		assertEquals(1, controller.read);
-		assertEquals(0, controller.update);
-		assertEquals(0, controller.delete);
-		assertEquals(0, controller.options);
-		assertEquals(0, controller.head);
-		assertEquals(0, controller.patch);
-		post.releaseConnection();
+		HttpPost post = new HttpPost(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(post);
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertEquals(1, controller.create);
+			assertEquals(1, controller.read);
+			assertEquals(0, controller.update);
+			assertEquals(0, controller.delete);
+			assertEquals(0, controller.options);
+			assertEquals(0, controller.head);
+			assertEquals(0, controller.patch);
+		}
+		finally
+		{
+			post.releaseConnection();
+		}
 
-		HttpPut put = new HttpPut(TEST_URL);
-		response = (HttpResponse) client.execute(put);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(1, controller.update);
-		assertEquals(1, controller.read);
-		assertEquals(1, controller.create);
-		assertEquals(0, controller.delete);
-		assertEquals(0, controller.options);
-		assertEquals(0, controller.head);
-		assertEquals(0, controller.patch);
-		put.releaseConnection();
+		HttpPut put = new HttpPut(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(put);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(1, controller.update);
+			assertEquals(1, controller.read);
+			assertEquals(1, controller.create);
+			assertEquals(0, controller.delete);
+			assertEquals(0, controller.options);
+			assertEquals(0, controller.head);
+			assertEquals(0, controller.patch);
+		}
+		finally
+		{
+			put.releaseConnection();
+		}
 
-		HttpDelete delete = new HttpDelete(TEST_URL);
-		response = (HttpResponse) client.execute(delete);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(1, controller.delete);
-		assertEquals(1, controller.read);
-		assertEquals(1, controller.create);
-		assertEquals(1, controller.update);
-		assertEquals(0, controller.options);
-		assertEquals(0, controller.head);
-		assertEquals(0, controller.patch);
-		delete.releaseConnection();
+		HttpDelete delete = new HttpDelete(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(delete);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(1, controller.delete);
+			assertEquals(1, controller.read);
+			assertEquals(1, controller.create);
+			assertEquals(1, controller.update);
+			assertEquals(0, controller.options);
+			assertEquals(0, controller.head);
+			assertEquals(0, controller.patch);
+		}
+		finally
+		{
+			delete.releaseConnection();
+		}
 
-		HttpOptions options = new HttpOptions(TEST_URL);
-		response = (HttpResponse) client.execute(options);
-		assertEquals(405, response.getStatusLine().getStatusCode());
-		options.releaseConnection();
+		HttpOptions options = new HttpOptions(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(options);
+			assertEquals(405, response.getStatusLine().getStatusCode());
+		}
+		finally
+		{
+			options.releaseConnection();
+		}
 
-		re.shutdown();
+		re.shutdown(true);
 	}
 
 	@Test
 	public void shouldCallAltMethods()
 	throws ClientProtocolException, IOException
 	{
+		int port = nextPort();
+		String testUrl = createUrl(TEST_URL_PATTERN, port);
 		RestExpress re = new RestExpress();
 		NoopController controller = new NoopController();
 		re.uri(TEST_PATH, controller)
 			.method(HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.PATCH);
-		re.bind(TEST_PORT);
-		
-		HttpClient client = new DefaultHttpClient();
-		HttpGet get = new HttpGet(TEST_URL);
-		HttpResponse response = (HttpResponse) client.execute(get);
-		assertEquals(405, response.getStatusLine().getStatusCode());
-		get.releaseConnection();
+		re.bind(port);
 
-		HttpOptions options = new HttpOptions(TEST_URL);
-		response = (HttpResponse) client.execute(options);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(0, controller.delete);
-		assertEquals(0, controller.read);
-		assertEquals(0, controller.create);
-		assertEquals(0, controller.update);
-		assertEquals(1, controller.options);
-		assertEquals(0, controller.head);
-		assertEquals(0, controller.patch);
-		options.releaseConnection();
+		waitForStartup();
 
-		HttpHead head = new HttpHead(TEST_URL);
-		response = (HttpResponse) client.execute(head);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(0, controller.delete);
-		assertEquals(0, controller.read);
-		assertEquals(0, controller.create);
-		assertEquals(0, controller.update);
-		assertEquals(1, controller.options);
-		assertEquals(1, controller.head);
-		assertEquals(0, controller.patch);
-		head.releaseConnection();
+		HttpGet get = new HttpGet(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(get);
+			assertEquals(405, response.getStatusLine().getStatusCode());			
+		}
+		finally
+		{
+			get.releaseConnection();
+		}
 
-		HttpPatch patch = new HttpPatch(TEST_URL);
-		response = (HttpResponse) client.execute(patch);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(0, controller.delete);
-		assertEquals(0, controller.read);
-		assertEquals(0, controller.create);
-		assertEquals(0, controller.update);
-		assertEquals(1, controller.options);
-		assertEquals(1, controller.head);
-		assertEquals(1, controller.patch);
-		patch.releaseConnection();
+		HttpOptions options = new HttpOptions(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(options);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(0, controller.delete);
+			assertEquals(0, controller.read);
+			assertEquals(0, controller.create);
+			assertEquals(0, controller.update);
+			assertEquals(1, controller.options);
+			assertEquals(0, controller.head);
+			assertEquals(0, controller.patch);
+		}
+		finally
+		{
+			options.releaseConnection();
+		}
 
-		re.shutdown();
+		HttpHead head = new HttpHead(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(head);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(0, controller.delete);
+			assertEquals(0, controller.read);
+			assertEquals(0, controller.create);
+			assertEquals(0, controller.update);
+			assertEquals(1, controller.options);
+			assertEquals(1, controller.head);
+			assertEquals(0, controller.patch);
+		}
+		finally
+		{
+			head.releaseConnection();
+		}
+
+		HttpPatch patch = new HttpPatch(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(patch);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(0, controller.delete);
+			assertEquals(0, controller.read);
+			assertEquals(0, controller.create);
+			assertEquals(0, controller.update);
+			assertEquals(1, controller.options);
+			assertEquals(1, controller.head);
+			assertEquals(1, controller.patch);
+		}
+		finally
+		{
+			patch.releaseConnection();
+		}
+
+		re.shutdown(true);
 	}
 
 	@Test
 	public void shouldCallAltNamedMethods()
 	throws ClientProtocolException, IOException
 	{
+		int port = nextPort();
+		String testUrl = createUrl(TEST_URL_PATTERN, port);
 		RestExpress re = new RestExpress();
 		AltController controller = new AltController();
 		re.uri(TEST_PATH, controller)
 			.action("altHead", HttpMethod.HEAD)
 			.action("altOptions", HttpMethod.OPTIONS)
 			.action("altPatch", HttpMethod.PATCH);
-		re.bind(TEST_PORT);
-		
-		HttpClient client = new DefaultHttpClient();
-		HttpGet get = new HttpGet(TEST_URL);
-		HttpResponse response = (HttpResponse) client.execute(get);
-		assertEquals(405, response.getStatusLine().getStatusCode());
-		get.releaseConnection();
+		re.bind(port);
 
-		HttpOptions options = new HttpOptions(TEST_URL);
-		response = (HttpResponse) client.execute(options);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(1, controller.options);
-		assertEquals(0, controller.head);
-		assertEquals(0, controller.patch);
-		options.releaseConnection();
+		waitForStartup();
 
-		HttpHead head = new HttpHead(TEST_URL);
-		response = (HttpResponse) client.execute(head);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(1, controller.options);
-		assertEquals(1, controller.head);
-		assertEquals(0, controller.patch);
-		head.releaseConnection();
+		HttpGet get = new HttpGet(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(get);
+			assertEquals(405, response.getStatusLine().getStatusCode());
+		}
+		finally
+		{
+			get.releaseConnection();
+		}
 
-		HttpPatch patch = new HttpPatch(TEST_URL);
-		response = (HttpResponse) client.execute(patch);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(1, controller.options);
-		assertEquals(1, controller.head);
-		assertEquals(1, controller.patch);
-		patch.releaseConnection();
+		HttpOptions options = new HttpOptions(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(options);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(1, controller.options);
+			assertEquals(0, controller.head);
+			assertEquals(0, controller.patch);
+		}
+		finally
+		{
+			options.releaseConnection();
+		}
 
-		re.shutdown();
+		HttpHead head = new HttpHead(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(head);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(1, controller.options);
+			assertEquals(1, controller.head);
+			assertEquals(0, controller.patch);
+		}
+		finally
+		{
+			head.releaseConnection();
+		}
+
+		HttpPatch patch = new HttpPatch(testUrl);
+		try
+		{
+			HttpResponse response = (HttpResponse) CLIENT.execute(patch);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(1, controller.options);
+			assertEquals(1, controller.head);
+			assertEquals(1, controller.patch);
+		}
+		finally
+		{
+			patch.releaseConnection();
+		}
+
+		re.shutdown(true);
 	}
 
 	@Test
 	public void shouldSetOutputMediaType()
 	throws ClientProtocolException, IOException
 	{
+		int port = nextPort();
+		String testUrl = createUrl(TEST_URL_PATTERN, port);
 		RestExpress re = new RestExpress();
 		NoopController controller = new NoopController();
 		re.uri(TEST_PATH, controller);
-		re.bind(TEST_PORT);
+		re.bind(port);
 
-		HttpClient client = new DefaultHttpClient();
+		waitForStartup();
 
-		HttpPost post = new HttpPost(TEST_URL);
-		post.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
-		HttpResponse response = (HttpResponse) client.execute(post);
-		assertEquals(201, response.getStatusLine().getStatusCode());
-		assertEquals(ContentType.JSON, controller.outputMediaType);
-		post.releaseConnection();
+		HttpPost post = new HttpPost(testUrl);
+		try
+		{
+			post.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
+			HttpResponse response = (HttpResponse) CLIENT.execute(post);
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertEquals(ContentType.JSON, controller.outputMediaType);
+		}
+		finally
+		{
+			post.releaseConnection();
+		}
 
-		HttpGet get = new HttpGet(TEST_URL);
-		get.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
-		response = (HttpResponse) client.execute(get);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(ContentType.JSON, controller.outputMediaType);
-		get.releaseConnection();
+		HttpGet get = new HttpGet(testUrl);
+		try
+		{
+			get.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
+			HttpResponse response = (HttpResponse) CLIENT.execute(get);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(ContentType.JSON, controller.outputMediaType);
+		}
+		finally
+		{
+			get.releaseConnection();
+		}
 
-		HttpPut put = new HttpPut(TEST_URL);
-		put.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
-		response = (HttpResponse) client.execute(put);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(ContentType.JSON, controller.outputMediaType);
-		put.releaseConnection();
+		HttpPut put = new HttpPut(testUrl);
+		try
+		{
+			put.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
+			HttpResponse response = (HttpResponse) CLIENT.execute(put);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(ContentType.JSON, controller.outputMediaType);
+		}
+		finally
+		{
+			put.releaseConnection();
+		}
 
-		HttpDelete delete = new HttpDelete(TEST_URL);
-		delete.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
-		response = (HttpResponse) client.execute(delete);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		assertEquals(ContentType.JSON, controller.outputMediaType);
-		delete.releaseConnection();
+		HttpDelete delete = new HttpDelete(testUrl);
+		try
+		{
+			delete.addHeader(HttpHeaders.Names.ACCEPT, "application/json");
+			HttpResponse response = (HttpResponse) CLIENT.execute(delete);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(ContentType.JSON, controller.outputMediaType);
+		}
+		finally
+		{
+			delete.releaseConnection();
+		}
 
 		re.shutdown();
 	}
@@ -365,7 +396,7 @@ public class RestExpressTest
 		try
 		{
 			re = new RestExpress();
-			re.bind(TEST_PORT);
+			re.bind(nextPort());
 		}
 		finally
 		{
@@ -439,4 +470,26 @@ public class RestExpressTest
 			++patch;
 		}
     }
+
+	private synchronized int nextPort()
+	{
+		return nextPort++;
+	}
+
+	private String createUrl(String testUrl, int port)
+	{
+		return String.format(testUrl, port);
+	}
+
+	private void waitForStartup()
+	{
+		try
+		{
+			Thread.sleep(500L);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+	}
 }

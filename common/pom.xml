@@ -4,7 +4,6 @@
 	<name>RestExpress-Common</name>
 	<description>Utilities and classes common to all RESTExpress projects.</description>
 	<url>https://github.com/RestExpress/RestExpress-Common</url>
-	<groupId>com.strategicgains</groupId>
 	<artifactId>RestExpress-Common</artifactId>
 	<packaging>jar</packaging>
 

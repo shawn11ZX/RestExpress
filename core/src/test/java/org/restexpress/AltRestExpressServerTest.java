@@ -4,13 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +20,13 @@ import java.util.zip.InflaterInputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
@@ -44,6 +42,10 @@ import org.restexpress.serialization.AbstractSerializationProvider;
 import org.restexpress.serialization.NullSerializationProvider;
 import org.restexpress.serialization.json.JacksonJsonProcessor;
 import org.restexpress.serialization.xml.XstreamXmlProcessor;
+
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 public class AltRestExpressServerTest
 {
@@ -73,7 +75,7 @@ public class AltRestExpressServerTest
 	private static final String URL_EXCEPTION_LITTLE_O = SERVER_HOST + PATTERN_EXCEPTION_LITTLE_O;
 	private static final String URL_ECHO = SERVER_HOST + ECHO_PATTERN;
 
-	private static final HttpClient CLIENT = new DefaultHttpClient();
+	private static final CloseableHttpClient CLIENT = new DefaultHttpClient();
 	private static final AbstractSerializationProvider DEFAULT_SERIALIZER = new NullSerializationProvider();
 
 	static
@@ -94,7 +96,7 @@ public class AltRestExpressServerTest
 	public RestExpress createServer()
 	{
 		RestExpress server = new RestExpress();
-		RestExpress.setSerializationProvider(DEFAULT_SERIALIZER);
+		RestExpress.setDefaultSerializationProvider(DEFAULT_SERIALIZER);
 		StringTestController stringTestController = new StringTestController();
 		ObjectTestController objectTestController = new ObjectTestController();
 		EchoTestController echoTestController = new EchoTestController();
@@ -129,6 +131,7 @@ public class AltRestExpressServerTest
 
 	@Before
 	public void ensureServerRunning()
+	throws InterruptedException
 	{
 		POSTPROCESSOR.resetCallCount();
 		ERROR_PREPROCESSOR.shouldThrow(false);
@@ -137,6 +140,8 @@ public class AltRestExpressServerTest
 		{
 			SERVER = createServer();
 			SERVER.bind(DEFAULT_PORT);
+
+			Thread.sleep(500L);
 		}
 	}
 
@@ -148,7 +153,9 @@ public class AltRestExpressServerTest
 
 	@AfterClass
 	public static void shutdownServer()
+	throws IOException
 	{
+		CLIENT.close();
 		SERVER.shutdown(true);
 	}
 

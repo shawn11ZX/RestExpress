@@ -127,11 +127,14 @@ public class RestExpressServerTest
 
 	@Before
 	public void ensureServerRunning()
+	throws InterruptedException
 	{
 		if (SERVER == null)
 		{
 			SERVER = createServer();
 			SERVER.bind(DEFAULT_PORT);
+
+			Thread.sleep(500L);
 		}
 	}
 
