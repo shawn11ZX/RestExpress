@@ -462,6 +462,7 @@ public class RestExpress
 		serverSettings.setUseCompression(false);
 		return this;
 	}
+	
 
 	/**
 	 * Answers whether the service is setup to use response compression via the Netty HttpContentCompressor.
@@ -599,6 +600,18 @@ public class RestExpress
 		serverSettings.setMaxContentSize(size);
 		return this;
 	}
+	
+	/**
+	 * Set the read timeout (in seconds) of HTTP connection, if no traffic is received in this interval,
+	 * the connection will be closed.
+	 * @param readTimeoutSeconds read timeout in seconds of connection
+	 * @return the RestExpress instance.
+	 */
+	public RestExpress setReadTimeout(int readTimeoutSeconds)
+	{
+		serverSettings.setReadTimeout(readTimeoutSeconds);
+		return this;
+	}
 
 	/**
 	 * Can be called after routes are defined to augment or get data from
@@ -681,7 +694,9 @@ public class RestExpress
 		    .addRequestHandler(buildRequestHandler())
 		    .setSSLContext(sslContext)
 		    .setMaxContentLength(serverSettings.getMaxContentSize())
-		    .setUseCompression(serverSettings.shouldUseCompression()));
+		    .setReadTimeout(serverSettings.getReadTimeout())
+		    .setUseCompression(serverSettings.shouldUseCompression())
+		    );
 
 		setBootstrapOptions(bootstrap);
 

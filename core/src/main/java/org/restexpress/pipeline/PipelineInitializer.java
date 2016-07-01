@@ -14,6 +14,7 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ extends ChannelInitializer<SocketChannel>
 	private EventExecutorGroup eventExecutorGroup = null;
 	private SSLContext sslContext = null;
 	private boolean useCompression = true;
-
+	private int readTimeout = 0;
 	// SECTION: CONSTRUCTORS
 
 	public PipelineInitializer()
@@ -68,6 +69,11 @@ extends ChannelInitializer<SocketChannel>
 		return this;
 	}
 
+	public PipelineInitializer setReadTimeout(int readTimeoutSeconds)
+	{
+		this.readTimeout = readTimeoutSeconds;
+		return this;
+	}
 	/**
 	 * Set the maximum length of the aggregated (chunked) content. If the length
 	 * of the aggregated content exceeds this value, a TooLongFrameException
@@ -101,6 +107,10 @@ extends ChannelInitializer<SocketChannel>
 	{
 		ChannelPipeline pipeline = ch.pipeline();
 
+		if (readTimeout > 0)
+		{
+			pipeline.addLast("readtimeout", new ReadTimeoutHandler(readTimeout));
+		}
 		if (null != sslContext)
 		{
 			SSLEngine sslEngine = sslContext.createSSLEngine();

@@ -45,6 +45,9 @@ public class ServerSettings
 	// Controls whether the server uses GZIP compression for responses.
 	private boolean useCompression = true;
 
+	// Channel read timeout in seconds
+	private int readTimeout = 0;
+	
 	public String getName()
 	{
 		return name;
@@ -138,5 +141,14 @@ public class ServerSettings
 	public boolean shouldUseCompression()
 	{
 		return useCompression;
+	}
+
+	public int getReadTimeout() {
+		return readTimeout;
+	}
+	
+	public void setReadTimeout(int readTimeoutSeconds)
+	{
+		this.readTimeout = readTimeoutSeconds;
 	}
 }
